@@ -1,0 +1,128 @@
+import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
+import { createClient } from "@/lib/supabase/server";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2025-11-17.clover",
+});
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { email } = body;
+
+    if (!email) {
+      return NextResponse.json(
+        { error: "Email is required" },
+        { status: 400 }
+      );
+    }
+
+    const supabase = await createClient();
+
+    // Fetch bookings from Supabase
+    const { data: bookings, error: bookingsError } = await supabase
+      .from("advanced_bookings")
+      .select("*")
+      .eq("client_email", email.toLowerCase())
+      .order("start_time", { ascending: false });
+
+    if (bookingsError) {
+      console.error("Error fetching bookings:", bookingsError);
+    }
+
+    // Fetch document purchases from Stripe
+    let documentPurchases: Array<{
+      id: string;
+      created: number;
+      amount: number;
+      status: string;
+      items: Array<{ description: string; quantity: number; amount: number }>;
+    }> = [];
+
+    try {
+      // Search for checkout sessions by customer email
+      const sessions = await stripe.checkout.sessions.list({
+        limit: 100,
+        expand: ["data.line_items"],
+      });
+
+      // Filter sessions by email and document type
+      const customerSessions = sessions.data.filter(
+        (session) =>
+          session.customer_email?.toLowerCase() === email.toLowerCase() &&
+          session.metadata?.type === "document" &&
+          session.payment_status === "paid"
+      );
+
+      for (const session of customerSessions) {
+        const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+
+        documentPurchases.push({
+          id: session.id,
+          created: session.created,
+          amount: session.amount_total || 0,
+          status: session.payment_status,
+          items: lineItems.data.map((item) => ({
+            description: item.description || "Document",
+            quantity: item.quantity || 1,
+            amount: item.amount_total || 0,
+          })),
+        });
+      }
+    } catch (stripeError) {
+      console.error("Error fetching Stripe data:", stripeError);
+    }
+
+    // Fetch consultation payments from Stripe
+    let consultationPayments: Array<{
+      id: string;
+      created: number;
+      amount: number;
+      status: string;
+      consultationType: string;
+      date: string;
+      time: string;
+    }> = [];
+
+    try {
+      const sessions = await stripe.checkout.sessions.list({
+        limit: 100,
+      });
+
+      const consultationSessions = sessions.data.filter(
+        (session) =>
+          session.customer_email?.toLowerCase() === email.toLowerCase() &&
+          session.metadata?.type === "consultation" &&
+          session.payment_status === "paid"
+      );
+
+      consultationPayments = consultationSessions.map((session) => ({
+        id: session.id,
+        created: session.created,
+        amount: session.amount_total || 0,
+        status: session.payment_status,
+        consultationType: session.metadata?.consultationName || "Consultation",
+        date: session.metadata?.date || "",
+        time: session.metadata?.time || "",
+      }));
+    } catch (stripeError) {
+      console.error("Error fetching consultation payments:", stripeError);
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        bookings: bookings || [],
+        documentPurchases,
+        consultationPayments,
+      },
+    });
+  } catch (error) {
+    console.error("Client portal error:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch client data" },
+      { status: 500 }
+    );
+  }
+}

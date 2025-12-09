@@ -1,0 +1,66 @@
+
+<svg width="400" height="500" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="blur">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="0.8"/>
+    </filter>
+    <style>
+      .header { font-family: 'Arial', sans-serif; font-size: 16px; font-weight: bold; fill: #2d2d2d; }
+      .title { font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; fill: #1a1a1a; }
+      .subtitle { font-family: 'Arial', sans-serif; font-size: 11px; fill: #4a4a4a; }
+      .body { font-family: 'Arial', sans-serif; font-size: 9px; fill: #555; }
+      .line { stroke: #ddd; stroke-width: 1; }
+      .signature-line { stroke: #999; stroke-width: 1; }
+    </style>
+  </defs>
+  
+  <!-- Document background -->
+  <rect width="400" height="500" fill="#fefefe" stroke="#ddd" stroke-width="1"/>
+  
+  <!-- Header -->
+  <rect width="400" height="60" fill="#f8f9fa"/>
+  <text x="20" y="25" class="header">HAMILTON BAILEY LAW FIRM</text>
+  <text x="20" y="45" class="subtitle">147 Pirie Street, Adelaide SA 5000</text>
+  
+  <!-- Title -->
+  <text x="20" y="90" class="title">FAMILY TRUST DEED</text>
+  <line x1="20" y1="100" x2="380" y2="100" class="line"/>
+  
+  <!-- Category badge -->
+  <rect x="20" y="110" width="158" height="20" fill="#81D8D0" opacity="0.2" rx="3"/>
+  <text x="30" y="124" class="subtitle">Wills & Estate Planning</text>
+  
+  <!-- Document content (blurred) -->
+  <g filter="url(#blur)">
+    <text x="20" y="160" class="body">WHEREAS the parties wish to enter into this agreement for the provision of</text>
+    <text x="20" y="175" class="body">legal services and documentation, and WHEREAS Hamilton Bailey Law Firm</text>
+    <text x="20" y="190" class="body">is a recognised specialist in medical practice law and corporate governance;</text>
+    
+    <text x="20" y="215" class="body">NOW THEREFORE THIS AGREEMENT WITNESSETH that in consideration</text>
+    <text x="20" y="230" class="body">of the mutual covenants and agreements contained herein, the parties agree</text>
+    <text x="20" y="245" class="body">as follows:</text>
+    
+    <text x="20" y="270" class="body">1. DEFINITIONS AND INTERPRETATION</text>
+    <text x="30" y="285" class="body">1.1 In this Agreement, unless the context otherwise requires:</text>
+    <text x="40" y="300" class="body">(a) "Practice" means the medical practice carried on by the</text>
+    <text x="50" y="315" class="body">practitioner at the premises described herein;</text>
+    <text x="40" y="330" class="body">(b) "Services" means the legal and professional services</text>
+    <text x="50" y="345" class="body">to be provided under this agreement;</text>
+    
+    <text x="20" y="370" class="body">2. OBLIGATIONS OF PARTIES</text>
+    <text x="30" y="385" class="body">2.1 The Service Provider shall:</text>
+    <text x="40" y="400" class="body">(a) provide services in accordance with professional standards;</text>
+    <text x="40" y="415" class="body">(b) maintain confidentiality of all client information;</text>
+    <text x="40" y="430" class="body">(c) comply with all applicable laws and regulations;</text>
+  </g>
+  
+  <!-- Footer -->
+  <line x1="20" y1="460" x2="180" y2="460" class="signature-line"/>
+  <line x1="220" y1="460" x2="380" y2="460" class="signature-line"/>
+  <text x="20" y="475" class="subtitle">Client Signature</text>
+  <text x="220" y="475" class="subtitle">Date</text>
+  
+  <!-- Professional seal -->
+  <circle cx="350" cy="420" r="25" fill="none" stroke="#81D8D0" stroke-width="2" opacity="0.6"/>
+  <text x="340" y="425" class="subtitle" font-size="8px">HBL</text>
+</svg>
