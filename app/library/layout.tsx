@@ -103,7 +103,7 @@ export default async function LibraryLayout({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-white via-slate-50/30 to-tiffany-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 antialiased">
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-white via-gray-50/30 to-tiffany-50/20 antialiased">
         {/* Skip to main content for accessibility */}
         <a
           href="#main-content"
