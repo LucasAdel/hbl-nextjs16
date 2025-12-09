@@ -5,37 +5,83 @@ import { LibraryFooter } from "@/components/library/LibraryFooter";
 
 export const metadata: Metadata = {
   title: {
-    default: "Legal Resource Library | Hamilton Bailey Law",
-    template: "%s | HBL Library",
+    default: "Hamilton Bailey Legal Library | Healthcare Law Resources",
+    template: "%s | Hamilton Bailey Legal Library",
   },
   description:
-    "Comprehensive legal resources for healthcare professionals. Expert articles on compliance, employment law, AHPRA regulations, and medical practice management.",
+    "Your comprehensive resource for Australian healthcare law, medical practice compliance, and regulatory guidance. Expert legal articles and insights for healthcare professionals.",
   keywords: [
-    "legal resources",
-    "healthcare law articles",
+    "hamilton bailey legal library",
+    "healthcare law resources",
+    "medical practice law",
+    "AHPRA compliance",
+    "australian healthcare regulations",
     "medical practice compliance",
-    "AHPRA resources",
-    "employment law guides",
-    "healthcare regulations",
-    "payroll tax medical",
+    "employment law healthcare",
     "tenant doctor agreements",
+    "payroll tax medical",
+    "healthcare contracts",
   ],
   openGraph: {
     type: "website",
     locale: "en_AU",
-    siteName: "Hamilton Bailey Law Library",
-    title: "Legal Resource Library | Hamilton Bailey Law",
+    siteName: "Hamilton Bailey Legal Library",
+    title: "Hamilton Bailey Legal Library | Healthcare Law Resources",
     description:
-      "Expert legal guides and resources for healthcare professionals across Australia.",
+      "Your comprehensive resource for Australian healthcare law, medical practice compliance, and regulatory guidance.",
+    images: [
+      {
+        url: "/images/hb-logo-social.png",
+        width: 1200,
+        height: 630,
+        alt: "Hamilton Bailey Legal Library",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Legal Resource Library | Hamilton Bailey Law",
+    title: "Hamilton Bailey Legal Library",
     description:
-      "Expert legal guides for healthcare professionals.",
+      "Expert legal guides for healthcare professionals in Australia.",
   },
   alternates: {
     canonical: "https://library.hamiltonbailey.com",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+};
+
+// JSON-LD structured data for SEO
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Hamilton Bailey Legal Library",
+  description:
+    "Comprehensive legal resources and expert insights for medical practitioners and healthcare businesses across Australia.",
+  url: "https://library.hamiltonbailey.com",
+  publisher: {
+    "@type": "Organization",
+    "@id": "https://hamiltonbailey.com/#organization",
+    name: "Hamilton Bailey Law Firm",
+    url: "https://hamiltonbailey.com",
+    logo: {
+      "@type": "ImageObject",
+      url: "https://hamiltonbailey.com/images/hb-logo.svg",
+    },
+  },
+  potentialAction: {
+    "@type": "SearchAction",
+    target: "https://library.hamiltonbailey.com/search?q={search_term_string}",
+    "query-input": "required name=search_term_string",
   },
 };
 
@@ -50,17 +96,33 @@ export default async function LibraryLayout({
   const isSubdomain = host.startsWith("library.");
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
-      {/* Library Header */}
-      <LibraryHeader />
+    <>
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
-      {/* Main Content */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {children}
-      </main>
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-white via-slate-50/30 to-tiffany-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 antialiased">
+        {/* Skip to main content for accessibility */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-tiffany-500 text-white px-4 py-2 rounded-md z-50"
+        >
+          Skip to main content
+        </a>
 
-      {/* Library Footer - Only show on subdomain for standalone experience */}
-      {isSubdomain && <LibraryFooter />}
-    </div>
+        {/* Library Header */}
+        <LibraryHeader />
+
+        {/* Main Content */}
+        <main id="main-content" className="flex-1">
+          {children}
+        </main>
+
+        {/* Library Footer - Only show on subdomain for standalone experience */}
+        {isSubdomain && <LibraryFooter />}
+      </div>
+    </>
   );
 }
