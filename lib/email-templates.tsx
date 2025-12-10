@@ -617,10 +617,461 @@ export function ContactFormNotificationEmail({
   );
 }
 
+// ============================================================================
+// Cart Recovery Email Templates
+// 3-email sequence for abandoned cart recovery
+// ============================================================================
+
+interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
+interface CartRecoveryBaseProps {
+  customerName?: string;
+  cartItems: CartItem[];
+  cartTotal: number;
+  recoveryUrl: string;
+}
+
+// Email 1: "You left something behind" (sent after 1 hour)
+interface CartRecoveryEmail1Props extends CartRecoveryBaseProps {}
+
+export function CartRecoveryEmail1({
+  customerName,
+  cartItems,
+  cartTotal,
+  recoveryUrl,
+}: CartRecoveryEmail1Props) {
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD" }).format(amount);
+
+  return (
+    <EmailWrapper previewText="You left some items in your cart">
+      <EmailHeader />
+      <tr>
+        <td style={{ backgroundColor: "#ffffff", padding: "40px 30px" }}>
+          <h1
+            style={{
+              color: "#111827",
+              fontSize: "24px",
+              fontWeight: "700",
+              margin: "0 0 20px 0",
+              textAlign: "center",
+            }}
+          >
+            You Left Something Behind
+          </h1>
+
+          <p style={{ color: "#4b5563", fontSize: "16px", lineHeight: "1.6", margin: "0 0 25px 0" }}>
+            {customerName ? `Hi ${customerName},` : "Hi there,"}
+          </p>
+
+          <p style={{ color: "#4b5563", fontSize: "16px", lineHeight: "1.6", margin: "0 0 25px 0" }}>
+            We noticed you left some items in your cart. Don't worry, we've saved them for you!
+          </p>
+
+          {/* Cart Items */}
+          <table
+            role="presentation"
+            cellPadding="0"
+            cellSpacing="0"
+            style={{
+              width: "100%",
+              backgroundColor: "#f9fafb",
+              borderRadius: "12px",
+              marginBottom: "25px",
+            }}
+          >
+            <tr>
+              <td style={{ padding: "20px" }}>
+                <p style={{ color: "#111827", fontSize: "16px", fontWeight: "600", margin: "0 0 15px 0" }}>
+                  Your Cart
+                </p>
+                {cartItems.map((item, index) => (
+                  <div
+                    key={item.id}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      borderBottom: index < cartItems.length - 1 ? "1px solid #e5e7eb" : "none",
+                      paddingBottom: index < cartItems.length - 1 ? "12px" : 0,
+                      marginBottom: index < cartItems.length - 1 ? "12px" : 0,
+                    }}
+                  >
+                    <div>
+                      <p style={{ color: "#111827", fontSize: "14px", fontWeight: "500", margin: 0 }}>
+                        {item.name}
+                      </p>
+                      <p style={{ color: "#6b7280", fontSize: "12px", margin: "4px 0 0 0" }}>
+                        Qty: {item.quantity}
+                      </p>
+                    </div>
+                    <span style={{ color: "#111827", fontSize: "14px", fontWeight: "600" }}>
+                      {formatCurrency(item.price * item.quantity)}
+                    </span>
+                  </div>
+                ))}
+                <div
+                  style={{
+                    borderTop: "2px solid #e5e7eb",
+                    paddingTop: "15px",
+                    marginTop: "15px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span style={{ color: "#111827", fontSize: "16px", fontWeight: "700" }}>Total</span>
+                  <span style={{ color: "#2AAFA2", fontSize: "18px", fontWeight: "700" }}>
+                    {formatCurrency(cartTotal)}
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </table>
+
+          <div style={{ textAlign: "center", marginBottom: "25px" }}>
+            <EmailButton href={recoveryUrl}>Complete Your Purchase</EmailButton>
+          </div>
+
+          <p style={{ color: "#6b7280", fontSize: "14px", lineHeight: "1.6", margin: 0, textAlign: "center" }}>
+            Your cart will be saved for the next 7 days.
+          </p>
+        </td>
+      </tr>
+      <EmailFooter />
+    </EmailWrapper>
+  );
+}
+
+// Email 2: "Still thinking it over?" (sent after 24 hours)
+interface CartRecoveryEmail2Props extends CartRecoveryBaseProps {
+  testimonial?: {
+    quote: string;
+    author: string;
+    role?: string;
+  };
+}
+
+export function CartRecoveryEmail2({
+  customerName,
+  cartItems,
+  cartTotal,
+  recoveryUrl,
+  testimonial = {
+    quote: "The Tenant Doctor Agreement saved me hours of work and gave me peace of mind. Highly recommend!",
+    author: "Dr. Sarah Mitchell",
+    role: "GP, Melbourne",
+  },
+}: CartRecoveryEmail2Props) {
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD" }).format(amount);
+
+  return (
+    <EmailWrapper previewText="Still thinking about your purchase?">
+      <EmailHeader />
+      <tr>
+        <td style={{ backgroundColor: "#ffffff", padding: "40px 30px" }}>
+          <h1
+            style={{
+              color: "#111827",
+              fontSize: "24px",
+              fontWeight: "700",
+              margin: "0 0 20px 0",
+              textAlign: "center",
+            }}
+          >
+            Still Thinking It Over?
+          </h1>
+
+          <p style={{ color: "#4b5563", fontSize: "16px", lineHeight: "1.6", margin: "0 0 25px 0" }}>
+            {customerName ? `Hi ${customerName},` : "Hi there,"}
+          </p>
+
+          <p style={{ color: "#4b5563", fontSize: "16px", lineHeight: "1.6", margin: "0 0 25px 0" }}>
+            We understand choosing the right legal documents is an important decision. That's why over 700 medical
+            professionals trust Hamilton Bailey Law.
+          </p>
+
+          {/* Social Proof Stats */}
+          <table
+            role="presentation"
+            cellPadding="0"
+            cellSpacing="0"
+            style={{
+              width: "100%",
+              marginBottom: "25px",
+            }}
+          >
+            <tr>
+              <td
+                style={{
+                  backgroundColor: "#f0fdfa",
+                  padding: "20px",
+                  borderRadius: "12px",
+                  textAlign: "center",
+                }}
+              >
+                <table role="presentation" cellPadding="0" cellSpacing="0" style={{ width: "100%" }}>
+                  <tr>
+                    <td style={{ width: "33%", textAlign: "center" }}>
+                      <p style={{ color: "#2AAFA2", fontSize: "24px", fontWeight: "700", margin: 0 }}>700+</p>
+                      <p style={{ color: "#6b7280", fontSize: "12px", margin: "5px 0 0 0" }}>Clients served</p>
+                    </td>
+                    <td style={{ width: "33%", textAlign: "center" }}>
+                      <p style={{ color: "#2AAFA2", fontSize: "24px", fontWeight: "700", margin: 0 }}>98%</p>
+                      <p style={{ color: "#6b7280", fontSize: "12px", margin: "5px 0 0 0" }}>Satisfaction</p>
+                    </td>
+                    <td style={{ width: "33%", textAlign: "center" }}>
+                      <p style={{ color: "#2AAFA2", fontSize: "24px", fontWeight: "700", margin: 0 }}>14+</p>
+                      <p style={{ color: "#6b7280", fontSize: "12px", margin: "5px 0 0 0" }}>Years experience</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+          {/* Testimonial */}
+          <table
+            role="presentation"
+            cellPadding="0"
+            cellSpacing="0"
+            style={{
+              width: "100%",
+              backgroundColor: "#f9fafb",
+              borderRadius: "12px",
+              marginBottom: "25px",
+            }}
+          >
+            <tr>
+              <td style={{ padding: "25px" }}>
+                <p style={{ color: "#374151", fontSize: "16px", fontStyle: "italic", lineHeight: "1.6", margin: "0 0 15px 0" }}>
+                  "{testimonial.quote}"
+                </p>
+                <p style={{ color: "#111827", fontSize: "14px", fontWeight: "600", margin: 0 }}>
+                  — {testimonial.author}
+                </p>
+                {testimonial.role && (
+                  <p style={{ color: "#6b7280", fontSize: "12px", margin: "4px 0 0 0" }}>{testimonial.role}</p>
+                )}
+              </td>
+            </tr>
+          </table>
+
+          {/* Cart Summary */}
+          <p style={{ color: "#111827", fontSize: "16px", fontWeight: "600", margin: "0 0 15px 0" }}>
+            Your saved items ({cartItems.length}):
+          </p>
+          <ul style={{ color: "#4b5563", fontSize: "14px", margin: "0 0 20px 0", paddingLeft: "20px" }}>
+            {cartItems.map((item) => (
+              <li key={item.id} style={{ marginBottom: "8px" }}>
+                {item.name} - {formatCurrency(item.price)}
+              </li>
+            ))}
+          </ul>
+
+          <div style={{ textAlign: "center", marginBottom: "25px" }}>
+            <EmailButton href={recoveryUrl}>Return to Your Cart</EmailButton>
+          </div>
+
+          <p style={{ color: "#6b7280", fontSize: "14px", lineHeight: "1.6", margin: 0, textAlign: "center" }}>
+            Have questions? Reply to this email or call us at (08) 8212 8585.
+          </p>
+        </td>
+      </tr>
+      <EmailFooter />
+    </EmailWrapper>
+  );
+}
+
+// Email 3: "Last chance + discount" (sent after 72 hours)
+interface CartRecoveryEmail3Props extends CartRecoveryBaseProps {
+  discountCode: string;
+  discountPercent: number;
+  expiresIn: string;
+}
+
+export function CartRecoveryEmail3({
+  customerName,
+  cartItems,
+  cartTotal,
+  recoveryUrl,
+  discountCode,
+  discountPercent,
+  expiresIn = "48 hours",
+}: CartRecoveryEmail3Props) {
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD" }).format(amount);
+
+  const discountedTotal = cartTotal * (1 - discountPercent / 100);
+
+  return (
+    <EmailWrapper previewText={`Last chance: ${discountPercent}% off your cart!`}>
+      <EmailHeader />
+      <tr>
+        <td style={{ backgroundColor: "#ffffff", padding: "40px 30px" }}>
+          {/* Urgency Banner */}
+          <table
+            role="presentation"
+            cellPadding="0"
+            cellSpacing="0"
+            style={{
+              width: "100%",
+              backgroundColor: "#fef3c7",
+              borderRadius: "8px",
+              marginBottom: "25px",
+            }}
+          >
+            <tr>
+              <td style={{ padding: "12px 20px", textAlign: "center" }}>
+                <p style={{ color: "#92400e", fontSize: "14px", fontWeight: "600", margin: 0 }}>
+                  ⏰ Your {discountPercent}% discount expires in {expiresIn}
+                </p>
+              </td>
+            </tr>
+          </table>
+
+          <h1
+            style={{
+              color: "#111827",
+              fontSize: "24px",
+              fontWeight: "700",
+              margin: "0 0 20px 0",
+              textAlign: "center",
+            }}
+          >
+            Last Chance: {discountPercent}% Off Your Order
+          </h1>
+
+          <p style={{ color: "#4b5563", fontSize: "16px", lineHeight: "1.6", margin: "0 0 25px 0" }}>
+            {customerName ? `Hi ${customerName},` : "Hi there,"}
+          </p>
+
+          <p style={{ color: "#4b5563", fontSize: "16px", lineHeight: "1.6", margin: "0 0 25px 0" }}>
+            We really don't want you to miss out on the documents you were interested in. As a final thank you for
+            considering Hamilton Bailey Law, here's an exclusive <strong>{discountPercent}% discount</strong> on your cart.
+          </p>
+
+          {/* Discount Code Box */}
+          <table
+            role="presentation"
+            cellPadding="0"
+            cellSpacing="0"
+            style={{
+              width: "100%",
+              backgroundColor: "#f0fdf4",
+              border: "2px dashed #22c55e",
+              borderRadius: "12px",
+              marginBottom: "25px",
+            }}
+          >
+            <tr>
+              <td style={{ padding: "25px", textAlign: "center" }}>
+                <p style={{ color: "#166534", fontSize: "14px", fontWeight: "500", margin: "0 0 10px 0" }}>
+                  Use this code at checkout:
+                </p>
+                <p
+                  style={{
+                    color: "#166534",
+                    fontSize: "28px",
+                    fontWeight: "700",
+                    fontFamily: "monospace",
+                    letterSpacing: "2px",
+                    margin: "0 0 10px 0",
+                  }}
+                >
+                  {discountCode}
+                </p>
+                <p style={{ color: "#15803d", fontSize: "14px", margin: 0 }}>
+                  Save {formatCurrency(cartTotal - discountedTotal)}!
+                </p>
+              </td>
+            </tr>
+          </table>
+
+          {/* Cart Summary with Discount */}
+          <table
+            role="presentation"
+            cellPadding="0"
+            cellSpacing="0"
+            style={{
+              width: "100%",
+              backgroundColor: "#f9fafb",
+              borderRadius: "12px",
+              marginBottom: "25px",
+            }}
+          >
+            <tr>
+              <td style={{ padding: "20px" }}>
+                <p style={{ color: "#111827", fontSize: "16px", fontWeight: "600", margin: "0 0 15px 0" }}>
+                  Your Cart Summary
+                </p>
+                {cartItems.map((item, index) => (
+                  <div
+                    key={item.id}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginBottom: index < cartItems.length - 1 ? "10px" : 0,
+                    }}
+                  >
+                    <span style={{ color: "#4b5563", fontSize: "14px" }}>{item.name}</span>
+                    <span style={{ color: "#111827", fontSize: "14px" }}>{formatCurrency(item.price)}</span>
+                  </div>
+                ))}
+                <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: "15px", marginTop: "15px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                    <span style={{ color: "#6b7280", fontSize: "14px" }}>Subtotal</span>
+                    <span style={{ color: "#6b7280", fontSize: "14px", textDecoration: "line-through" }}>
+                      {formatCurrency(cartTotal)}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                    <span style={{ color: "#22c55e", fontSize: "14px", fontWeight: "600" }}>
+                      Discount ({discountPercent}%)
+                    </span>
+                    <span style={{ color: "#22c55e", fontSize: "14px", fontWeight: "600" }}>
+                      -{formatCurrency(cartTotal - discountedTotal)}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ color: "#111827", fontSize: "18px", fontWeight: "700" }}>Your Price</span>
+                    <span style={{ color: "#2AAFA2", fontSize: "20px", fontWeight: "700" }}>
+                      {formatCurrency(discountedTotal)}
+                    </span>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </table>
+
+          <div style={{ textAlign: "center", marginBottom: "25px" }}>
+            <EmailButton href={`${recoveryUrl}?discount=${discountCode}`}>
+              Claim Your {discountPercent}% Discount
+            </EmailButton>
+          </div>
+
+          <p style={{ color: "#6b7280", fontSize: "13px", lineHeight: "1.6", margin: 0, textAlign: "center" }}>
+            This exclusive offer expires in {expiresIn}. Don't miss out!
+          </p>
+        </td>
+      </tr>
+      <EmailFooter />
+    </EmailWrapper>
+  );
+}
+
 // Export all templates
 export const emailTemplates = {
   bookingConfirmation: BookingConfirmationEmail,
   documentPurchase: DocumentPurchaseEmail,
   newsletterWelcome: NewsletterWelcomeEmail,
   contactFormNotification: ContactFormNotificationEmail,
+  cartRecovery1: CartRecoveryEmail1,
+  cartRecovery2: CartRecoveryEmail2,
+  cartRecovery3: CartRecoveryEmail3,
 };

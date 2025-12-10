@@ -1,29 +1,46 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { X, Users, ShoppingCart, Star, TrendingUp, Clock } from "lucide-react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { X, Users, ShoppingCart, Star, TrendingUp, Clock, FileText, Calendar } from "lucide-react";
 
-interface Notification {
+// ============================================================================
+// SOPHISTICATED SOCIAL PROOF NOTIFICATION SYSTEM
+// Pre-generates 3+ hours of unique, realistic notifications
+// ============================================================================
+
+interface NotificationData {
   id: string;
-  type: "purchase" | "signup" | "review" | "viewing" | "limited";
+  type: "purchase" | "signup" | "review" | "viewing" | "limited" | "download";
   message: string;
+  rating?: number; // 4.5 or 5
+  iconType: "cart" | "users" | "star" | "clock" | "file" | "calendar";
+}
+
+interface Notification extends NotificationData {
   time: string;
   icon: React.ReactNode;
 }
 
-// Simulated social proof data (in production, pull from real analytics)
-const SAMPLE_NAMES = [
-  "Sarah M.", "James T.", "Dr. Patel", "Emily W.", "Michael S.",
-  "Dr. Chen", "Jessica L.", "Robert K.", "Amanda B.", "David H.",
-  "Dr. Thompson", "Lisa R.", "Andrew G.", "Rachel C.", "Mark D.",
+// Comprehensive location data with population weighting
+const LOCATIONS = [
+  { city: "Sydney", weight: 25 },
+  { city: "Melbourne", weight: 23 },
+  { city: "Brisbane", weight: 12 },
+  { city: "Perth", weight: 10 },
+  { city: "Adelaide", weight: 7 },
+  { city: "Gold Coast", weight: 5 },
+  { city: "Newcastle", weight: 4 },
+  { city: "Canberra", weight: 4 },
+  { city: "Wollongong", weight: 3 },
+  { city: "Hobart", weight: 2 },
+  { city: "Geelong", weight: 2 },
+  { city: "Townsville", weight: 1 },
+  { city: "Cairns", weight: 1 },
+  { city: "Darwin", weight: 1 },
 ];
 
-const SAMPLE_LOCATIONS = [
-  "Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide",
-  "Gold Coast", "Newcastle", "Canberra", "Hobart", "Darwin",
-];
-
-const SAMPLE_DOCUMENTS = [
+// Expanded document/service catalog
+const DOCUMENTS = [
   "Medical Practice Setup Guide",
   "AHPRA Compliance Checklist",
   "Employment Contract Template",
@@ -32,95 +49,408 @@ const SAMPLE_DOCUMENTS = [
   "Partnership Agreement",
   "Service Agreement Template",
   "Medicare Compliance Guide",
+  "Practice Sale Agreement",
+  "Locum Agreement Template",
+  "Associate Agreement",
+  "Non-Compete Agreement",
+  "Patient Consent Forms Pack",
+  "Telehealth Policy Template",
+  "Staff Handbook Template",
+  "Independent Contractor Agreement",
+  "Practice Lease Review Guide",
+  "Medical Records Policy",
+  "Incident Reporting Template",
+  "Practice Valuation Guide",
 ];
 
-function generateRandomNotification(): Notification {
-  const types: Notification["type"][] = ["purchase", "signup", "review", "viewing", "limited"];
-  const type = types[Math.floor(Math.random() * types.length)];
-  const name = SAMPLE_NAMES[Math.floor(Math.random() * SAMPLE_NAMES.length)];
-  const location = SAMPLE_LOCATIONS[Math.floor(Math.random() * SAMPLE_LOCATIONS.length)];
-  const document = SAMPLE_DOCUMENTS[Math.floor(Math.random() * SAMPLE_DOCUMENTS.length)];
-  const minutes = Math.floor(Math.random() * 30) + 1;
+// Realistic review snippets (varied length and style) - 75+ unique reviews
+const REVIEW_SNIPPETS = [
+  // Short and punchy
+  "Saved me hours of work",
+  "Worth every dollar",
+  "Exactly what I needed",
+  "Highly recommend",
+  "Outstanding quality",
+  "Absolutely essential",
+  "Best investment ever",
+  "Incredibly thorough",
+  "Very impressed",
+  "Exceeded expectations",
+  "Game changer",
+  "So professional",
+  "Brilliant resource",
+  "Top quality",
+  "Spot on",
 
-  let message = "";
-  let icon: React.ReactNode;
+  // Practice-specific
+  "Perfect for my new practice",
+  "Exactly what I needed for my practice",
+  "Made setting up my clinic so easy",
+  "Essential for any medical practice",
+  "Every practice owner needs this",
+  "Wish I had this when I started",
+  "Made my practice setup seamless",
+  "Perfect for solo practitioners",
+  "Great for group practices too",
+  "Tailored perfectly for healthcare",
 
-  switch (type) {
-    case "purchase":
-      message = `${name} from ${location} just purchased "${document}"`;
-      icon = <ShoppingCart className="h-4 w-4 text-green-500" />;
-      break;
-    case "signup":
-      message = `${name} from ${location} just signed up for a consultation`;
-      icon = <Users className="h-4 w-4 text-blue-500" />;
-      break;
-    case "review":
-      message = `${name} left a 5-star review: "Excellent legal documents!"`;
-      icon = <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />;
-      break;
-    case "viewing":
-      message = `${Math.floor(Math.random() * 20) + 5} people are viewing ${document}`;
-      icon = <Users className="h-4 w-4 text-purple-500" />;
-      break;
-    case "limited":
-      message = `Only ${Math.floor(Math.random() * 5) + 1} consultation slots left this week!`;
-      icon = <Clock className="h-4 w-4 text-red-500" />;
-      break;
+  // Value-focused
+  "Great value for money",
+  "Saved us significant legal fees",
+  "Worth ten times the price",
+  "Paid for itself immediately",
+  "Much cheaper than a lawyer",
+  "Incredible value",
+  "Money well spent",
+  "Best money I've spent on my practice",
+  "Saved thousands in legal costs",
+  "Affordable and professional",
+
+  // Quality-focused
+  "Professional and thorough",
+  "Comprehensive and well-structured",
+  "Exceptional quality documents",
+  "Professional grade templates",
+  "Meticulous attention to detail",
+  "Clearly written by experts",
+  "Legal quality without the fees",
+  "Proper legal standard documents",
+  "Well-researched and current",
+  "Up to date with regulations",
+
+  // Ease of use
+  "Clear and easy to customise",
+  "Made the whole process so much easier",
+  "Streamlined our entire setup",
+  "So straightforward to use",
+  "Easy to modify for our needs",
+  "Simple and intuitive",
+  "Took minutes to complete",
+  "No legal expertise needed",
+  "Step by step guidance helped",
+  "User friendly templates",
+
+  // Compliance-focused
+  "Excellent for compliance",
+  "Made compliance straightforward",
+  "Comprehensive coverage of requirements",
+  "Covers all AHPRA requirements",
+  "Medicare compliant out of the box",
+  "Privacy Act requirements covered",
+  "All the compliance boxes ticked",
+  "Audit ready documentation",
+  "Helped us pass our review",
+  "Regulator approved standard",
+
+  // Emotional/relief
+  "Finally found what I was looking for",
+  "Wish I found this sooner",
+  "Such a relief to find this",
+  "Took so much stress away",
+  "Peace of mind knowing it's right",
+  "Can sleep easy now",
+  "Weight off my shoulders",
+  "No more worrying about paperwork",
+  "Finally feel properly protected",
+  "Confidence in our documentation",
+
+  // Recommendation
+  "Highly recommend for any medical practice",
+  "Already recommended to colleagues",
+  "Told all my GP friends about this",
+  "Sharing with my study group",
+  "Must have for new graduates",
+  "Recommending to everyone",
+  "Five colleagues have bought it since",
+  "Our whole network uses these now",
+
+  // Support-focused
+  "Fantastic support team too",
+  "Quick response when I had questions",
+  "Support was incredibly helpful",
+  "They customised it for my needs",
+  "Great follow up service",
+  "Felt supported throughout",
+
+  // Time-saving
+  "Saved me so much time",
+  "Would have taken weeks otherwise",
+  "Done in an afternoon",
+  "Quick turnaround on everything",
+  "Efficient and fast",
+  "No time wasted",
+];
+
+// Consultation types
+const CONSULTATION_TYPES = [
+  "a free consultation",
+  "a practice setup consultation",
+  "a compliance review",
+  "a partnership consultation",
+  "a contract review",
+  "a practice sale consultation",
+  "a lease negotiation consultation",
+];
+
+// Seeded random for reproducible shuffling
+function seededRandom(seed: number): () => number {
+  return function() {
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+    return seed / 0x7fffffff;
+  };
+}
+
+// Fisher-Yates shuffle with seed
+function shuffleArray<T>(array: T[], seed: number): T[] {
+  const shuffled = [...array];
+  const random = seededRandom(seed);
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+// Weighted random selection
+function weightedRandomLocation(random: () => number): string {
+  const totalWeight = LOCATIONS.reduce((sum, loc) => sum + loc.weight, 0);
+  let r = random() * totalWeight;
+  for (const loc of LOCATIONS) {
+    r -= loc.weight;
+    if (r <= 0) return loc.city;
+  }
+  return LOCATIONS[0].city;
+}
+
+// Generate rating (80% chance of 5 stars, 20% chance of 4.5)
+function generateRating(random: () => number): number {
+  return random() > 0.2 ? 5 : 4.5;
+}
+
+// Generate all notifications for a 3-hour session
+function generateNotificationPool(): NotificationData[] {
+  // Use current hour as seed for daily variation, but consistent within the hour
+  const seed = Math.floor(Date.now() / (1000 * 60 * 60));
+  const random = seededRandom(seed);
+
+  const notifications: NotificationData[] = [];
+  let idCounter = 0;
+
+  // Shuffle all arrays for variety
+  const shuffledDocs = shuffleArray(DOCUMENTS, seed);
+  const shuffledReviews = shuffleArray(REVIEW_SNIPPETS, seed);
+  const shuffledConsultations = shuffleArray(CONSULTATION_TYPES, seed);
+
+  // Generate ~220 notifications (enough for 3+ hours at 45-60 sec intervals)
+  // Distribution: 30% purchases, 25% signups, 25% reviews, 10% viewing, 10% limited/download
+
+  // Generate purchases (66 notifications)
+  for (let i = 0; i < 66; i++) {
+    const doc = shuffledDocs[i % shuffledDocs.length];
+    const location = weightedRandomLocation(random);
+    notifications.push({
+      id: `notif-${idCounter++}`,
+      type: "purchase",
+      message: `Someone from ${location} just purchased "${doc}"`,
+      iconType: "cart",
+    });
   }
 
-  return {
-    id: Date.now().toString(),
-    type,
-    message,
-    time: `${minutes} min ago`,
-    icon,
-  };
+  // Generate signups (55 notifications)
+  for (let i = 0; i < 55; i++) {
+    const location = weightedRandomLocation(random);
+    const consultationType = shuffledConsultations[i % shuffledConsultations.length];
+    notifications.push({
+      id: `notif-${idCounter++}`,
+      type: "signup",
+      message: `Someone from ${location} just booked ${consultationType}`,
+      iconType: "calendar",
+    });
+  }
+
+  // Generate reviews (55 notifications)
+  for (let i = 0; i < 55; i++) {
+    const rating = generateRating(random);
+    const review = shuffledReviews[i % shuffledReviews.length];
+    notifications.push({
+      id: `notif-${idCounter++}`,
+      type: "review",
+      message: `New ${rating}-star review: "${review}"`,
+      rating,
+      iconType: "star",
+    });
+  }
+
+  // Generate viewing notifications (22 notifications)
+  for (let i = 0; i < 22; i++) {
+    const doc = shuffledDocs[i % shuffledDocs.length];
+    const viewers = Math.floor(random() * 15) + 8; // 8-22 viewers
+    notifications.push({
+      id: `notif-${idCounter++}`,
+      type: "viewing",
+      message: `${viewers} people are viewing "${doc}"`,
+      iconType: "users",
+    });
+  }
+
+  // Generate limited availability (11 notifications)
+  for (let i = 0; i < 11; i++) {
+    const slots = Math.floor(random() * 4) + 1; // 1-4 slots
+    const timeframe = random() > 0.5 ? "this week" : "today";
+    notifications.push({
+      id: `notif-${idCounter++}`,
+      type: "limited",
+      message: `Only ${slots} consultation slot${slots > 1 ? 's' : ''} left ${timeframe}!`,
+      iconType: "clock",
+    });
+  }
+
+  // Generate downloads (11 notifications)
+  for (let i = 0; i < 11; i++) {
+    const doc = shuffledDocs[i % shuffledDocs.length];
+    const location = weightedRandomLocation(random);
+    notifications.push({
+      id: `notif-${idCounter++}`,
+      type: "download",
+      message: `Someone from ${location} just downloaded "${doc}"`,
+      iconType: "file",
+    });
+  }
+
+  // Shuffle the entire pool for random distribution
+  return shuffleArray(notifications, seed + 1);
+}
+
+// Generate realistic variable intervals (30-90 seconds, weighted toward 45-60)
+function generateIntervals(count: number, seed: number): number[] {
+  const random = seededRandom(seed);
+  const intervals: number[] = [];
+
+  for (let i = 0; i < count; i++) {
+    // Bell curve distribution centered around 50 seconds
+    const u1 = random();
+    const u2 = random();
+    const gaussian = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+    // Scale: mean 50 seconds, std dev 15 seconds, clamped 30-90
+    const interval = Math.max(30, Math.min(90, 50 + gaussian * 15));
+    intervals.push(interval * 1000); // Convert to milliseconds
+  }
+
+  return intervals;
+}
+
+// Icon component helper
+function getIcon(iconType: NotificationData["iconType"], rating?: number): React.ReactNode {
+  switch (iconType) {
+    case "cart":
+      return <ShoppingCart className="h-4 w-4 text-green-500" />;
+    case "users":
+      return <Users className="h-4 w-4 text-purple-500" />;
+    case "star":
+      return (
+        <div className="flex items-center gap-0.5">
+          <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+          {rating === 4.5 && (
+            <span className="text-xs text-yellow-600 font-medium">4.5</span>
+          )}
+        </div>
+      );
+    case "clock":
+      return <Clock className="h-4 w-4 text-red-500" />;
+    case "file":
+      return <FileText className="h-4 w-4 text-blue-500" />;
+    case "calendar":
+      return <Calendar className="h-4 w-4 text-tiffany" />;
+    default:
+      return <Users className="h-4 w-4 text-gray-500" />;
+  }
+}
+
+// Generate realistic "time ago" strings
+function generateTimeAgo(index: number): string {
+  // Earlier notifications appear more recent
+  const baseMinutes = Math.floor(index * 0.5) + 1; // Spread across time
+  const variance = Math.floor(Math.random() * 3);
+  const minutes = Math.max(1, baseMinutes + variance);
+
+  if (minutes < 2) return "just now";
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  return `${hours}h ago`;
 }
 
 interface SocialProofNotificationsProps {
   enabled?: boolean;
-  interval?: number; // Milliseconds between notifications
   maxNotifications?: number;
   position?: "bottom-left" | "bottom-right" | "top-left" | "top-right";
+  displayDuration?: number; // How long each notification shows (ms)
 }
 
 export function SocialProofNotifications({
   enabled = true,
-  interval = 30000, // Default 30 seconds
   maxNotifications = 1,
   position = "bottom-left",
+  displayDuration = 7000,
 }: SocialProofNotificationsProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [dismissed, setDismissed] = useState(false);
+  const notificationIndexRef = useRef(0);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const addNotification = useCallback(() => {
+  // Pre-generate notification pool and intervals (memoized per session)
+  const { pool, intervals } = useMemo(() => {
+    const seed = Math.floor(Date.now() / (1000 * 60 * 60));
+    return {
+      pool: generateNotificationPool(),
+      intervals: generateIntervals(250, seed),
+    };
+  }, []);
+
+  const showNextNotification = useCallback(() => {
     if (dismissed) return;
 
-    const notification = generateRandomNotification();
-    setNotifications((prev) => [...prev.slice(-(maxNotifications - 1)), notification]);
+    const index = notificationIndexRef.current;
+    if (index >= pool.length) {
+      // Wrap around after exhausting pool (after ~3 hours)
+      notificationIndexRef.current = 0;
+      return;
+    }
 
-    // Auto-remove after 6 seconds
+    const data = pool[index];
+    const notification: Notification = {
+      ...data,
+      id: `${data.id}-${Date.now()}`, // Unique ID for React key
+      time: generateTimeAgo(index),
+      icon: getIcon(data.iconType, data.rating),
+    };
+
+    setNotifications((prev) => [...prev.slice(-(maxNotifications - 1)), notification]);
+    notificationIndexRef.current++;
+
+    // Auto-remove after display duration
     setTimeout(() => {
       setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
-    }, 6000);
-  }, [maxNotifications, dismissed]);
+    }, displayDuration);
+
+    // Schedule next notification with variable interval
+    const nextInterval = intervals[index % intervals.length];
+    timeoutRef.current = setTimeout(showNextNotification, nextInterval);
+  }, [pool, intervals, maxNotifications, displayDuration, dismissed]);
 
   useEffect(() => {
     if (!enabled) return;
 
-    // Show first notification after a short delay
-    const initialTimeout = setTimeout(() => {
-      addNotification();
-    }, 5000);
-
-    // Continue showing notifications at interval
-    const notificationInterval = setInterval(addNotification, interval);
+    // Initial delay before first notification (8-15 seconds)
+    const initialDelay = 8000 + Math.random() * 7000;
+    const initialTimeout = setTimeout(showNextNotification, initialDelay);
 
     return () => {
       clearTimeout(initialTimeout);
-      clearInterval(notificationInterval);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     };
-  }, [enabled, interval, addNotification]);
+  }, [enabled, showNextNotification]);
 
   const positionClasses = {
     "bottom-left": "bottom-4 left-4",
@@ -153,8 +483,12 @@ export function SocialProofNotifications({
                 prev.filter((n) => n.id !== notification.id)
               );
               setDismissed(true);
+              if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+              }
             }}
             className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            aria-label="Dismiss notification"
           >
             <X className="h-4 w-4" />
           </button>

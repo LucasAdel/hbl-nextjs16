@@ -13,11 +13,13 @@ import { LiveChat } from "@/components/features/LiveChat";
 import { ServiceWorkerRegistration } from "@/components/features/ServiceWorkerRegistration";
 import { OrganizationSchema, WebsiteSchema, LocalBusinessSchema } from "@/components/seo/JsonLd";
 import { CartAbandonmentTracker } from "@/components/cart/CartAbandonmentTracker";
-import { AIChatWidget } from "@/components/ai-chat-widget";
+import { AIChatWidget } from "@/features/bailey-ai";
 import { GamificationWidgetWrapper } from "@/components/gamification-widget-wrapper";
 import { PostHogProvider } from "@/components/providers/PostHogProvider";
 import { CommandPalette } from "@/components/search/CommandPalette";
 import { SocialProofNotifications } from "@/components/social-proof/SocialProofNotifications";
+import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
+import { ExitIntentPopup } from "@/components/popups/ExitIntentPopup";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -98,14 +100,25 @@ export default function RootLayout({
         <meta name="theme-color" content="#2AAFA2" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
 
-        {/* Theme initialization script */}
+        {/* Theme initialization script - light mode default for first visitors */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               try {
                 const theme = localStorage.getItem('hbl-theme');
+                const firstVisit = localStorage.getItem('hbl-first-visit');
                 const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (theme === 'dark' || (theme === 'system' && systemDark) || (!theme && systemDark)) {
+
+                // Only apply dark mode if:
+                // 1. User explicitly chose dark mode, OR
+                // 2. User chose system mode AND system is dark, OR
+                // 3. Returning visitor (not first visit) without explicit choice AND system is dark
+                const shouldBeDark =
+                  theme === 'dark' ||
+                  (theme === 'system' && systemDark) ||
+                  (firstVisit === 'false' && !theme && systemDark);
+
+                if (shouldBeDark) {
                   document.documentElement.classList.add('dark');
                 }
               } catch (e) {}
@@ -115,6 +128,7 @@ export default function RootLayout({
       </head>
       <body className={`${montserrat.variable} font-sans antialiased`}>
         <PostHogProvider>
+          <AnalyticsProvider>
           <ThemeProvider>
             <Navigation />
           <main id="main-content" className="flex-grow w-full min-h-screen" role="main">
@@ -145,12 +159,14 @@ export default function RootLayout({
           <ServiceWorkerRegistration />
           <CartAbandonmentTracker />
           <CommandPalette />
-          <SocialProofNotifications enabled={true} interval={45000} position="bottom-left" />
+          <SocialProofNotifications enabled={true} position="bottom-left" />
+          <ExitIntentPopup />
           {/* SEO Structured Data */}
           <OrganizationSchema />
           <WebsiteSchema />
           <LocalBusinessSchema />
           </ThemeProvider>
+          </AnalyticsProvider>
         </PostHogProvider>
       </body>
     </html>

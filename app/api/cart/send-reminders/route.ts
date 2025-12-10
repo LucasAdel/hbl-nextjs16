@@ -5,10 +5,11 @@ import { Resend } from "resend";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Reminder intervals in hours
+// Optimized for professional services - respects busy medical practitioner schedules
 const REMINDER_INTERVALS = {
-  1: 1,    // First reminder after 1 hour
-  2: 24,   // Second reminder after 24 hours
-  3: 72,   // Third reminder after 72 hours (3 days)
+  1: 4,    // First reminder after 4 hours - gives time to finish clinic/surgery
+  2: 48,   // Second reminder after 48 hours - allows deliberation
+  3: 168,  // Third reminder after 7 days - matches professional decision cycle
 };
 
 const MAX_REMINDERS = 3;

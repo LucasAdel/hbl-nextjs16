@@ -14,8 +14,12 @@ import {
   Bell,
   Shield,
   Loader2,
+  Sun,
+  Moon,
+  Palette,
 } from "lucide-react";
 import { toast } from "sonner";
+import { setAdminDefaultTheme, getAdminDefaultThemeSetting } from "@/lib/theme-context";
 
 interface CalendarStatus {
   connected: boolean;
@@ -28,6 +32,7 @@ export default function AdminSettingsPage() {
   const [calendarStatus, setCalendarStatus] = useState<CalendarStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [defaultTheme, setDefaultTheme] = useState<"light" | "dark">("light");
 
   const fetchCalendarStatus = async () => {
     try {
@@ -50,6 +55,9 @@ export default function AdminSettingsPage() {
 
   useEffect(() => {
     fetchCalendarStatus();
+
+    // Load saved default theme setting
+    setDefaultTheme(getAdminDefaultThemeSetting());
 
     // Check for success/error query params
     const params = new URLSearchParams(window.location.search);
@@ -82,6 +90,12 @@ export default function AdminSettingsPage() {
     if (calendarStatus?.authUrl) {
       window.location.href = calendarStatus.authUrl;
     }
+  };
+
+  const handleDefaultThemeChange = (newTheme: "light" | "dark") => {
+    setDefaultTheme(newTheme);
+    setAdminDefaultTheme(newTheme);
+    toast.success(`Default theme set to ${newTheme} mode`);
   };
 
   return (
@@ -206,6 +220,60 @@ export default function AdminSettingsPage() {
                   <li>Include Google Meet links for virtual consultations</li>
                   <li>Set up automatic reminders</li>
                 </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Website Appearance Settings */}
+        <section className="mb-8">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <Palette className="w-5 h-5 text-tiffany" />
+            Website Appearance
+          </h2>
+
+          <div className="bg-white rounded-xl shadow-sm border p-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between py-3 border-b">
+                <div className="flex items-center gap-3">
+                  <Sun className="w-5 h-5 text-gray-400" />
+                  <div>
+                    <p className="font-medium text-gray-900">Default Theme</p>
+                    <p className="text-sm text-gray-500">
+                      Set the default theme for new visitors (users can still change it)
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+                  <button
+                    onClick={() => handleDefaultThemeChange("light")}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                      defaultTheme === "light"
+                        ? "bg-white text-tiffany shadow-sm"
+                        : "text-gray-500 hover:text-gray-700"
+                    }`}
+                  >
+                    <Sun className="w-4 h-4" />
+                    Light
+                  </button>
+                  <button
+                    onClick={() => handleDefaultThemeChange("dark")}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                      defaultTheme === "dark"
+                        ? "bg-white text-tiffany shadow-sm"
+                        : "text-gray-500 hover:text-gray-700"
+                    }`}
+                  >
+                    <Moon className="w-4 h-4" />
+                    Dark
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
+                <p className="text-sm text-amber-800">
+                  <strong>Note:</strong> This setting only affects new visitors. Users who have already chosen a theme preference will keep their selection.
+                </p>
               </div>
             </div>
           </div>

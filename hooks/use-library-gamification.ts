@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import type { LibraryArticle } from "@/lib/library/types";
+import type { LibraryArticle } from "@/lib/codex/types";
 
 // XP rewards for library actions
 const XP_REWARDS = {

@@ -4,6 +4,7 @@ import ServicesOverview from "@/components/features/ServicesOverview";
 import AboutSection from "@/components/features/AboutSection";
 import Testimonials from "@/components/features/Testimonials";
 import CallToAction from "@/components/features/CallToAction";
+import { MapboxMap } from "@/components/contact/MapboxMap";
 import Link from "next/link";
 import { FileText, Building, Briefcase, Users, MapPin, Phone, Clock, Mail, Shield, Lock } from "lucide-react";
 
@@ -262,32 +263,8 @@ export default function Home() {
             </div>
 
             {/* Map Section */}
-            <div className="relative">
-              <div className="bg-gray-100 rounded-2xl overflow-hidden shadow-lg h-full min-h-[400px]">
-                {/* Mapbox Map Embed */}
-                <iframe
-                  src="https://api.mapbox.com/styles/v1/mapbox/light-v11.html?title=false&access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw#15.5/-34.9285/138.6007"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0, minHeight: '400px' }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="Hamilton Bailey Law Firm Location - 147 Pirie Street, Adelaide"
-                />
-                {/* Map Overlay with Address */}
-                <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-lg">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-tiffany rounded-full flex items-center justify-center flex-shrink-0 mr-3">
-                      <MapPin className="h-5 w-5 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="font-blair text-gray-900">Hamilton Bailey Law Firm</h4>
-                      <p className="text-sm text-gray-600">147 Pirie Street, Adelaide SA 5000</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div className="relative h-full min-h-[400px]">
+              <MapboxMap className="h-full min-h-[400px] rounded-2xl shadow-lg" />
             </div>
           </div>
         </div>

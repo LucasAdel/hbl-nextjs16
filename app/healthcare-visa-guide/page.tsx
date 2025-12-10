@@ -2,13 +2,16 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { FileText, Calendar, Users, Clock, DollarSign, CheckCircle, Mail, X } from "lucide-react";
+import { FileText, Calendar, Users, Clock, DollarSign, CheckCircle, Mail, X, Loader2 } from "lucide-react";
+import VisaPointsCalculator from "@/components/visa/VisaPointsCalculator";
 
 export default function HealthcareVisaGuidePage() {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const features = [
     {
@@ -68,15 +71,37 @@ export default function HealthcareVisaGuidePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real implementation, this would send to an API
-    console.log("Submitted:", { name, email });
-    setSubmitted(true);
-    setTimeout(() => {
-      setShowEmailModal(false);
-      setSubmitted(false);
-      setEmail("");
-      setName("");
-    }, 3000);
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/visa-guide", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to send guide");
+      }
+
+      setSubmitted(true);
+      setTimeout(() => {
+        setShowEmailModal(false);
+        setSubmitted(false);
+        setEmail("");
+        setName("");
+        setError(null);
+      }, 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -225,6 +250,20 @@ export default function HealthcareVisaGuidePage() {
               </div>
             </div>
 
+            {/* Points Calculator Section */}
+            <div className="mt-12">
+              <h2 className="font-blair text-3xl font-bold text-center mb-4">
+                Check Your Eligibility
+              </h2>
+              <p className="text-gray-600 text-center mb-8 max-w-2xl mx-auto">
+                Use our points calculator to estimate your eligibility for points-tested skilled visas.
+                This tool helps you understand where you stand before starting your application.
+              </p>
+              <div className="max-w-2xl mx-auto">
+                <VisaPointsCalculator />
+              </div>
+            </div>
+
             {/* CTA Section */}
             <div className="text-center mt-12">
               <h3 className="font-blair text-2xl font-semibold mb-4">
@@ -292,7 +331,8 @@ export default function HealthcareVisaGuidePage() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       required
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany focus:border-transparent"
+                      disabled={isLoading}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                       placeholder="Dr. John Smith"
                     />
                   </div>
@@ -305,15 +345,29 @@ export default function HealthcareVisaGuidePage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany focus:border-transparent"
+                      disabled={isLoading}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-tiffany focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                       placeholder="john@example.com"
                     />
                   </div>
+                  {error && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                      {error}
+                    </div>
+                  )}
                   <button
                     type="submit"
-                    className="w-full py-3 bg-tiffany hover:bg-tiffany-dark text-white font-semibold rounded-lg transition-colors"
+                    disabled={isLoading}
+                    className="w-full py-3 bg-tiffany hover:bg-tiffany-dark text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                   >
-                    Send Me the Guide
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      "Send Me the Guide"
+                    )}
                   </button>
                   <p className="text-xs text-gray-500 text-center">
                     By submitting, you agree to receive emails from Hamilton Bailey. You can

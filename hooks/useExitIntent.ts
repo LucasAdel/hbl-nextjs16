@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { analytics } from "@/lib/analytics/comprehensive-tracker";
 
 interface UseExitIntentOptions {
-  /** Delay in ms before exit intent can trigger (prevents false positives) */
+  /** Delay in ms before exit intent can trigger (prevents false positives) - default 45s */
   delay?: number;
   /** Sensitivity of mouse detection (pixels from top of viewport) */
   threshold?: number;
@@ -17,6 +18,12 @@ interface UseExitIntentOptions {
   enableMobile?: boolean;
   /** Callback when exit intent is detected */
   onExitIntent?: () => void;
+  /** Pages to exclude from exit intent */
+  excludePaths?: string[];
+  /** Track analytics events */
+  trackAnalytics?: boolean;
+  /** Offer type for analytics */
+  offerType?: string;
 }
 
 interface UseExitIntentReturn {
@@ -28,27 +35,48 @@ interface UseExitIntentReturn {
   trigger: () => void;
   /** Dismiss and set cooldown */
   dismiss: () => void;
+  /** Mark as converted (user took action) */
+  markConverted: () => void;
+  /** Time remaining before can trigger (ms) */
+  timeUntilActive: number;
 }
 
 /**
  * Hook to detect exit intent (mouse leaving viewport / scroll up on mobile)
  * Used to show cart abandonment prevention modals
+ *
+ * IMPORTANT: Designed to NOT be annoying:
+ * - Default 45-second delay before it can trigger
+ * - Only shows once per session by default
+ * - Excludes checkout/admin pages
  */
 export function useExitIntent(options: UseExitIntentOptions = {}): UseExitIntentReturn {
   const {
-    delay = 1000,
+    delay = 45000, // 45 seconds - not too aggressive!
     threshold = 20,
     oncePerSession = true,
     cookieKey = "exit_intent_shown",
     cooldown = 24 * 60 * 60 * 1000, // 24 hours
     enableMobile = true,
     onExitIntent,
+    excludePaths = ["/admin", "/checkout", "/cart", "/thank-you", "/success", "/login", "/register"],
+    trackAnalytics = true,
+    offerType = "default",
   } = options;
 
   const [triggered, setTriggered] = useState(false);
+  const [timeUntilActive, setTimeUntilActive] = useState(delay);
   const canTriggerRef = useRef(false);
   const lastScrollRef = useRef(0);
   const touchStartYRef = useRef(0);
+  const pageLoadTimeRef = useRef(Date.now());
+
+  // Check if on excluded path
+  const isExcludedPath = useCallback(() => {
+    if (typeof window === "undefined") return true;
+    const currentPath = window.location.pathname;
+    return excludePaths.some((path) => currentPath.startsWith(path));
+  }, [excludePaths]);
 
   // Check if already shown this session
   const hasShownThisSession = useCallback(() => {
@@ -80,12 +108,17 @@ export function useExitIntent(options: UseExitIntentOptions = {}): UseExitIntent
 
   // Trigger exit intent
   const trigger = useCallback(() => {
-    if (triggered || hasShownThisSession()) return;
+    if (triggered || hasShownThisSession() || isExcludedPath()) return;
 
     setTriggered(true);
     markAsShown();
     onExitIntent?.();
-  }, [triggered, hasShownThisSession, markAsShown, onExitIntent]);
+
+    // Track analytics
+    if (trackAnalytics) {
+      analytics.trackExitIntent(true, undefined, offerType);
+    }
+  }, [triggered, hasShownThisSession, isExcludedPath, markAsShown, onExitIntent, trackAnalytics, offerType]);
 
   // Reset trigger state
   const reset = useCallback(() => {
@@ -96,7 +129,23 @@ export function useExitIntent(options: UseExitIntentOptions = {}): UseExitIntent
   const dismiss = useCallback(() => {
     setTriggered(false);
     markAsShown();
-  }, [markAsShown]);
+
+    // Track analytics
+    if (trackAnalytics) {
+      analytics.trackExitIntent(false, "dismissed", offerType);
+    }
+  }, [markAsShown, trackAnalytics, offerType]);
+
+  // Mark as converted (user took action)
+  const markConverted = useCallback(() => {
+    setTriggered(false);
+    markAsShown();
+
+    // Track analytics
+    if (trackAnalytics) {
+      analytics.trackExitIntent(false, "converted", offerType);
+    }
+  }, [markAsShown, trackAnalytics, offerType]);
 
   // Desktop: Mouse leave detection
   useEffect(() => {
@@ -188,12 +237,48 @@ export function useExitIntent(options: UseExitIntentOptions = {}): UseExitIntent
     };
   }, [delay, enableMobile, triggered, hasShownThisSession, trigger]);
 
+  // Track time until active (for UI display)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - pageLoadTimeRef.current;
+      const remaining = Math.max(0, delay - elapsed);
+      setTimeUntilActive(remaining);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [delay]);
+
   return {
     triggered,
     reset,
     trigger,
     dismiss,
+    markConverted,
+    timeUntilActive,
   };
+}
+
+/**
+ * Pre-configured hook for cart pages (more aggressive timing)
+ */
+export function useCartExitIntent(options: Omit<UseExitIntentOptions, "delay" | "excludePaths"> = {}) {
+  return useExitIntent({
+    ...options,
+    delay: 15000, // 15 seconds on cart page
+    excludePaths: ["/checkout", "/thank-you", "/success"],
+    offerType: "cart_recovery",
+  });
+}
+
+/**
+ * Pre-configured hook for general pages (less aggressive)
+ */
+export function useGeneralExitIntent(options: Omit<UseExitIntentOptions, "delay"> = {}) {
+  return useExitIntent({
+    ...options,
+    delay: 60000, // 60 seconds - very non-aggressive
+    offerType: "newsletter",
+  });
 }
 
 export default useExitIntent;

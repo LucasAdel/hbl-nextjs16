@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getSubdomain, LIBRARY_SUBDOMAIN, DOMAINS, DEV_DOMAINS } from "@/lib/subdomain";
+import { getSubdomain, CODEX_SUBDOMAIN, DOMAINS, DEV_DOMAINS } from "@/lib/subdomain";
 
 export function useSubdomain() {
   const [subdomain, setSubdomain] = useState<string | null>(null);
-  const [isLibrary, setIsLibrary] = useState(false);
+  const [isCodex, setIsCodex] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -13,7 +13,7 @@ export function useSubdomain() {
       const hostname = window.location.hostname;
       const detected = getSubdomain(hostname);
       setSubdomain(detected);
-      setIsLibrary(detected === LIBRARY_SUBDOMAIN);
+      setIsCodex(detected === CODEX_SUBDOMAIN);
       setIsLoading(false);
     }
   }, []);
@@ -30,21 +30,25 @@ export function useSubdomain() {
   };
 
   /**
-   * Get URL for library subdomain
+   * Get URL for codex subdomain
    */
-  const getLibraryUrl = (path: string = "/") => {
-    if (typeof window === "undefined") return `/library${path === "/" ? "" : path}`;
+  const getCodexUrl = (path: string = "/") => {
+    if (typeof window === "undefined") return `/codex${path === "/" ? "" : path}`;
 
     const isDev = window.location.hostname.includes("localhost");
-    const baseUrl = isDev ? `http://${DEV_DOMAINS.library}` : DOMAINS.library;
+    const baseUrl = isDev ? `http://${DEV_DOMAINS.codex}` : DOMAINS.codex;
     return `${baseUrl}${path}`;
   };
 
   return {
     subdomain,
-    isLibrary,
+    isCodex,
+    // Backward compatibility aliases
+    isLibrary: isCodex,
     isLoading,
     getMainSiteUrl,
-    getLibraryUrl,
+    getCodexUrl,
+    // Backward compatibility alias
+    getLibraryUrl: getCodexUrl,
   };
 }

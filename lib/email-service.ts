@@ -1,4 +1,3 @@
-import { renderToStaticMarkup } from "react-dom/server";
 import {
   BookingConfirmationEmail,
   DocumentPurchaseEmail,
@@ -21,8 +20,10 @@ interface EmailResult {
   error?: string;
 }
 
-// Render React email template to HTML string
-export function renderEmailTemplate(template: React.ReactElement): string {
+// Render React email template to HTML string (async to use dynamic import)
+export async function renderEmailTemplate(template: React.ReactElement): Promise<string> {
+  // Dynamic import to avoid bundling react-dom/server in client
+  const { renderToStaticMarkup } = await import("react-dom/server");
   return `<!DOCTYPE html>${renderToStaticMarkup(template)}`;
 }
 
@@ -135,7 +136,7 @@ export async function sendBookingConfirmation(data: {
   meetingAddress?: string;
   confirmationNumber: string;
 }): Promise<EmailResult> {
-  const html = renderEmailTemplate(
+  const html = await renderEmailTemplate(
     BookingConfirmationEmail({
       customerName: data.customerName,
       appointmentDate: data.appointmentDate,
@@ -162,7 +163,7 @@ export async function sendDocumentPurchaseReceipt(data: {
   totalAmount: number;
   downloadLinks: { name: string; url: string }[];
 }): Promise<EmailResult> {
-  const html = renderEmailTemplate(
+  const html = await renderEmailTemplate(
     DocumentPurchaseEmail({
       customerName: data.customerName,
       orderNumber: data.orderNumber,
@@ -183,7 +184,7 @@ export async function sendNewsletterWelcome(data: {
   to: string;
   subscriberName?: string;
 }): Promise<EmailResult> {
-  const html = renderEmailTemplate(
+  const html = await renderEmailTemplate(
     NewsletterWelcomeEmail({
       subscriberName: data.subscriberName,
     })
@@ -209,7 +210,7 @@ export async function sendContactFormNotification(data: {
     timeStyle: "short",
   });
 
-  const html = renderEmailTemplate(
+  const html = await renderEmailTemplate(
     ContactFormNotificationEmail({
       name: data.name,
       email: data.email,

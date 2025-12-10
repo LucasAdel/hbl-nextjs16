@@ -16,8 +16,8 @@ const Navigation: React.FC = () => {
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const navItemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
 
-  // Hide navigation on portal routes (portal has its own navigation)
-  if (pathname?.startsWith("/portal")) {
+  // Hide navigation on portal and codex routes (they have their own navigation)
+  if (pathname?.startsWith("/portal") || pathname?.startsWith("/codex")) {
     return null;
   }
 
@@ -26,7 +26,8 @@ const Navigation: React.FC = () => {
     { name: "About", path: "/about" },
     { name: "Services", path: "/services" },
     { name: "Documents", path: "/documents" },
-    { name: "Library", path: "/library" },
+    { name: "Codex", path: "/codex" },
+    { name: "Immigration", path: "/healthcare-visa-guide" },
     { name: "Client Intake", path: "/client-intake" },
     { name: "Contact", path: "/contact" },
   ];

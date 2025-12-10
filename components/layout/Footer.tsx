@@ -9,8 +9,8 @@ const Footer: React.FC = () => {
   const pathname = usePathname();
   const currentYear = new Date().getFullYear();
 
-  // Hide footer on portal routes (portal has its own minimal layout)
-  if (pathname?.startsWith("/portal")) {
+  // Hide footer on portal and codex routes (they have their own layouts)
+  if (pathname?.startsWith("/portal") || pathname?.startsWith("/codex")) {
     return null;
   }
 

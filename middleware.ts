@@ -1,10 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import {
-  isLibrarySubdomain,
-  stripLibraryPrefix,
-  addLibraryPrefix,
-  isLibraryPath,
+  isCodexSubdomain,
+  stripCodexPrefix,
+  addCodexPrefix,
+  isCodexPath,
 } from "@/lib/subdomain";
 
 // Routes that require authentication
@@ -17,19 +17,19 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // ============================================
-  // Subdomain Routing: library.hamiltonbailey.com
+  // Subdomain Routing: codex.hamiltonbailey.com
   // ============================================
 
-  // Check if this is a library subdomain request
-  if (isLibrarySubdomain(hostname)) {
-    // On library subdomain, rewrite paths to /library/*
-    // e.g., library.hamiltonbailey.com/ -> /library
-    // e.g., library.hamiltonbailey.com/search -> /library/search
-    // e.g., library.hamiltonbailey.com/article-slug -> /library/article-slug
+  // Check if this is a codex subdomain request
+  if (isCodexSubdomain(hostname)) {
+    // On codex subdomain, rewrite paths to /codex/*
+    // e.g., codex.hamiltonbailey.com/ -> /codex
+    // e.g., codex.hamiltonbailey.com/search -> /codex/search
+    // e.g., codex.hamiltonbailey.com/article-slug -> /codex/article-slug
 
-    // Don't rewrite if already targeting library path (shouldn't happen on subdomain)
-    if (!isLibraryPath(pathname)) {
-      const newPath = addLibraryPrefix(pathname);
+    // Don't rewrite if already targeting codex path (shouldn't happen on subdomain)
+    if (!isCodexPath(pathname)) {
+      const newPath = addCodexPrefix(pathname);
       const url = request.nextUrl.clone();
       url.pathname = newPath;
 
@@ -37,20 +37,20 @@ export async function middleware(request: NextRequest) {
       return NextResponse.rewrite(url);
     }
   } else {
-    // On main domain, redirect /library/* requests to library subdomain
-    // This ensures library.hamiltonbailey.com is the canonical URL
-    if (isLibraryPath(pathname) && process.env.ENABLE_LIBRARY_SUBDOMAIN_REDIRECT === "true") {
-      const libraryPath = stripLibraryPrefix(pathname);
-      const libraryUrl = new URL(
-        libraryPath,
+    // On main domain, redirect /codex/* requests to codex subdomain
+    // This ensures codex.hamiltonbailey.com is the canonical URL
+    if (isCodexPath(pathname) && process.env.ENABLE_CODEX_SUBDOMAIN_REDIRECT === "true") {
+      const codexPath = stripCodexPrefix(pathname);
+      const codexUrl = new URL(
+        codexPath,
         process.env.NODE_ENV === "development"
-          ? "http://library.localhost:3000"
-          : "https://library.hamiltonbailey.com"
+          ? "http://codex.localhost:3000"
+          : "https://codex.hamiltonbailey.com"
       );
       // Preserve query params
-      libraryUrl.search = request.nextUrl.search;
+      codexUrl.search = request.nextUrl.search;
 
-      return NextResponse.redirect(libraryUrl, { status: 301 });
+      return NextResponse.redirect(codexUrl, { status: 301 });
     }
   }
 

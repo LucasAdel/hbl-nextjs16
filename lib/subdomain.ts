@@ -1,22 +1,22 @@
 /**
  * Subdomain Detection and Routing Utilities
- * Handles library.hamiltonbailey.com subdomain routing
+ * Handles codex.hamiltonbailey.com subdomain routing
  */
 
 // Domain configuration
 export const MAIN_DOMAIN = "hamiltonbailey.com";
-export const LIBRARY_SUBDOMAIN = "library";
+export const CODEX_SUBDOMAIN = "codex";
 
 // Full subdomain URLs
 export const DOMAINS = {
   main: `https://${MAIN_DOMAIN}`,
-  library: `https://${LIBRARY_SUBDOMAIN}.${MAIN_DOMAIN}`,
+  codex: `https://${CODEX_SUBDOMAIN}.${MAIN_DOMAIN}`,
 } as const;
 
 // Development domains (for local testing)
 export const DEV_DOMAINS = {
   main: "localhost:3000",
-  library: "library.localhost:3000",
+  codex: "codex.localhost:3000",
 } as const;
 
 /**
@@ -25,9 +25,9 @@ export const DEV_DOMAINS = {
 export function getSubdomain(hostname: string): string | null {
   // Handle localhost development
   if (hostname.includes("localhost") || hostname.includes("127.0.0.1")) {
-    // Check for library.localhost:3000 pattern
-    if (hostname.startsWith("library.")) {
-      return "library";
+    // Check for codex.localhost:3000 pattern
+    if (hostname.startsWith("codex.")) {
+      return "codex";
     }
     return null;
   }
@@ -40,7 +40,7 @@ export function getSubdomain(hostname: string): string | null {
     return null;
   }
 
-  // For library.hamiltonbailey.com (3 parts), subdomain is first part
+  // For codex.hamiltonbailey.com (3 parts), subdomain is first part
   if (parts.length === 3) {
     const subdomain = parts[0];
     // Ignore www as a subdomain
@@ -50,25 +50,30 @@ export function getSubdomain(hostname: string): string | null {
     return subdomain;
   }
 
-  // For more complex cases like library.staging.hamiltonbailey.com
+  // For more complex cases like codex.staging.hamiltonbailey.com
   return parts[0];
 }
 
 /**
- * Check if current request is for library subdomain
+ * Check if current request is for codex subdomain
  */
-export function isLibrarySubdomain(hostname: string): boolean {
-  return getSubdomain(hostname) === LIBRARY_SUBDOMAIN;
+export function isCodexSubdomain(hostname: string): boolean {
+  return getSubdomain(hostname) === CODEX_SUBDOMAIN;
 }
+
+/**
+ * @deprecated Use isCodexSubdomain instead
+ */
+export const isLibrarySubdomain = isCodexSubdomain;
 
 /**
  * Get the appropriate URL for a path based on subdomain context
  */
-export function getUrl(path: string, forSubdomain: "main" | "library" = "main"): string {
+export function getUrl(path: string, forSubdomain: "main" | "codex" = "main"): string {
   const isDev = process.env.NODE_ENV === "development";
   const baseUrl = isDev
-    ? forSubdomain === "library"
-      ? `http://${DEV_DOMAINS.library}`
+    ? forSubdomain === "codex"
+      ? `http://${DEV_DOMAINS.codex}`
       : `http://${DEV_DOMAINS.main}`
     : DOMAINS[forSubdomain];
 
@@ -77,39 +82,54 @@ export function getUrl(path: string, forSubdomain: "main" | "library" = "main"):
 
 /**
  * Generate cross-subdomain link
- * Use this for links between main site and library subdomain
+ * Use this for links between main site and codex subdomain
  */
 export function getCrossSubdomainUrl(
   path: string,
-  targetSubdomain: "main" | "library"
+  targetSubdomain: "main" | "codex"
 ): string {
   return getUrl(path, targetSubdomain);
 }
 
 /**
- * Check if a path should be handled by library subdomain
+ * Check if a path should be handled by codex subdomain
  */
-export function isLibraryPath(pathname: string): boolean {
-  return pathname.startsWith("/library");
+export function isCodexPath(pathname: string): boolean {
+  return pathname.startsWith("/codex");
 }
 
 /**
- * Strip /library prefix from path (used when rewriting on subdomain)
+ * @deprecated Use isCodexPath instead
  */
-export function stripLibraryPrefix(pathname: string): string {
-  if (pathname.startsWith("/library")) {
-    const stripped = pathname.replace(/^\/library/, "");
+export const isLibraryPath = isCodexPath;
+
+/**
+ * Strip /codex prefix from path (used when rewriting on subdomain)
+ */
+export function stripCodexPrefix(pathname: string): string {
+  if (pathname.startsWith("/codex")) {
+    const stripped = pathname.replace(/^\/codex/, "");
     return stripped || "/";
   }
   return pathname;
 }
 
 /**
- * Add /library prefix to path (used when accessing from main domain)
+ * @deprecated Use stripCodexPrefix instead
  */
-export function addLibraryPrefix(pathname: string): string {
-  if (pathname.startsWith("/library")) {
+export const stripLibraryPrefix = stripCodexPrefix;
+
+/**
+ * Add /codex prefix to path (used when accessing from main domain)
+ */
+export function addCodexPrefix(pathname: string): string {
+  if (pathname.startsWith("/codex")) {
     return pathname;
   }
-  return `/library${pathname === "/" ? "" : pathname}`;
+  return `/codex${pathname === "/" ? "" : pathname}`;
 }
+
+/**
+ * @deprecated Use addCodexPrefix instead
+ */
+export const addLibraryPrefix = addCodexPrefix;

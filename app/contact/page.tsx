@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Mail, Phone, MapPin, Clock, Send, AlertCircle } from "lucide-react";
+import { MapboxMap } from "@/components/contact/MapboxMap";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -60,21 +61,21 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-slate-900">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-tiffany-lighter/10 pt-32 pb-16">
-        <div className="absolute top-20 left-10 w-80 h-80 rounded-full blur-3xl bg-tiffany/5" />
+      <section className="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-tiffany-lighter/10 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 pt-32 pb-16">
+        <div className="absolute top-20 left-10 w-80 h-80 rounded-full blur-3xl bg-tiffany/5 dark:bg-tiffany/10" />
         <div className="container-custom relative z-10">
           <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center px-4 py-2 rounded-full mb-8 bg-tiffany/10">
-              <span className="font-montserrat text-sm font-semibold text-tiffany uppercase tracking-wider">
+            <div className="inline-flex items-center px-4 py-2 rounded-full mb-8 bg-tiffany/10 dark:bg-tiffany/20">
+              <span className="font-montserrat text-sm font-semibold text-tiffany dark:text-tiffany-light uppercase tracking-wider">
                 Get In Touch
               </span>
             </div>
-            <h1 className="font-blair text-4xl md:text-5xl font-bold text-text-primary mb-6">
+            <h1 className="font-blair text-4xl md:text-5xl font-bold text-text-primary dark:text-white mb-6">
               Contact Our Team
             </h1>
-            <p className="font-montserrat text-lg text-text-secondary">
+            <p className="font-montserrat text-lg text-text-secondary dark:text-gray-300">
               We&apos;re here to assist Australian medical practitioners with their legal needs.
               Reach out to discuss how we can support your practice.
             </p>
@@ -83,26 +84,26 @@ export default function ContactPage() {
       </section>
 
       {/* Contact Section */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-white dark:bg-slate-900">
         <div className="container-custom">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div>
-              <h2 className="text-2xl font-blair mb-6">Get In Touch</h2>
+              <h2 className="text-2xl font-blair mb-6 text-gray-900 dark:text-white">Get In Touch</h2>
 
               {error && (
-                <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded-r-lg">
+                <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-400 dark:border-red-500 p-4 mb-6 rounded-r-lg">
                   <div className="flex items-center">
-                    <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
-                    <p className="text-red-700">{error}</p>
+                    <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mr-2" />
+                    <p className="text-red-700 dark:text-red-300">{error}</p>
                   </div>
                 </div>
               )}
 
               {submitted ? (
-                <div className="bg-tiffany/10 border border-tiffany/20 rounded-xl p-8 text-center">
-                  <div className="w-16 h-16 bg-tiffany/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="bg-tiffany/10 dark:bg-tiffany/20 border border-tiffany/20 dark:border-tiffany/30 rounded-xl p-8 text-center">
+                  <div className="w-16 h-16 bg-tiffany/20 dark:bg-tiffany/30 rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg
-                      className="w-8 h-8 text-tiffany-dark"
+                      className="w-8 h-8 text-tiffany-dark dark:text-tiffany-light"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -115,8 +116,8 @@ export default function ContactPage() {
                       />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-blair text-tiffany-dark mb-2">Message Sent!</h3>
-                  <p className="text-gray-600">
+                  <h3 className="text-xl font-blair text-tiffany-dark dark:text-tiffany-light mb-2">Message Sent!</h3>
+                  <p className="text-gray-600 dark:text-gray-300">
                     Thank you for contacting Hamilton Bailey Law Firm. We&apos;ll get back to you
                     shortly.
                   </p>
@@ -127,7 +128,7 @@ export default function ContactPage() {
                     <div>
                       <label
                         htmlFor="firstName"
-                        className="block text-sm font-medium text-gray-700 mb-1"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                       >
                         First Name *
                       </label>
@@ -138,13 +139,13 @@ export default function ContactPage() {
                         value={formData.firstName}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-tiffany focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-tiffany focus:border-transparent"
                       />
                     </div>
                     <div>
                       <label
                         htmlFor="lastName"
-                        className="block text-sm font-medium text-gray-700 mb-1"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                       >
                         Last Name *
                       </label>
@@ -155,7 +156,7 @@ export default function ContactPage() {
                         value={formData.lastName}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-tiffany focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-tiffany focus:border-transparent"
                       />
                     </div>
                   </div>
@@ -164,7 +165,7 @@ export default function ContactPage() {
                     <div>
                       <label
                         htmlFor="email"
-                        className="block text-sm font-medium text-gray-700 mb-1"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                       >
                         Email *
                       </label>
@@ -175,13 +176,13 @@ export default function ContactPage() {
                         value={formData.email}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-tiffany focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-tiffany focus:border-transparent"
                       />
                     </div>
                     <div>
                       <label
                         htmlFor="phone"
-                        className="block text-sm font-medium text-gray-700 mb-1"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                       >
                         Phone
                       </label>
@@ -191,7 +192,7 @@ export default function ContactPage() {
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-tiffany focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-tiffany focus:border-transparent"
                       />
                     </div>
                   </div>
@@ -199,7 +200,7 @@ export default function ContactPage() {
                   <div>
                     <label
                       htmlFor="service"
-                      className="block text-sm font-medium text-gray-700 mb-1"
+                      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                     >
                       Service of Interest
                     </label>
@@ -208,7 +209,7 @@ export default function ContactPage() {
                       name="service"
                       value={formData.service}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-tiffany focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-tiffany focus:border-transparent"
                     >
                       <option value="">Select a service (optional)</option>
                       <option value="Practice Setup & Structuring">Practice Setup & Structuring</option>
@@ -225,7 +226,7 @@ export default function ContactPage() {
                   <div>
                     <label
                       htmlFor="message"
-                      className="block text-sm font-medium text-gray-700 mb-1"
+                      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                     >
                       Message *
                     </label>
@@ -236,7 +237,7 @@ export default function ContactPage() {
                       onChange={handleChange}
                       required
                       rows={4}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-tiffany focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-tiffany focus:border-transparent"
                     />
                   </div>
 
@@ -277,7 +278,7 @@ export default function ContactPage() {
                         </span>
                       )}
                     </button>
-                    <p className="text-xs text-gray-500 mt-2">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                       By submitting this form, you agree to our privacy policy.
                     </p>
                   </div>
@@ -286,19 +287,19 @@ export default function ContactPage() {
             </div>
 
             <div>
-              <h2 className="text-2xl font-blair mb-6">Our Practice</h2>
-              <div className="mb-8 h-72 rounded-lg overflow-hidden shadow-md bg-gray-200 flex items-center justify-center">
-                <p className="text-gray-500">Map - 147 Pirie Street, Adelaide</p>
-              </div>
+              <h2 className="text-2xl font-blair mb-6 text-gray-900 dark:text-white">Our Practice</h2>
+
+              {/* Interactive Map */}
+              <MapboxMap className="mb-8 h-72 rounded-xl shadow-lg" />
 
               <div className="space-y-6">
                 <div className="flex items-start">
-                  <div className="w-10 h-10 bg-tiffany-lighter rounded-full flex items-center justify-center flex-shrink-0 mr-4">
-                    <MapPin className="h-5 w-5 text-tiffany-dark" />
+                  <div className="w-10 h-10 bg-tiffany-lighter dark:bg-tiffany/20 rounded-full flex items-center justify-center flex-shrink-0 mr-4">
+                    <MapPin className="h-5 w-5 text-tiffany-dark dark:text-tiffany-light" />
                   </div>
                   <div>
-                    <h4 className="font-blair text-lg">Address</h4>
-                    <p className="text-gray-600">
+                    <h4 className="font-blair text-lg text-gray-900 dark:text-white">Address</h4>
+                    <p className="text-gray-600 dark:text-gray-300">
                       147 Pirie Street
                       <br />
                       Adelaide, South Australia 5000
@@ -307,32 +308,32 @@ export default function ContactPage() {
                 </div>
 
                 <div className="flex items-start">
-                  <div className="w-10 h-10 bg-tiffany-lighter rounded-full flex items-center justify-center flex-shrink-0 mr-4">
-                    <Mail className="h-5 w-5 text-tiffany-dark" />
+                  <div className="w-10 h-10 bg-tiffany-lighter dark:bg-tiffany/20 rounded-full flex items-center justify-center flex-shrink-0 mr-4">
+                    <Mail className="h-5 w-5 text-tiffany-dark dark:text-tiffany-light" />
                   </div>
                   <div>
-                    <h4 className="font-blair text-lg">Contact</h4>
-                    <p className="text-gray-600">Use the contact form to send us a message</p>
+                    <h4 className="font-blair text-lg text-gray-900 dark:text-white">Contact</h4>
+                    <p className="text-gray-600 dark:text-gray-300">Use the contact form to send us a message</p>
                   </div>
                 </div>
 
                 <div className="flex items-start">
-                  <div className="w-10 h-10 bg-tiffany-lighter rounded-full flex items-center justify-center flex-shrink-0 mr-4">
-                    <Phone className="h-5 w-5 text-tiffany-dark" />
+                  <div className="w-10 h-10 bg-tiffany-lighter dark:bg-tiffany/20 rounded-full flex items-center justify-center flex-shrink-0 mr-4">
+                    <Phone className="h-5 w-5 text-tiffany-dark dark:text-tiffany-light" />
                   </div>
                   <div>
-                    <h4 className="font-blair text-lg">Phone</h4>
-                    <p className="text-gray-600">+61 8 5122 0056</p>
+                    <h4 className="font-blair text-lg text-gray-900 dark:text-white">Phone</h4>
+                    <p className="text-gray-600 dark:text-gray-300">+61 8 5122 0056</p>
                   </div>
                 </div>
 
                 <div className="flex items-start">
-                  <div className="w-10 h-10 bg-tiffany-lighter rounded-full flex items-center justify-center flex-shrink-0 mr-4">
-                    <Clock className="h-5 w-5 text-tiffany-dark" />
+                  <div className="w-10 h-10 bg-tiffany-lighter dark:bg-tiffany/20 rounded-full flex items-center justify-center flex-shrink-0 mr-4">
+                    <Clock className="h-5 w-5 text-tiffany-dark dark:text-tiffany-light" />
                   </div>
                   <div>
-                    <h4 className="font-blair text-lg">Business Hours</h4>
-                    <p className="text-gray-600">
+                    <h4 className="font-blair text-lg text-gray-900 dark:text-white">Business Hours</h4>
+                    <p className="text-gray-600 dark:text-gray-300">
                       Monday - Friday: 9:00 AM - 5:00 PM
                       <br />
                       Saturday & Sunday: Closed
@@ -346,11 +347,11 @@ export default function ContactPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-gray-50 dark:bg-slate-800">
         <div className="container-custom">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-blair mb-4">Frequently Asked Questions</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-3xl font-blair mb-4 text-gray-900 dark:text-white">Frequently Asked Questions</h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               Common questions about working with Hamilton Bailey Law Firm.
             </p>
           </div>
@@ -378,9 +379,9 @@ export default function ContactPage() {
                   "Yes, we offer retainer arrangements and support packages for medical practices that need regular legal assistance and document updates.",
               },
             ].map((faq) => (
-              <div key={faq.question} className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className="text-xl font-blair mb-3">{faq.question}</h3>
-                <p className="text-gray-600">{faq.answer}</p>
+              <div key={faq.question} className="bg-white dark:bg-slate-900 p-6 rounded-lg shadow-md dark:shadow-slate-900/50 border border-transparent dark:border-slate-700">
+                <h3 className="text-xl font-blair mb-3 text-gray-900 dark:text-white">{faq.question}</h3>
+                <p className="text-gray-600 dark:text-gray-300">{faq.answer}</p>
               </div>
             ))}
           </div>

@@ -12,7 +12,8 @@ export type SequenceType =
   | "post_purchase"
   | "booking_reminder"
   | "re_engagement"
-  | "cart_abandonment";
+  | "cart_abandonment"
+  | "financial_year_review"; // Triggered annually in May for Australian FY (ends June 30)
 
 export type SequenceStatus = "active" | "paused" | "completed" | "cancelled";
 
@@ -24,6 +25,11 @@ export interface EmailSequenceStep {
   conditions?: {
     skipIf?: string[]; // Skip if user has done these actions
     onlyIf?: string[]; // Only send if user matches these conditions
+  };
+  sendWindow?: {
+    // Only send during this calendar window each year (MM-DD format)
+    startDate: string; // e.g., "01-15" for January 15
+    endDate: string; // e.g., "06-30" for June 30
   };
 }
 
@@ -155,6 +161,23 @@ export const EMAIL_SEQUENCES: Record<SequenceType, EmailSequence> = {
         subject: "How Did Your Documents Work Out? Quick Feedback Request",
         templateId: "purchase_5_feedback",
       },
+      {
+        stepNumber: 6,
+        delayHours: 4320, // 6 months later - annual review reminder
+        subject: "Schedule Your Annual Service Agreement Review - Book with Your Accountant & Our Team",
+        templateId: "purchase_6_annual_review",
+        // Note: Tenant Doctor Service Agreements should ideally be reviewed every May/June
+        // (Australian financial year) to ensure terms remain correct subject to business changes.
+        // Email invites client to coordinate with their accounting provider and Hamilton Bailey Law
+        // for a comprehensive annual review of their service agreements.
+        conditions: {
+          onlyIf: ["purchased_tenant_doctor", "purchased_service_agreement"],
+        },
+        sendWindow: {
+          startDate: "01-15", // January 15
+          endDate: "06-30", // June 30 - Australian FY end
+        },
+      },
     ],
   },
 
@@ -218,26 +241,68 @@ export const EMAIL_SEQUENCES: Record<SequenceType, EmailSequence> = {
     id: "cart_abandonment",
     type: "cart_abandonment",
     name: "Cart Abandonment Recovery",
-    description: "Recover abandoned shopping carts",
+    description: "Recover abandoned shopping carts with 3-email sequence",
     isActive: true,
     steps: [
       {
         stepNumber: 1,
-        delayHours: 1, // 1 hour after abandonment
+        delayHours: 4, // 4 hours after abandonment - respects busy professional schedules
         subject: "You Left Something Behind - Your Cart is Waiting",
-        templateId: "cart_1_reminder",
+        templateId: "cartRecovery1", // Maps to CartRecoveryEmail1
+        conditions: {
+          skipIf: ["has_purchased", "cart_recovered"],
+        },
       },
       {
         stepNumber: 2,
-        delayHours: 24, // 24 hours later
-        subject: "Still Thinking About It? Here's Why Our Clients Trust Us",
-        templateId: "cart_2_social_proof",
+        delayHours: 48, // 48 hours after abandonment - allows deliberation
+        subject: "Still Thinking It Over? Here's Why 700+ Doctors Trust Us",
+        templateId: "cartRecovery2", // Maps to CartRecoveryEmail2 with testimonials
+        conditions: {
+          skipIf: ["has_purchased", "cart_recovered"],
+        },
       },
       {
         stepNumber: 3,
-        delayHours: 72, // 3 days later
-        subject: "Final Reminder: Your Cart Expires Soon",
-        templateId: "cart_3_urgency",
+        delayHours: 168, // 7 days after abandonment - matches professional decision cycle
+        subject: "Last Chance: 10% Off Your Cart - Expires in 48 Hours!",
+        templateId: "cartRecovery3", // Maps to CartRecoveryEmail3 with discount
+        conditions: {
+          skipIf: ["has_purchased", "cart_recovered"],
+        },
+      },
+    ],
+  },
+
+  financial_year_review: {
+    id: "financial_year_review",
+    type: "financial_year_review",
+    name: "Australian Financial Year Document Review",
+    description:
+      "Annual review reminder for Tenant Doctor and Service Agreements - triggered in May each year to align with Australian FY (ending June 30). Invites clients to schedule a review appointment with their accounting provider and Hamilton Bailey Law to ensure service agreements reflect any business changes before the new financial year.",
+    isActive: true,
+    steps: [
+      {
+        stepNumber: 1,
+        delayHours: 0, // Triggered by scheduled job in May
+        subject:
+          "FY Ending Soon - Schedule Your Service Agreement Review with Your Accountant & Hamilton Bailey Law",
+        templateId: "fy_review_reminder",
+        // Sent to all customers who purchased Tenant Doctor or Service Agreements
+        // Invites them to coordinate with their accountant and our firm for annual review
+        conditions: {
+          onlyIf: ["purchased_tenant_doctor", "purchased_service_agreement"],
+        },
+      },
+      {
+        stepNumber: 2,
+        delayHours: 168, // 7 days later - follow-up if no action
+        subject: "Reminder: Book Your Annual Agreement Review Before June 30 - Coordinate with Your Accountant & Our Team",
+        templateId: "fy_review_followup",
+        conditions: {
+          skipIf: ["booked_review_consultation", "confirmed_no_changes"],
+          onlyIf: ["purchased_tenant_doctor", "purchased_service_agreement"],
+        },
       },
     ],
   },

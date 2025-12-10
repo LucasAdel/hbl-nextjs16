@@ -2,7 +2,15 @@
  * AI Chat Knowledge Base - Hamilton Bailey Law Firm
  *
  * Comprehensive knowledge base containing all Hamilton Bailey-specific information
- * imported from bailey-legal-bloom project (24 entries total)
+ * imported from bailey-legal-bloom project (38 entries total)
+ *
+ * Categories covered:
+ * - Company information (overview, principal, contact)
+ * - Services (Tenant Doctor™, payroll tax, commercial law, audits, pathology)
+ * - Compliance (AHPRA, Fair Work, risk indicators, regulatory)
+ * - Expertise (case law: Thomas/Naaz, Optical Superstore, Hollis v Vabu)
+ * - Partnerships (Health and Life, David Dahm clarification)
+ * - Resources (library, educational, technology)
  */
 
 export interface KnowledgeItem {
@@ -537,6 +545,304 @@ export const KNOWLEDGE_BASE: KnowledgeItem[] = [
     xpReward: 20,
     metadata: { average_savings: "50-75%", success_rate: "high" }
   },
+
+  // ============================================
+  // ADDITIONAL KNOWLEDGE (from bailey-legal-bloom knowledge-base)
+  // ============================================
+
+  // 25. AHPRA Annual Declarations
+  {
+    id: "ahpra-declarations",
+    category: "compliance",
+    subcategory: "ahpra",
+    topic: "ahpra annual declarations",
+    title: "AHPRA Annual Declaration Requirements",
+    content: "AHPRA requires self-employed health practitioners to make annual declarations including: (1) Self-Employment Status - clear written statement confirming independent status, (2) Practice Addresses - disclosure of every premises including telehealth locations, (3) Business Names - all business names and practice company names used, (4) Shared Premises Practitioners - names of all registered health practitioners you share premises with and cost-sharing arrangements.",
+    summary: "Four key AHPRA declaration requirements for self-employed health practitioners.",
+    keywords: ["ahpra", "annual declaration", "self-employed", "registration", "national law", "practitioner registration"],
+    intentPatterns: ["ahpra", "annual declaration", "ahpra compliance", "practitioner registration", "national law"],
+    responseTemplate: "AHPRA Annual Declarations are critical for maintaining your professional registration. Here are the four key requirements:\n\n**1. Self-Employment Status**\nProvide clear written confirmation of your independent status when responding to AHPRA enquiries.\n\n**2. Practice Addresses**\nDisclose EVERY premises where you practise, including:\n• Primary clinics\n• Secondary locations\n• Telehealth service addresses\n\n**3. Business Names**\nDocument all business and practice company names under which you operate professionally.\n\n**4. Shared Premises Practitioners**\nList full names of all registered health practitioners you share premises with, including any cost-sharing arrangements (even informal ones).\n\n**Why It Matters:**\nIncomplete declarations can trigger regulatory issues and must align with your payroll tax documentation.\n\nWould you like help ensuring your AHPRA declarations are complete and compliant?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "AHPRA requirements may change. Verify current requirements with AHPRA directly.",
+    adviceLevel: "specific",
+    confidenceLevel: 10,
+    relatedProducts: ["ahpra-compliance-review"],
+    xpReward: 30,
+    metadata: { requirements: 4, legislation: "National Law" }
+  },
+
+  // 26. Pathology Lease Negotiations
+  {
+    id: "pathology-lease",
+    category: "services",
+    subcategory: "pathology",
+    topic: "pathology lease agreements",
+    title: "Pathology Lease & Rent Negotiations",
+    content: "Hamilton Bailey specializes in pathology collection room agreements for medical practices. We negotiate lease terms with major pathology providers, review existing agreements for compliance and value optimization, and ensure arrangements comply with ACCC guidelines and healthcare regulations. Services include rent review negotiations, lease renewals, and new agreement establishment.",
+    summary: "Expert negotiation of pathology collection room leases and agreements.",
+    keywords: ["pathology", "lease", "rent", "collection room", "pathology agreement", "pathology provider"],
+    intentPatterns: ["pathology lease", "pathology rent", "collection room", "pathology agreement", "pathology negotiation"],
+    responseTemplate: "Pathology lease agreements require specialized expertise. Hamilton Bailey provides:\n\n**Negotiation Services:**\n• New pathology collection room agreements\n• Lease renewals and rent reviews\n• Terms optimization with major providers\n• Multi-site pathology arrangements\n\n**Compliance Review:**\n• ACCC guideline compliance\n• Healthcare regulation alignment\n• Value assessment and benchmarking\n• Risk identification in existing agreements\n\n**Key Considerations:**\n• Rental rates vs market value\n• Term length and renewal options\n• Exclusivity provisions\n• Service level requirements\n• Make-good obligations\n\n**Our Advantage:**\nWe understand pathology provider business models and can negotiate optimal terms for your practice.\n\nWould you like us to review your pathology lease or negotiate a new agreement?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Lease advice depends on specific terms and circumstances.",
+    adviceLevel: "specific",
+    confidenceLevel: 10,
+    relatedProducts: ["pathology-lease-review"],
+    xpReward: 30,
+    metadata: { service_type: "negotiation", providers: ["major pathology companies"] }
+  },
+
+  // 27. Legal Audit Services
+  {
+    id: "legal-audit",
+    category: "services",
+    subcategory: "audit",
+    topic: "legal audit services",
+    title: "Legal Audit for Medical Practices",
+    content: "Our legal audit service provides comprehensive review of existing medical practice agreements including pathology leases, tenant-doctor service agreements, compliance documentation, and business structure review. We provide a detailed Letter of Advice outlining findings, risks, and recommendations with priority ranking.",
+    summary: "Comprehensive legal audit of medical practice agreements and documentation.",
+    keywords: ["legal audit", "document review", "compliance audit", "agreement review", "practice audit"],
+    intentPatterns: ["legal audit", "review my agreements", "document audit", "compliance review", "audit my practice"],
+    responseTemplate: "Our Legal Audit service provides comprehensive review of your practice documentation:\n\n**What We Audit:**\n• Pathology lease agreements\n• Tenant-Doctor service agreements\n• Compliance documentation\n• Business structure documents\n• Employment/contractor agreements\n\n**Our Process:**\n1. Initial contact and preliminary discussion\n2. Terms of Engagement execution\n3. Document collection and review\n4. Comprehensive analysis\n5. Letter of Advice delivery\n\n**What You Receive:**\n• Detailed analysis of existing agreements\n• Identification of problematic issues\n• Strategy recommendations\n• Compliance gap analysis\n• Priority ranking of issues requiring attention\n• Cost estimates for remediation\n\n**Investment:** Fixed fee based on scope\n\nWould you like to request a legal audit of your practice documentation?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Audit findings depend on documents provided and specific circumstances.",
+    adviceLevel: "specific",
+    confidenceLevel: 10,
+    relatedProducts: ["legal-audit-package"],
+    xpReward: 35,
+    metadata: { deliverable: "Letter of Advice", process_steps: 5 }
+  },
+
+  // 28. PT21 Requirements for Accountants
+  {
+    id: "pt21-requirements",
+    category: "compliance",
+    subcategory: "payroll-tax",
+    topic: "21 requirements for accountants",
+    title: "21 Payroll Tax Requirements for Accountants",
+    content: "The PT21 framework comprises 21 critical requirements that accountants must verify when advising medical practices on payroll tax compliance. These requirements ensure proper contractor classification and compliance with State Revenue Office interpretations based on recent case law including Thomas and Naaz [2022].",
+    summary: "21 critical payroll tax compliance requirements for accountants advising medical practices.",
+    keywords: ["pt21", "21 requirements", "accountant", "certification", "payroll tax requirements", "compliance checklist"],
+    intentPatterns: ["21 requirements", "pt21", "accountant requirements", "payroll tax checklist", "compliance requirements"],
+    responseTemplate: "The PT21 Framework provides accountants with 21 critical requirements for payroll tax compliance:\n\n**Purpose:**\nEnsure proper verification when advising medical practices on contractor arrangements and payroll tax obligations.\n\n**Key Areas Covered:**\n• Contractor classification criteria\n• Documentation requirements\n• Service agreement essentials\n• Business structure verification\n• Independence indicators\n\n**Based On:**\n• Recent case law (Thomas and Naaz [2022])\n• State Revenue Office interpretations\n• ATO guidelines\n• Fair Work Act considerations\n\n**For Accountants:**\nThis framework helps you:\n• Verify compliance before providing advice\n• Identify risk areas requiring legal review\n• Support due diligence processes\n• Collaborate effectively with legal advisors\n\n**Certification:**\nAccountants can become certified in applying these requirements through our training program.\n\nWould you like information about PT21 certification or training?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Requirements may change with regulatory updates. Professional advice should be obtained.",
+    adviceLevel: "specific",
+    confidenceLevel: 10,
+    relatedProducts: ["pt21-certification"],
+    xpReward: 30,
+    metadata: { requirements_count: 21, target_audience: "accountants" }
+  },
+
+  // 29. Thomas and Naaz Case Law Detail
+  {
+    id: "thomas-naaz-case",
+    category: "expertise",
+    subcategory: "case-law",
+    topic: "thomas and naaz case",
+    title: "Thomas and Naaz [2022] NSWCATAD - Case Analysis",
+    content: "Thomas and Naaz Pty Ltd v Chief Commissioner of State Revenue [2022] NSWCATAD 56 is a landmark payroll tax case where a medical practice was assessed for payroll tax on GP contractor payments. The case established key principles for determining employment vs contractor relationships in medical practices, emphasizing factors like control, integration, and the reality of the working arrangement.",
+    summary: "Landmark 2022 payroll tax case establishing key principles for medical practice contractor classification.",
+    keywords: ["thomas and naaz", "case law", "nswcatad", "payroll tax case", "2022", "contractor case"],
+    intentPatterns: ["thomas and naaz", "thomas naaz case", "2022 payroll tax case", "contractor case law"],
+    responseTemplate: "**Thomas and Naaz Pty Ltd v Chief Commissioner of State Revenue [2022] NSWCATAD 56**\n\nThis landmark case significantly impacts medical practice payroll tax compliance:\n\n**Case Background:**\n• Medical practice assessed for payroll tax on GP contractor payments\n• Practice argued GPs were independent contractors\n• State Revenue claimed employment relationship existed\n\n**Key Findings:**\n• Control indicators examined beyond contract terms\n• Integration into practice operations considered\n• Economic reality of arrangement analyzed\n• Administrative and billing arrangements reviewed\n\n**Implications for Medical Practices:**\n• Contract terms alone don't determine status\n• Practical working arrangements are scrutinized\n• Integration level affects classification\n• Risk of retrospective assessments increased\n\n**Our Response:**\nHamilton Bailey has restructured our Tenant Doctor™ arrangements to address these specific findings, ensuring compliance with current interpretations.\n\nWould you like to discuss how Thomas and Naaz affects your practice?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Case law interpretation requires specific legal advice.",
+    adviceLevel: "specific",
+    confidenceLevel: 10,
+    relatedProducts: ["compliance-review"],
+    xpReward: 25,
+    metadata: { year: 2022, jurisdiction: "NSW", case_type: "payroll tax" }
+  },
+
+  // 30. Optical Superstore Case Detail
+  {
+    id: "optical-superstore-case",
+    category: "expertise",
+    subcategory: "case-law",
+    topic: "optical superstore case",
+    title: "Optical Superstore v Commissioner [2019] - Case Analysis",
+    content: "Optical Superstore Pty Ltd v Commissioner of State Revenue [2019] established important principles for contractor classification in healthcare retail settings. The case examined factors including the level of control, provision of equipment, rostering practices, and integration into business operations.",
+    summary: "2019 case establishing contractor classification principles in healthcare retail contexts.",
+    keywords: ["optical superstore", "case law", "2019", "contractor classification", "healthcare retail"],
+    intentPatterns: ["optical superstore", "optical superstore case", "2019 case", "contractor classification"],
+    responseTemplate: "**Optical Superstore Pty Ltd v Commissioner of State Revenue [2019]**\n\nThis case provides important precedent for contractor classification:\n\n**Case Context:**\n• Optometrists engaged as contractors\n• State Revenue assessed payroll tax liability\n• Examined relationship between retailer and practitioners\n\n**Key Principles Established:**\n• Equipment provision as control indicator\n• Rostering practices examined\n• Customer relationship ownership\n• Integration into retail operations\n• Branding and presentation requirements\n\n**Relevance to Medical Practices:**\n• Similar factors apply to GP/specialist arrangements\n• Rostering and scheduling scrutinized\n• Practice presentation requirements matter\n• Equipment and facility provision analyzed\n\n**Application:**\nWe apply lessons from Optical Superstore when structuring Tenant Doctor™ arrangements to ensure appropriate independence indicators.\n\nWould you like to understand how this case affects your practitioner arrangements?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Case law application depends on specific circumstances.",
+    adviceLevel: "specific",
+    confidenceLevel: 10,
+    relatedProducts: [],
+    xpReward: 25,
+    metadata: { year: 2019, case_type: "payroll tax", sector: "healthcare retail" }
+  },
+
+  // 31. David Dahm and Health & Life Clarification
+  {
+    id: "david-dahm-clarification",
+    category: "partnerships",
+    subcategory: "health-and-life",
+    topic: "david dahm role",
+    title: "David Dahm - Health and Life CEO (Partner Firm)",
+    content: "IMPORTANT: David Dahm is the CEO of Health and Life, a SEPARATE entity that partners with Hamilton Bailey. He is NOT an employee or partner of Hamilton Bailey Law Firm. Health and Life is an independent healthcare accounting firm founded in 1991, and David leads their team of 60 specialists serving 1,200+ medical practice clients.",
+    summary: "David Dahm is CEO of Health and Life (partner firm), NOT a Hamilton Bailey employee.",
+    keywords: ["david dahm", "health and life ceo", "separate entity", "partner not employee", "accounting ceo"],
+    intentPatterns: ["who is david dahm", "david dahm hamilton bailey", "david dahm role", "is david dahm"],
+    responseTemplate: "**Important Clarification about David Dahm:**\n\nDavid Dahm is the **CEO of Health and Life**, which is a **SEPARATE** entity from Hamilton Bailey Law Firm.\n\n**About David Dahm:**\n• CEO of Health and Life (since founding partner)\n• CA, FCPA, CTA qualifications\n• Former AGPAL surveyor\n• 2019-2020 National Telstra Business Women Judge\n• Led 950+ industry presentations\n• 460+ published articles\n\n**Health and Life (Separate Entity):**\n• Australia's leading healthcare accounting firm\n• Founded 1991 (34+ years experience)\n• 1,200+ medical practice clients\n• 60 specialist staff nationally\n• Developer of Doctors Pay Calculator™\n\n**Relationship with Hamilton Bailey:**\nHealth and Life is a **strategic partner** of Hamilton Bailey, not part of our firm. We collaborate to provide integrated legal and accounting solutions.\n\nFor legal matters: Contact Hamilton Bailey\nFor accounting matters: Contact Health and Life\n\nWould you like contact information for either firm?",
+    requiresDisclaimer: false,
+    legalDisclaimer: "",
+    adviceLevel: "general",
+    confidenceLevel: 10,
+    relatedProducts: [],
+    xpReward: 15,
+    metadata: { entity: "Health and Life", role: "CEO", relationship: "partner not employee" }
+  },
+
+  // 32. Extended Risk Language Patterns
+  {
+    id: "risk-language-extended",
+    category: "compliance",
+    subcategory: "risk-indicators",
+    topic: "extended risk language",
+    title: "Extended Risk Language Patterns for Payroll Tax",
+    content: "Comprehensive list of high-risk language patterns that may indicate employment relationships. Website content, practice policies, and all communications should be reviewed for: possessive pronouns with practitioners, integration language, control indicators, and employee-like terminology. Low-risk alternatives emphasize independence and separate business relationships.",
+    summary: "Extended guide to risky vs compliant language in medical practice communications.",
+    keywords: ["risk language", "compliance language", "website review", "policy language", "communication compliance"],
+    intentPatterns: ["risky language", "what language to avoid", "compliance wording", "safe terminology"],
+    responseTemplate: "Extended Risk Language Guide for Medical Practices:\n\n**HIGH RISK LANGUAGE (Avoid These):**\n\n*Possessive Pronouns:*\n• \"Our doctors/practitioners/medical team\"\n• \"Staff members\"\n• \"Our specialists\"\n\n*Control Indicators:*\n• \"Doctors must/are required to\"\n• \"Practice policies require\"\n• \"Performance reviews\"\n• \"Staff meetings\"\n• \"Allocated patients\"\n\n*Integration Language:*\n• \"Part of the team\"\n• \"Join our practice\"\n• \"Work for us\"\n• \"Employment opportunities\"\n\n**LOW RISK ALTERNATIVES:**\n\n*Independence Language:*\n• \"Independent practitioners\"\n• \"Tenant doctors\"\n• \"Visiting practitioners\"\n• \"Associated specialists\"\n• \"Practitioners operate their own business\"\n\n*Business Relationship:*\n• \"Practice premises available\"\n• \"Consulting room arrangements\"\n• \"Professional services agreement\"\n• \"Licence to occupy\"\n\n**ACTION REQUIRED:**\n• Review all website content\n• Update practice policies\n• Revise patient communications\n• Train reception staff on terminology\n\nWould you like a comprehensive review of your practice's communications?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Language alone does not determine classification. Professional advice required.",
+    adviceLevel: "specific",
+    confidenceLevel: 10,
+    relatedProducts: ["compliance-language-review"],
+    xpReward: 35,
+    metadata: { review_areas: ["website", "policies", "communications", "staff training"] }
+  },
+
+  // 33. Hollis v Vabu Case Detail
+  {
+    id: "hollis-vabu-case",
+    category: "expertise",
+    subcategory: "case-law",
+    topic: "hollis v vabu case",
+    title: "Hollis v Vabu [2001] HCA - Foundational Contractor Law",
+    content: "Hollis v Vabu Pty Ltd [2001] HCA 44 is a High Court of Australia decision establishing foundational principles for distinguishing employees from independent contractors. The multi-factor test examines control, integration, economic reality, and the totality of the relationship.",
+    summary: "High Court foundation case for contractor vs employee classification in Australia.",
+    keywords: ["hollis v vabu", "high court", "2001", "contractor employee", "multi-factor test", "foundational case"],
+    intentPatterns: ["hollis v vabu", "high court contractor case", "foundational case law", "employee contractor test"],
+    responseTemplate: "**Hollis v Vabu Pty Ltd [2001] HCA 44 - High Court of Australia**\n\nThis foundational case establishes the framework for contractor classification:\n\n**Background:**\n• High Court examined bicycle courier arrangements\n• Established multi-factor test for classification\n• Remains cornerstone of contractor law\n\n**Multi-Factor Test Factors:**\n1. **Control** - Over how, when, where work performed\n2. **Integration** - Part of the business or own enterprise\n3. **Economic Reality** - Risk bearing, profit opportunity\n4. **Exclusivity** - Ability to work for others\n5. **Equipment** - Who provides tools of trade\n6. **Presentation** - Uniform, branding requirements\n\n**Application to Medical Practices:**\n• Each factor examined in totality\n• No single factor determinative\n• Practical reality prevails over contract terms\n• Subsequent cases (Thomas and Naaz, Optical Superstore) apply these principles\n\n**Current Relevance:**\nThis case underpins all contractor classification analysis in Australia, including medical practice arrangements.\n\nWould you like to understand how these factors apply to your practitioner arrangements?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Legal classification requires professional analysis of all factors.",
+    adviceLevel: "specific",
+    confidenceLevel: 10,
+    relatedProducts: [],
+    xpReward: 25,
+    metadata: { year: 2001, court: "High Court of Australia", significance: "foundational" }
+  },
+
+  // 34. Copyright and Licensing
+  {
+    id: "copyright-licensing",
+    category: "legal",
+    subcategory: "intellectual-property",
+    topic: "copyright and licensing",
+    title: "Licensing, Trademark & Copyright",
+    content: "All Hamilton Bailey materials, templates, agreements, and content are protected by Australian and international copyright law. Registered clients receive licensed access to documents which must not be redistributed, modified for commercial distribution, or shared with unauthorized parties. Violations may result in service termination and legal action.",
+    summary: "Copyright protection and licensing terms for Hamilton Bailey materials and templates.",
+    keywords: ["copyright", "licensing", "trademark", "intellectual property", "terms", "permitted use"],
+    intentPatterns: ["copyright", "licensing terms", "can I share", "permitted use", "trademark"],
+    responseTemplate: "Hamilton Bailey Copyright and Licensing Information:\n\n**Copyright Protection:**\n© Hamilton Bailey Lawyers. All rights reserved.\n• All materials protected by Australian and international copyright law\n• Templates, agreements, and content are proprietary\n\n**Permitted Use (Registered Clients):**\n✓ Use templates within your own practice\n✓ Make copies for internal use and record-keeping\n✓ Share with professional advisors for compliance purposes\n\n**Prohibited Use:**\n✗ Redistribution or resale of materials\n✗ Creating derivative works for commercial distribution\n✗ Sharing access credentials or documents with unauthorized parties\n✗ Using materials to compete with Hamilton Bailey\n✗ Removing or altering copyright notices\n\n**Trademark Notice:**\n\"Hamilton Bailey\" and \"Tenant Doctor\" are registered trademarks.\n\n**Enforcement:**\nViolations may result in:\n• Service termination\n• Legal action for infringement\n• Claims for damages including legal costs\n\nQuestions about permitted use? Please contact us directly.",
+    requiresDisclaimer: false,
+    legalDisclaimer: "",
+    adviceLevel: "general",
+    confidenceLevel: 10,
+    relatedProducts: [],
+    xpReward: 10,
+    metadata: { trademark: "Tenant Doctor™", protected: true }
+  },
+
+  // 35. Medical Practice Advisory Overview
+  {
+    id: "medical-practice-advisory",
+    category: "services",
+    subcategory: "advisory",
+    topic: "medical practice advisory",
+    title: "Comprehensive Medical Practice Advisory Services",
+    content: "Hamilton Bailey provides end-to-end advisory services for medical practices including establishment, compliance, growth, and exit planning. Our integrated approach combines legal expertise with strategic business advice specifically tailored for healthcare professionals navigating complex regulatory environments.",
+    summary: "End-to-end advisory services for medical practice lifecycle management.",
+    keywords: ["advisory", "medical practice", "consulting", "strategic advice", "practice management", "business advice"],
+    intentPatterns: ["advisory services", "practice advice", "consulting", "strategic guidance", "practice management"],
+    responseTemplate: "Hamilton Bailey Medical Practice Advisory Services:\n\n**Practice Lifecycle Support:**\n\n**1. Establishment**\n• Business structure selection\n• Regulatory compliance setup\n• Initial agreements and documentation\n• Service entity configuration\n\n**2. Ongoing Operations**\n• Tenant Doctor™ arrangements\n• Payroll tax compliance\n• Fair Work Act adherence\n• Contract management\n\n**3. Growth & Expansion**\n• New location structuring\n• Partner/associate integration\n• Practice acquisitions\n• Multi-site compliance\n\n**4. Exit Planning**\n• Practice sale structuring\n• Succession planning\n• Asset protection\n• Tax optimization\n\n**Our Approach:**\n• Fixed-fee pricing transparency\n• Integrated legal-accounting solutions (with Health and Life)\n• Proactive compliance management\n• Technology-enabled efficiency\n\nWhat stage of practice development can we assist with?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Advisory services require engagement and specific advice based on circumstances.",
+    adviceLevel: "general",
+    confidenceLevel: 10,
+    relatedProducts: ["advisory-package"],
+    xpReward: 25,
+    metadata: { lifecycle_stages: ["establishment", "operations", "growth", "exit"] }
+  },
+
+  // 36. Tenant Doctor Characteristics Detail
+  {
+    id: "tenant-doctor-characteristics",
+    category: "services",
+    subcategory: "tenant-doctor",
+    topic: "tenant doctor key characteristics",
+    title: "Key Characteristics of Tenant Doctor™ Arrangements",
+    content: "A Tenant Doctor™ arrangement must demonstrate key characteristics of independence: operating own ABN/business, control over work methods, bearing business risk, ability to delegate, own professional indemnity insurance, setting own fees, separate Medicare provider number, and independent patient relationships. These factors distinguish contractors from employees.",
+    summary: "Essential characteristics that define compliant Tenant Doctor™ arrangements.",
+    keywords: ["tenant doctor characteristics", "independence indicators", "contractor characteristics", "abn", "business risk"],
+    intentPatterns: ["tenant doctor characteristics", "what makes tenant doctor", "independence requirements", "contractor indicators"],
+    responseTemplate: "Key Characteristics of a Compliant Tenant Doctor™ Arrangement:\n\n**Business Independence:**\n✓ Operates own ABN and business entity\n✓ Bears own business risk (good months and bad)\n✓ Sets own consultation fees\n✓ Has independent Medicare provider number\n\n**Control & Autonomy:**\n✓ Controls work methods and clinical decisions\n✓ Determines own hours (within facility access)\n✓ Can delegate work to locums\n✓ Free to work at multiple locations\n\n**Risk & Insurance:**\n✓ Own professional indemnity insurance\n✓ Own public liability coverage\n✓ Responsible for own compliance\n\n**Patient Relationships:**\n✓ Patients are the practitioner's patients\n✓ Own patient records and data\n✓ Independent recall and follow-up\n\n**Premises Arrangement:**\n✓ Licence to occupy (not employment)\n✓ Pays for premises access\n✓ Separate identifiable practice\n\n**Warning Signs (Avoid):**\n✗ Practice 'allocating' patients\n✗ Required attendance at staff meetings\n✗ Performance management processes\n✗ Practice setting fees\n\nWould you like us to assess whether your arrangements meet these characteristics?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Characteristics alone don't guarantee classification. Professional assessment required.",
+    adviceLevel: "specific",
+    confidenceLevel: 10,
+    relatedProducts: ["tenant-doctor-assessment"],
+    xpReward: 35,
+    metadata: { indicators: ["independence", "control", "risk", "autonomy"] }
+  },
+
+  // 37. State Revenue Office Information
+  {
+    id: "state-revenue-offices",
+    category: "compliance",
+    subcategory: "regulatory",
+    topic: "state revenue office",
+    title: "State Revenue Office - Payroll Tax Authority",
+    content: "State Revenue Offices (SRO) in each Australian state and territory administer payroll tax. Medical practices must register for payroll tax if contractor payments are deemed wages and exceed thresholds. SROs are increasingly auditing medical practices following Thomas and Naaz [2022], with retrospective assessments commonly covering 5+ years.",
+    summary: "Understanding State Revenue Office payroll tax authority and audit activity.",
+    keywords: ["state revenue", "sro", "payroll tax authority", "revenue office", "tax audit", "state tax"],
+    intentPatterns: ["state revenue", "sro", "who administers payroll tax", "revenue office audit", "state tax authority"],
+    responseTemplate: "State Revenue Office (SRO) - Payroll Tax Information:\n\n**What is the SRO?**\nEach Australian state/territory has a State Revenue Office that administers payroll tax (names vary by jurisdiction).\n\n**Current Audit Focus:**\n• Medical practices are priority audit targets\n• Post-Thomas and Naaz [2022] increased scrutiny\n• Contractor arrangement reviews intensified\n• Retrospective assessments covering 5+ years common\n\n**Payroll Tax Basics:**\n• Applies to 'wages' including deemed contractor payments\n• Thresholds vary by state\n• Grouping provisions may combine related entities\n• Significant penalties for non-compliance\n\n**Typical Assessment Process:**\n1. Risk profiling and selection\n2. Information request\n3. Document review\n4. Interview/site visit\n5. Assessment notice\n6. Objection/appeal rights\n\n**Our SRO Experience:**\n• Regular negotiations with all state SROs\n• Successful assessment reductions\n• Audit defense expertise\n• Proactive compliance strategies\n\nHave you received contact from State Revenue Office? We should discuss immediately.",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Payroll tax obligations depend on specific circumstances and state legislation.",
+    adviceLevel: "specific",
+    confidenceLevel: 10,
+    relatedProducts: ["sro-representation"],
+    xpReward: 25,
+    metadata: { audit_period: "5+ years", status: "increased enforcement" }
+  },
+
+  // 38. Library Resources
+  {
+    id: "library-resources",
+    category: "resources",
+    subcategory: "library",
+    topic: "legal resource library",
+    title: "Hamilton Bailey Legal Resource Library",
+    content: "Hamilton Bailey maintains a comprehensive legal resource library for registered clients including template agreements, compliance checklists, regulatory guides, case summaries, and educational materials. Resources are regularly updated to reflect changes in law, regulations, and case law interpretations.",
+    summary: "Comprehensive legal resource library available to registered Hamilton Bailey clients.",
+    keywords: ["library", "resources", "templates", "guides", "documents", "client resources"],
+    intentPatterns: ["library", "resources", "templates", "client documents", "legal resources"],
+    responseTemplate: "Hamilton Bailey Legal Resource Library:\n\n**Available Resources:**\n\n**Templates & Agreements:**\n• Tenant Doctor™ agreement templates\n• Service agreements\n• Employment contracts\n• Lease documentation\n• Policy templates\n\n**Compliance Materials:**\n• Payroll tax checklists\n• AHPRA declaration guides\n• Fair Work compliance guides\n• Risk assessment tools\n\n**Educational Content:**\n• Case law summaries\n• Regulatory update bulletins\n• Best practice guides\n• Video tutorials\n\n**Access:**\n• Available to registered clients\n• Regularly updated with legal changes\n• Searchable by topic\n• Downloadable formats\n\n**Client Portal:**\nRegistered clients access resources through our secure client portal with encrypted document storage.\n\n**Updates:**\nAll resources updated following significant:\n• Legislative changes\n• Case law developments\n• Regulatory interpretations\n\nWould you like information about accessing our resource library?",
+    requiresDisclaimer: false,
+    legalDisclaimer: "",
+    adviceLevel: "general",
+    confidenceLevel: 9,
+    relatedProducts: [],
+    xpReward: 15,
+    metadata: { access: "registered clients", format: "digital" }
+  },
 ];
 
 // XP rewards for chat interactions
@@ -611,16 +917,36 @@ export function detectIntent(message: string): string {
     return "tenant_doctor";
   }
   // Payroll Tax
-  if (lowerMessage.includes("payroll tax") || lowerMessage.includes("state revenue")) {
+  if (lowerMessage.includes("payroll tax") || lowerMessage.includes("state revenue") || lowerMessage.includes("pt21") || lowerMessage.includes("21 requirements")) {
     return "payroll_tax";
   }
   // Fair Work
   if (lowerMessage.includes("fair work") || lowerMessage.includes("employment")) {
     return "fair_work";
   }
-  // Audit/Investigation
-  if (lowerMessage.includes("audit") || lowerMessage.includes("investigation")) {
+  // AHPRA
+  if (lowerMessage.includes("ahpra") || lowerMessage.includes("annual declaration") || lowerMessage.includes("practitioner registration")) {
+    return "ahpra";
+  }
+  // Pathology
+  if (lowerMessage.includes("pathology") || lowerMessage.includes("collection room")) {
+    return "pathology";
+  }
+  // Legal Audit
+  if (lowerMessage.includes("legal audit") || lowerMessage.includes("document review") || lowerMessage.includes("agreement review")) {
+    return "legal_audit";
+  }
+  // Audit/Investigation (State Revenue)
+  if (lowerMessage.includes("audit") || lowerMessage.includes("investigation") || lowerMessage.includes("sro")) {
     return "audit";
+  }
+  // Case Law
+  if (lowerMessage.includes("thomas and naaz") || lowerMessage.includes("optical superstore") || lowerMessage.includes("hollis v vabu") || lowerMessage.includes("case law")) {
+    return "case_law";
+  }
+  // Risk Language
+  if (lowerMessage.includes("risk language") || lowerMessage.includes("risky language") || lowerMessage.includes("what to avoid") || lowerMessage.includes("compliance language")) {
+    return "risk_language";
   }
   // Compliance
   if (lowerMessage.includes("compliance") || lowerMessage.includes("regulatory") || lowerMessage.includes("triple threat")) {
@@ -630,16 +956,16 @@ export function detectIntent(message: string): string {
   if (lowerMessage.includes("structure") || lowerMessage.includes("service entity")) {
     return "structure";
   }
-  // Property
+  // Property/Lease
   if (lowerMessage.includes("property") || lowerMessage.includes("lease") || lowerMessage.includes("rent")) {
     return "property";
   }
-  // Health and Life / Accounting
-  if (lowerMessage.includes("health and life") || lowerMessage.includes("accounting") || lowerMessage.includes("accountant")) {
+  // Health and Life / Accounting / David Dahm
+  if (lowerMessage.includes("health and life") || lowerMessage.includes("accounting") || lowerMessage.includes("accountant") || lowerMessage.includes("david dahm")) {
     return "partnership";
   }
   // Technology
-  if (lowerMessage.includes("technology") || lowerMessage.includes("calculator") || lowerMessage.includes("xero")) {
+  if (lowerMessage.includes("technology") || lowerMessage.includes("calculator") || lowerMessage.includes("xero") || lowerMessage.includes("doctors pay")) {
     return "technology";
   }
   // Contact
@@ -649,6 +975,14 @@ export function detectIntent(message: string): string {
   // Urgent
   if (lowerMessage.includes("urgent") || lowerMessage.includes("emergency") || lowerMessage.includes("immediate")) {
     return "urgent";
+  }
+  // Copyright/Licensing
+  if (lowerMessage.includes("copyright") || lowerMessage.includes("licensing") || lowerMessage.includes("trademark") || lowerMessage.includes("permitted use")) {
+    return "copyright";
+  }
+  // Library/Resources
+  if (lowerMessage.includes("library") || lowerMessage.includes("resources") || lowerMessage.includes("templates") || lowerMessage.includes("guides")) {
+    return "resources";
   }
   // About/Company
   if (lowerMessage.includes("about") || lowerMessage.includes("who are") || lowerMessage.includes("tell me about")) {
