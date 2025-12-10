@@ -71,3 +71,12 @@ export {
   type ResponseAction,
   type StreamChunk,
 } from "./ai-response-generator";
+
+// Lead Emailer Service
+export {
+  extractContactInfo,
+  sendLeadNotificationEmail,
+  checkAndAlertLead,
+  type ExtractedContactInfo,
+  type LeadEmailData,
+} from "./lead-emailer";

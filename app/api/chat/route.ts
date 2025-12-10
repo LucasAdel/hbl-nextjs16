@@ -14,6 +14,7 @@ import {
 } from "@/lib/db/chat";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { checkAndAlertLead } from "@/features/bailey-ai/lib/lead-emailer";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getDb(supabase: SupabaseClient): any {
@@ -98,6 +99,16 @@ export async function POST(request: NextRequest) {
 
     // Detect intent
     const intent = detectIntent(message);
+
+    // Check for contact info and send lead alert (non-blocking)
+    checkAndAlertLead(
+      message,
+      conversation.id,
+      conversationKey,
+      conversation.messages || [],
+      userEmail,
+      intent
+    ).catch((err) => console.error("Lead alert error:", err));
 
     // Check for objections
     const objection = handleObjection(message);
