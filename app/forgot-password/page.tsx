@@ -1,29 +1,81 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Mail, AlertCircle, Loader2, CheckCircle, ArrowLeft } from "lucide-react";
+import { Mail, AlertCircle, Loader2, CheckCircle, ArrowLeft, Clock } from "lucide-react";
 import { requestPasswordReset } from "@/lib/auth";
+
+// Rate limiting: 1 request per 60 seconds per email
+const RATE_LIMIT_SECONDS = 60;
+const RATE_LIMIT_KEY = "pwd_reset_last_request";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
+
+  // Check for existing cooldown on mount
+  useEffect(() => {
+    const lastRequest = localStorage.getItem(RATE_LIMIT_KEY);
+    if (lastRequest) {
+      const elapsed = Math.floor((Date.now() - parseInt(lastRequest)) / 1000);
+      const remaining = RATE_LIMIT_SECONDS - elapsed;
+      if (remaining > 0) {
+        setCooldownRemaining(remaining);
+      } else {
+        localStorage.removeItem(RATE_LIMIT_KEY);
+      }
+    }
+  }, []);
+
+  // Countdown timer
+  useEffect(() => {
+    if (cooldownRemaining > 0) {
+      const timer = setInterval(() => {
+        setCooldownRemaining((prev) => {
+          if (prev <= 1) {
+            localStorage.removeItem(RATE_LIMIT_KEY);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [cooldownRemaining]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    // Check client-side rate limit
+    if (cooldownRemaining > 0) {
+      setError(`Please wait ${cooldownRemaining} seconds before requesting another reset.`);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const { error: resetError } = await requestPasswordReset(email);
 
       if (resetError) {
-        setError(resetError.message);
+        // Handle specific Supabase rate limit error
+        if (resetError.message.includes("rate") || resetError.message.includes("429") || resetError.status === 429) {
+          setError("Too many password reset requests. Please wait a few minutes and try again.");
+          setCooldownRemaining(RATE_LIMIT_SECONDS * 2); // Double cooldown on server rate limit
+          localStorage.setItem(RATE_LIMIT_KEY, Date.now().toString());
+        } else {
+          setError(resetError.message);
+        }
         return;
       }
 
+      // Set cooldown on success
+      localStorage.setItem(RATE_LIMIT_KEY, Date.now().toString());
+      setCooldownRemaining(RATE_LIMIT_SECONDS);
       setSuccess(true);
     } catch (err) {
       setError("An unexpected error occurred. Please try again.");
@@ -131,13 +183,18 @@ export default function ForgotPasswordPage() {
 
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full py-3 px-4 bg-teal-600 hover:bg-teal-700 disabled:bg-teal-400 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+              disabled={isLoading || cooldownRemaining > 0}
+              className="w-full py-3 px-4 bg-teal-600 hover:bg-teal-700 disabled:bg-teal-400 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
                   Sending reset link...
+                </>
+              ) : cooldownRemaining > 0 ? (
+                <>
+                  <Clock className="h-5 w-5" />
+                  Wait {cooldownRemaining}s
                 </>
               ) : (
                 "Send reset link"
@@ -155,6 +212,22 @@ export default function ForgotPasswordPage() {
               Sign in
             </Link>
           </p>
+
+          {/* Admin bypass for rate limits */}
+          {cooldownRemaining > 30 && (
+            <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+              <p className="text-xs text-amber-700 dark:text-amber-400 text-center">
+                <strong>Admin?</strong> If you&apos;re hitting rate limits, contact support or use the{" "}
+                <Link
+                  href="/admin-reset"
+                  className="underline hover:text-amber-900 dark:hover:text-amber-300"
+                >
+                  admin password reset
+                </Link>
+                .
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

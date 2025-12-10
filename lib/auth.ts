@@ -84,15 +84,47 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
   };
 }
 
-// Request password reset
+// Request password reset with enhanced error handling
 export async function requestPasswordReset(email: string) {
   const supabase = createClient();
   // Use auth/callback route which handles the token exchange properly
   // The callback will detect it's a recovery flow and redirect to /reset-password
-  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/auth/callback`,
-  });
-  return { data, error };
+  try {
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/callback`,
+    });
+
+    // Transform rate limit errors into user-friendly messages
+    if (error) {
+      const errorMessage = error.message.toLowerCase();
+      if (
+        errorMessage.includes("rate limit") ||
+        errorMessage.includes("too many") ||
+        errorMessage.includes("429") ||
+        error.status === 429
+      ) {
+        return {
+          data: null,
+          error: {
+            ...error,
+            message: "Too many password reset requests. Please wait 60 minutes before trying again, or contact support for immediate assistance.",
+            status: 429,
+          },
+        };
+      }
+    }
+
+    return { data, error };
+  } catch (err) {
+    // Handle network errors
+    return {
+      data: null,
+      error: {
+        message: "Unable to send password reset email. Please check your internet connection and try again.",
+        status: 500,
+      },
+    };
+  }
 }
 
 // Update password

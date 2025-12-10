@@ -561,22 +561,37 @@ export function SocialProofBanner({ className = "" }: { className?: string }) {
 
 // Live activity indicator for product pages
 export function LiveActivityIndicator({ documentId }: { documentId?: string }) {
-  const [viewers, setViewers] = useState(Math.floor(Math.random() * 8) + 2);
-  const [recentPurchases, setRecentPurchases] = useState(
-    Math.floor(Math.random() * 20) + 5
-  );
+  // Initialize with null to avoid hydration mismatch, then set on client
+  const [viewers, setViewers] = useState<number | null>(null);
+  const [recentPurchases, setRecentPurchases] = useState<number | null>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  // Initialize random values only on client side to prevent hydration mismatch
+  useEffect(() => {
+    setIsClient(true);
+    setViewers(Math.floor(Math.random() * 8) + 2);
+    setRecentPurchases(Math.floor(Math.random() * 20) + 5);
+  }, []);
 
   useEffect(() => {
+    if (!isClient) return;
+
     const interval = setInterval(() => {
       // Simulate fluctuating viewers
       setViewers((prev) => {
+        if (prev === null) return 5;
         const change = Math.random() > 0.5 ? 1 : -1;
         return Math.max(1, Math.min(15, prev + change));
       });
     }, 15000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isClient]);
+
+  // Don't render until client-side hydration is complete
+  if (!isClient || viewers === null || recentPurchases === null) {
+    return null;
+  }
 
   return (
     <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
