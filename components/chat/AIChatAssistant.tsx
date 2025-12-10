@@ -6,9 +6,9 @@ import {
   findRelevantKnowledge,
   detectIntent,
   handleObjection,
-  CHAT_XP_REWARDS,
-  KnowledgeItem,
-} from "@/lib/chat/chat-knowledge-base";
+  type KnowledgeItem,
+} from "@/features/bailey-ai/lib/knowledge-base";
+import { CHAT_XP_REWARDS } from "@/features/bailey-ai/types";
 
 interface Message {
   id: number;

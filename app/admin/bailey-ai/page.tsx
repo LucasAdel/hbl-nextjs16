@@ -74,7 +74,28 @@ interface AnalyticsData {
   dailyStats: { date: string; conversations: number; messages: number }[];
 }
 
-type TabType = "overview" | "knowledge" | "conversations" | "analytics";
+type TabType = "overview" | "knowledge" | "conversations" | "analytics" | "settings";
+
+interface AIModelOption {
+  key: string;
+  provider: "openai" | "anthropic" | "google" | "none";
+  displayName: string;
+  description: string;
+  available: boolean;
+}
+
+interface AISettings {
+  activeModel: string;
+  enableStreaming: boolean;
+  enableKnowledgeBase: boolean;
+  maxResponseLength: number;
+  temperature: number;
+  systemPromptVersion: "full" | "short";
+  enableEmergencyCheck: boolean;
+  enableLegalAdviceGuard: boolean;
+  enableObjectionHandling: boolean;
+  enableCalendarIntegration: boolean;
+}
 
 // Sample data - in production this would come from API
 const sampleKnowledge: KnowledgeItem[] = [
@@ -247,7 +268,120 @@ export default function BaileyAIManagementPage() {
     { id: "knowledge", label: "Knowledge Base", icon: BookOpen },
     { id: "conversations", label: "Conversations", icon: MessageSquare },
     { id: "analytics", label: "Analytics", icon: TrendingUp },
+    { id: "settings", label: "AI Settings", icon: Settings },
   ];
+
+  // AI Settings State
+  const [aiSettings, setAiSettings] = useState<AISettings>({
+    activeModel: "none",
+    enableStreaming: true,
+    enableKnowledgeBase: true,
+    maxResponseLength: 500,
+    temperature: 0.7,
+    systemPromptVersion: "short",
+    enableEmergencyCheck: true,
+    enableLegalAdviceGuard: true,
+    enableObjectionHandling: true,
+    enableCalendarIntegration: true,
+  });
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [settingsMessage, setSettingsMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Available AI Models
+  const aiModels: AIModelOption[] = [
+    {
+      key: "none",
+      provider: "none",
+      displayName: "Knowledge Base Only",
+      description: "Use only the internal knowledge base. No AI model required. Zero API costs.",
+      available: true,
+    },
+    {
+      key: "gpt-4o-mini",
+      provider: "openai",
+      displayName: "GPT-4o Mini (OpenAI)",
+      description: "Fast, cost-effective model. Best for simple queries. ~$0.15/1M tokens.",
+      available: true, // Will check API key on load
+    },
+    {
+      key: "gpt-4o",
+      provider: "openai",
+      displayName: "GPT-4o (OpenAI)",
+      description: "Most capable OpenAI model. Better reasoning. ~$5/1M tokens.",
+      available: true,
+    },
+    {
+      key: "claude-3-haiku",
+      provider: "anthropic",
+      displayName: "Claude 3 Haiku (Anthropic)",
+      description: "Fast and efficient. Great balance of speed and quality. ~$0.25/1M tokens.",
+      available: true,
+    },
+    {
+      key: "claude-3-sonnet",
+      provider: "anthropic",
+      displayName: "Claude 3 Sonnet (Anthropic)",
+      description: "Balanced model. Better for nuanced responses. ~$3/1M tokens.",
+      available: true,
+    },
+    {
+      key: "gemini-1.5-flash",
+      provider: "google",
+      displayName: "Gemini 1.5 Flash (Google)",
+      description: "Fast Google model. Good for quick responses. ~$0.075/1M tokens.",
+      available: true,
+    },
+    {
+      key: "gemini-1.5-pro",
+      provider: "google",
+      displayName: "Gemini 1.5 Pro (Google)",
+      description: "Most capable Google model. Excellent for complex queries. ~$1.25/1M tokens.",
+      available: true,
+    },
+  ];
+
+  // Load settings on mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const response = await fetch("/api/bailey-ai/settings");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.settings) {
+            setAiSettings(data.settings);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load AI settings:", error);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  // Save settings handler
+  const handleSaveSettings = async () => {
+    setIsSavingSettings(true);
+    setSettingsMessage(null);
+
+    try {
+      const response = await fetch("/api/bailey-ai/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(aiSettings),
+      });
+
+      if (response.ok) {
+        setSettingsMessage({ type: "success", text: "Settings saved successfully!" });
+      } else {
+        const data = await response.json();
+        setSettingsMessage({ type: "error", text: data.error || "Failed to save settings" });
+      }
+    } catch (error) {
+      setSettingsMessage({ type: "error", text: "Network error. Please try again." });
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -903,7 +1037,295 @@ export default function BaileyAIManagementPage() {
             </div>
           </div>
         )}
+
+        {/* Settings Tab */}
+        {activeTab === "settings" && (
+          <div className="space-y-6">
+            {/* Settings Message */}
+            {settingsMessage && (
+              <div
+                className={cn(
+                  "p-4 rounded-lg flex items-center gap-3",
+                  settingsMessage.type === "success"
+                    ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400"
+                    : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400"
+                )}
+              >
+                {settingsMessage.type === "success" ? (
+                  <CheckCircle className="h-5 w-5" />
+                ) : (
+                  <XCircle className="h-5 w-5" />
+                )}
+                {settingsMessage.text}
+              </div>
+            )}
+
+            {/* AI Model Selection */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                AI Model Selection
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                Choose which AI model powers Bailey. Start with &quot;Knowledge Base Only&quot; to test your knowledge base without API costs.
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {aiModels.map((model) => (
+                  <button
+                    key={model.key}
+                    onClick={() => setAiSettings({ ...aiSettings, activeModel: model.key })}
+                    className={cn(
+                      "text-left p-4 rounded-lg border-2 transition-all",
+                      aiSettings.activeModel === model.key
+                        ? "border-teal-500 bg-teal-50 dark:bg-teal-900/20"
+                        : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                    )}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {model.displayName}
+                      </span>
+                      {aiSettings.activeModel === model.key && (
+                        <CheckCircle className="h-5 w-5 text-teal-500" />
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {model.description}
+                    </p>
+                    <div className="mt-2">
+                      <span
+                        className={cn(
+                          "text-xs px-2 py-1 rounded-full",
+                          model.provider === "none"
+                            ? "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+                            : model.provider === "openai"
+                              ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                              : model.provider === "anthropic"
+                                ? "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400"
+                                : "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400"
+                        )}
+                      >
+                        {model.provider === "none" ? "No API Required" : model.provider.toUpperCase()}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Response Settings */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Response Settings
+              </h3>
+
+              <div className="space-y-6">
+                {/* Max Response Length */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Max Response Length: {aiSettings.maxResponseLength} tokens
+                  </label>
+                  <input
+                    type="range"
+                    min="100"
+                    max="2000"
+                    step="100"
+                    value={aiSettings.maxResponseLength}
+                    onChange={(e) =>
+                      setAiSettings({ ...aiSettings, maxResponseLength: parseInt(e.target.value) })
+                    }
+                    className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>Concise (100)</span>
+                    <span>Detailed (2000)</span>
+                  </div>
+                </div>
+
+                {/* Temperature */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Temperature: {aiSettings.temperature}
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    value={aiSettings.temperature}
+                    onChange={(e) =>
+                      setAiSettings({ ...aiSettings, temperature: parseFloat(e.target.value) })
+                    }
+                    className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>Precise (0)</span>
+                    <span>Creative (1)</span>
+                  </div>
+                </div>
+
+                {/* System Prompt Version */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    System Prompt Version
+                  </label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="promptVersion"
+                        checked={aiSettings.systemPromptVersion === "short"}
+                        onChange={() =>
+                          setAiSettings({ ...aiSettings, systemPromptVersion: "short" })
+                        }
+                        className="text-teal-500 focus:ring-teal-500"
+                      />
+                      <span className="text-sm text-gray-700 dark:text-gray-300">Short (Token Efficient)</span>
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="promptVersion"
+                        checked={aiSettings.systemPromptVersion === "full"}
+                        onChange={() =>
+                          setAiSettings({ ...aiSettings, systemPromptVersion: "full" })
+                        }
+                        className="text-teal-500 focus:ring-teal-500"
+                      />
+                      <span className="text-sm text-gray-700 dark:text-gray-300">Full (More Context)</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Safety Features */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Safety Features
+              </h3>
+
+              <div className="space-y-4">
+                <ToggleSetting
+                  label="Emergency Detection"
+                  description="Detect emergency situations and provide 000 hotline"
+                  checked={aiSettings.enableEmergencyCheck}
+                  onChange={(checked) =>
+                    setAiSettings({ ...aiSettings, enableEmergencyCheck: checked })
+                  }
+                />
+                <ToggleSetting
+                  label="Legal Advice Guard"
+                  description="Refuse to provide specific legal advice"
+                  checked={aiSettings.enableLegalAdviceGuard}
+                  onChange={(checked) =>
+                    setAiSettings({ ...aiSettings, enableLegalAdviceGuard: checked })
+                  }
+                />
+                <ToggleSetting
+                  label="Objection Handling"
+                  description="Handle common objections with prepared responses"
+                  checked={aiSettings.enableObjectionHandling}
+                  onChange={(checked) =>
+                    setAiSettings({ ...aiSettings, enableObjectionHandling: checked })
+                  }
+                />
+              </div>
+            </div>
+
+            {/* Feature Toggles */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Features
+              </h3>
+
+              <div className="space-y-4">
+                <ToggleSetting
+                  label="Enable Streaming"
+                  description="Stream responses in real-time (faster perceived response)"
+                  checked={aiSettings.enableStreaming}
+                  onChange={(checked) =>
+                    setAiSettings({ ...aiSettings, enableStreaming: checked })
+                  }
+                />
+                <ToggleSetting
+                  label="Knowledge Base Enhancement"
+                  description="Inject relevant knowledge base content into AI context"
+                  checked={aiSettings.enableKnowledgeBase}
+                  onChange={(checked) =>
+                    setAiSettings({ ...aiSettings, enableKnowledgeBase: checked })
+                  }
+                />
+                <ToggleSetting
+                  label="Calendar Integration"
+                  description="Answer appointment and booking queries"
+                  checked={aiSettings.enableCalendarIntegration}
+                  onChange={(checked) =>
+                    setAiSettings({ ...aiSettings, enableCalendarIntegration: checked })
+                  }
+                />
+              </div>
+            </div>
+
+            {/* Save Button */}
+            <div className="flex justify-end">
+              <button
+                onClick={handleSaveSettings}
+                disabled={isSavingSettings}
+                className="flex items-center gap-2 rounded-lg bg-teal-600 px-6 py-3 text-sm font-medium text-white hover:bg-teal-700 transition-colors disabled:opacity-50"
+              >
+                {isSavingSettings ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-4 w-4" />
+                    Save Settings
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
+    </div>
+  );
+}
+
+// Toggle Setting Component
+function ToggleSetting({
+  label,
+  description,
+  checked,
+  onChange,
+}: {
+  label: string;
+  description: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between py-2">
+      <div>
+        <p className="text-sm font-medium text-gray-900 dark:text-white">{label}</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">{description}</p>
+      </div>
+      <button
+        onClick={() => onChange(!checked)}
+        className={cn(
+          "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
+          checked ? "bg-teal-500" : "bg-gray-200 dark:bg-gray-700"
+        )}
+      >
+        <span
+          className={cn(
+            "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
+            checked ? "translate-x-6" : "translate-x-1"
+          )}
+        />
+      </button>
     </div>
   );
 }

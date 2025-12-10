@@ -3,8 +3,8 @@ import {
   findRelevantKnowledge,
   detectIntent,
   handleObjection,
-  CHAT_XP_REWARDS,
-} from "@/lib/chat/chat-knowledge-base";
+} from "@/features/bailey-ai/lib/knowledge-base";
+import { CHAT_XP_REWARDS } from "@/features/bailey-ai/types";
 import { checkRateLimit, getClientIdentifier } from "@/lib/rate-limiter";
 import {
   getOrCreateConversation,
