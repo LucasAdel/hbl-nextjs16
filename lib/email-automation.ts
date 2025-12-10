@@ -5,15 +5,17 @@
 
 import { createClient } from "@/lib/supabase/server";
 
-// Email sequence types
+// Email sequence types - must match database enum
 export type SequenceType =
   | "welcome_series"
   | "post_consultation"
   | "post_purchase"
   | "booking_reminder"
   | "re_engagement"
-  | "cart_abandonment"
-  | "financial_year_review"; // Triggered annually in May for Australian FY (ends June 30)
+  | "cart_abandonment";
+
+// Extended sequence types for local logic (not in DB enum)
+export type ExtendedSequenceType = SequenceType | "financial_year_review";
 
 export type SequenceStatus = "active" | "paused" | "completed" | "cancelled";
 
@@ -35,7 +37,7 @@ export interface EmailSequenceStep {
 
 export interface EmailSequence {
   id: string;
-  type: SequenceType;
+  type: ExtendedSequenceType;
   name: string;
   description: string;
   steps: EmailSequenceStep[];
@@ -43,7 +45,7 @@ export interface EmailSequence {
 }
 
 // Pre-defined email sequences
-export const EMAIL_SEQUENCES: Record<SequenceType, EmailSequence> = {
+export const EMAIL_SEQUENCES: Record<ExtendedSequenceType, EmailSequence> = {
   welcome_series: {
     id: "welcome_series",
     type: "welcome_series",

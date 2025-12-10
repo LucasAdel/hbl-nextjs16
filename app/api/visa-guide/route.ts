@@ -35,31 +35,34 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient();
 
-    // Store the lead in the database
-    const { error: leadError } = await supabase.from("leads").insert({
+    // Store the lead in newsletter_subscribers table
+    const { error: leadError } = await supabase.from("newsletter_subscribers").insert({
       email,
-      name: fullName,
+      first_name: leadFirstName,
+      last_name: fullName.split(" ").slice(1).join(" ") || null,
       source: "visa_guide_download",
-      metadata: {
-        guide_type: "healthcare_visa",
-        download_date: new Date().toISOString(),
-      },
-    });
+      interests: ["healthcare_visa"],
+      status: "active",
+    }).select().maybeSingle();
 
-    if (leadError) {
+    if (leadError && !leadError.message.includes("duplicate")) {
       console.error("Error storing visa guide lead:", leadError);
       // Continue even if lead storage fails - we still want to send the guide
     }
 
     // Track the action
-    await supabase.from("user_actions").insert({
-      email,
-      action: "visa_guide_requested",
-      metadata: {
-        name: fullName,
-        guide_type: "healthcare_visa",
-      },
-    }).catch((err) => console.error("Error tracking action:", err));
+    try {
+      await supabase.from("user_actions").insert({
+        email,
+        action: "visa_guide_requested",
+        metadata: {
+          name: fullName,
+          guide_type: "healthcare_visa",
+        },
+      });
+    } catch (err) {
+      console.error("Error tracking action:", err);
+    }
 
     // Send the visa guide email
     const guideUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://hamiltonbailey.com"}/guides/healthcare-visa-guide.pdf`;
@@ -130,17 +133,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Enroll in visa guide nurture sequence
-    await supabase.from("email_sequence_enrollments").insert({
-      email,
-      sequence_type: "visa_guide_nurture",
-      current_step: 1,
-      status: "active",
-      next_email_at: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days later
-      metadata: {
-        name: fullName,
-        guide_downloaded: true,
-      },
-    }).catch((err) => console.error("Error enrolling in sequence:", err));
+    try {
+      await supabase.from("email_sequence_enrollments").insert({
+        email,
+        sequence_type: "welcome_series",
+        current_step: 1,
+        status: "active",
+        next_email_at: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days later
+        metadata: {
+          name: fullName,
+          guide_downloaded: true,
+        },
+      });
+    } catch (err) {
+      console.error("Error enrolling in sequence:", err);
+    }
 
     return NextResponse.json({
       success: true,

@@ -64,9 +64,15 @@ export async function POST(request: NextRequest) {
     // Get settings to check if streaming is enabled
     const settings = await getBaileyAISettings();
 
+    // Session options for logging
+    const sessionOptions = {
+      sessionId: conversationKey,
+      userEmail,
+    };
+
     // If streaming is disabled or the model doesn't support it, use non-streaming
     if (!settings.enableStreaming) {
-      const response = await generateResponse(message, conversationHistory);
+      const response = await generateResponse(message, conversationHistory, sessionOptions);
 
       await addMessageToConversation(conversationKey, userMessage, 0, response.intent);
 
@@ -106,7 +112,7 @@ export async function POST(request: NextRequest) {
           await addMessageToConversation(conversationKey, userMessage, 0);
 
           // Generate streaming response
-          const generator = generateStreamingResponse(message, conversationHistory);
+          const generator = generateStreamingResponse(message, conversationHistory, sessionOptions);
 
           for await (const chunk of generator) {
             switch (chunk.type) {
@@ -170,7 +176,7 @@ export async function POST(request: NextRequest) {
 
           // On error, fall back to non-streaming response
           try {
-            const fallbackResponse = await generateResponse(message, conversationHistory);
+            const fallbackResponse = await generateResponse(message, conversationHistory, sessionOptions);
 
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({
               type: "delta",

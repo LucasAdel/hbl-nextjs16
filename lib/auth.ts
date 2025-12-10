@@ -87,8 +87,10 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
 // Request password reset
 export async function requestPasswordReset(email: string) {
   const supabase = createClient();
+  // Use auth/callback route which handles the token exchange properly
+  // The callback will detect it's a recovery flow and redirect to /reset-password
   const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/reset-password`,
+    redirectTo: `${window.location.origin}/auth/callback`,
   });
   return { data, error };
 }

@@ -21,6 +21,7 @@ import {
 } from "./system-prompt";
 import { getActiveModelConfig, type BaileyAISettings } from "./ai-settings";
 import { type AIModelConfig, isProviderConfigured } from "./ai-models";
+import { logConversationExchange } from "@/lib/supabase/conversations";
 
 // Lazy-loaded AI clients
 let openaiClient: OpenAI | null = null;
@@ -300,12 +301,58 @@ function generateActions(
 }
 
 /**
+ * Log conversation exchange to database
+ */
+async function logExchange(
+  userMessage: string,
+  response: GeneratedResponse,
+  responseTimeMs: number,
+  options?: {
+    sessionId?: string;
+    userId?: string;
+    userEmail?: string;
+  }
+): Promise<void> {
+  // Only log if session ID is provided
+  if (!options?.sessionId) return;
+
+  try {
+    await logConversationExchange({
+      sessionId: options.sessionId,
+      userId: options.userId,
+      userEmail: options.userEmail,
+      userMessage,
+      assistantMessage: response.content,
+      intent: response.intent,
+      knowledgeItemsUsed: response.knowledgeUsed,
+      xpAwarded: response.xpAwarded,
+      confidenceScore: response.confidence,
+      responseTimeMs,
+      source: response.source,
+      modelUsed: response.modelUsed || "knowledge-base",
+      actions: response.actions,
+      showDisclaimer: response.showDisclaimer,
+    });
+  } catch (error) {
+    console.error("Failed to log conversation exchange:", error);
+    // Don't throw - logging failure shouldn't break the chat
+  }
+}
+
+/**
  * Generate a response using the configured AI model or knowledge base
  */
 export async function generateResponse(
   message: string,
-  conversationHistory: { role: "user" | "assistant"; content: string }[] = []
+  conversationHistory: { role: "user" | "assistant"; content: string }[] = [],
+  options?: {
+    sessionId?: string;
+    userId?: string;
+    userEmail?: string;
+  }
 ): Promise<GeneratedResponse> {
+  const startTime = Date.now();
+
   // Get current settings and model config
   const { modelKey, config, settings } = await getActiveModelConfig();
 
@@ -313,9 +360,16 @@ export async function generateResponse(
   const intent = detectIntent(message);
   const relevantKnowledge = findRelevantKnowledge(message);
 
+  // Helper to create response and log
+  const createAndLogResponse = async (response: GeneratedResponse): Promise<GeneratedResponse> => {
+    const responseTimeMs = Date.now() - startTime;
+    await logExchange(message, response, responseTimeMs, options);
+    return response;
+  };
+
   // SAFETY CHECK 1: Emergency
   if (settings.enableEmergencyCheck && isEmergency(message)) {
-    return {
+    return createAndLogResponse({
       content: generateEmergencyResponse(),
       streaming: false,
       source: "fallback",
@@ -326,12 +380,12 @@ export async function generateResponse(
       actions: [],
       showDisclaimer: false,
       isEmergency: true,
-    };
+    });
   }
 
   // SAFETY CHECK 2: Legal advice request
   if (settings.enableLegalAdviceGuard && isAskingForLegalAdvice(message)) {
-    return {
+    return createAndLogResponse({
       content: generateLegalAdviceRefusal(),
       streaming: false,
       source: "fallback",
@@ -345,14 +399,14 @@ export async function generateResponse(
       ],
       showDisclaimer: false,
       isLegalAdviceRefusal: true,
-    };
+    });
   }
 
   // SAFETY CHECK 3: Objection handling
   if (settings.enableObjectionHandling) {
     const objection = handleObjection(message);
     if (objection.handled) {
-      return {
+      return createAndLogResponse({
         content: objection.response,
         streaming: false,
         source: "fallback",
@@ -365,7 +419,7 @@ export async function generateResponse(
           { label: "Learn More", action: "learn_more" },
         ],
         showDisclaimer: false,
-      };
+      });
     }
   }
 
@@ -373,7 +427,7 @@ export async function generateResponse(
   if (settings.enableCalendarIntegration && isCalendarQuery(message)) {
     const calendarResponse = generateCalendarResponse(message);
     if (calendarResponse) {
-      return {
+      return createAndLogResponse({
         content: calendarResponse,
         streaming: false,
         source: "knowledge_base",
@@ -386,7 +440,7 @@ export async function generateResponse(
           { label: "Call Us", action: "call" },
         ],
         showDisclaimer: false,
-      };
+      });
     }
   }
 
@@ -397,7 +451,7 @@ export async function generateResponse(
       ? Math.round(relevantKnowledge[0].xpReward * (relevantKnowledge[0].confidenceLevel / 10))
       : 5;
 
-    return {
+    return createAndLogResponse({
       content: response,
       streaming: false,
       source: "knowledge_base",
@@ -408,7 +462,7 @@ export async function generateResponse(
       xpAwarded,
       actions: generateActions(response, intent, relevantKnowledge),
       showDisclaimer: relevantKnowledge.some((k) => k.requiresDisclaimer),
-    };
+    });
   }
 
   // Try to generate AI response
@@ -426,7 +480,7 @@ export async function generateResponse(
         ? Math.round(relevantKnowledge[0].xpReward * (relevantKnowledge[0].confidenceLevel / 10))
         : 5;
 
-      return {
+      return createAndLogResponse({
         content: aiResponse,
         streaming: false,
         source: "ai",
@@ -437,7 +491,7 @@ export async function generateResponse(
         xpAwarded,
         actions: generateActions(aiResponse, intent, relevantKnowledge),
         showDisclaimer: relevantKnowledge.some((k) => k.requiresDisclaimer),
-      };
+      });
     }
   } catch (error) {
     console.error("AI response generation failed:", error);
@@ -449,7 +503,7 @@ export async function generateResponse(
     ? Math.round(relevantKnowledge[0].xpReward * (relevantKnowledge[0].confidenceLevel / 10))
     : 5;
 
-  return {
+  return createAndLogResponse({
     content: fallbackResponse,
     streaming: false,
     source: "knowledge_base",
@@ -460,7 +514,7 @@ export async function generateResponse(
     xpAwarded,
     actions: generateActions(fallbackResponse, intent, relevantKnowledge),
     showDisclaimer: relevantKnowledge.some((k) => k.requiresDisclaimer),
-  };
+  });
 }
 
 /**
@@ -645,13 +699,45 @@ async function generateGoogleResponse(
  */
 export async function* generateStreamingResponse(
   message: string,
-  conversationHistory: { role: "user" | "assistant"; content: string }[] = []
+  conversationHistory: { role: "user" | "assistant"; content: string }[] = [],
+  options?: {
+    sessionId?: string;
+    userId?: string;
+    userEmail?: string;
+  }
 ): AsyncGenerator<StreamChunk> {
+  const startTime = Date.now();
   const { modelKey, config, settings } = await getActiveModelConfig();
 
   // Detect intent and find relevant knowledge
   const intent = detectIntent(message);
   const relevantKnowledge = findRelevantKnowledge(message);
+
+  // Helper to log streaming response
+  const logStreamingResponse = async (content: string, metadata: Partial<GeneratedResponse>) => {
+    if (!options?.sessionId) return;
+    const responseTimeMs = Date.now() - startTime;
+    try {
+      await logConversationExchange({
+        sessionId: options.sessionId,
+        userId: options.userId,
+        userEmail: options.userEmail,
+        userMessage: message,
+        assistantMessage: content,
+        intent: metadata.intent || intent,
+        knowledgeItemsUsed: metadata.knowledgeUsed || relevantKnowledge.map((k) => k.title),
+        xpAwarded: metadata.xpAwarded || 0,
+        confidenceScore: metadata.confidence,
+        responseTimeMs,
+        source: metadata.source,
+        modelUsed: metadata.modelUsed || "knowledge-base",
+        actions: metadata.actions as unknown[],
+        showDisclaimer: metadata.showDisclaimer,
+      });
+    } catch (error) {
+      console.error("Failed to log streaming conversation:", error);
+    }
+  };
 
   // Yield start event
   yield {
@@ -667,37 +753,35 @@ export async function* generateStreamingResponse(
   if (settings.enableEmergencyCheck && isEmergency(message)) {
     const response = generateEmergencyResponse();
     yield { type: "delta", content: response };
-    yield {
-      type: "complete",
-      metadata: {
-        content: response,
-        source: "fallback",
-        isEmergency: true,
-        xpAwarded: 0,
-        actions: [],
-        showDisclaimer: false,
-      },
+    const metadata = {
+      content: response,
+      source: "fallback" as const,
+      isEmergency: true,
+      xpAwarded: 0,
+      actions: [],
+      showDisclaimer: false,
     };
+    yield { type: "complete", metadata };
+    await logStreamingResponse(response, metadata);
     return;
   }
 
   if (settings.enableLegalAdviceGuard && isAskingForLegalAdvice(message)) {
     const response = generateLegalAdviceRefusal();
     yield { type: "delta", content: response };
-    yield {
-      type: "complete",
-      metadata: {
-        content: response,
-        source: "fallback",
-        isLegalAdviceRefusal: true,
-        xpAwarded: 5,
-        actions: [
-          { label: "Book Consultation", action: "book" },
-          { label: "Call Us", action: "call" },
-        ],
-        showDisclaimer: false,
-      },
+    const metadata = {
+      content: response,
+      source: "fallback" as const,
+      isLegalAdviceRefusal: true,
+      xpAwarded: 5,
+      actions: [
+        { label: "Book Consultation", action: "book" },
+        { label: "Call Us", action: "call" },
+      ],
+      showDisclaimer: false,
     };
+    yield { type: "complete", metadata };
+    await logStreamingResponse(response, metadata);
     return;
   }
 
@@ -705,19 +789,18 @@ export async function* generateStreamingResponse(
     const objection = handleObjection(message);
     if (objection.handled) {
       yield { type: "delta", content: objection.response };
-      yield {
-        type: "complete",
-        metadata: {
-          content: objection.response,
-          source: "fallback",
-          xpAwarded: 5,
-          actions: [
-            { label: "Book Consultation", action: "book" },
-            { label: "Learn More", action: "learn_more" },
-          ],
-          showDisclaimer: false,
-        },
+      const metadata = {
+        content: objection.response,
+        source: "fallback" as const,
+        xpAwarded: 5,
+        actions: [
+          { label: "Book Consultation", action: "book" },
+          { label: "Learn More", action: "learn_more" },
+        ],
+        showDisclaimer: false,
       };
+      yield { type: "complete", metadata };
+      await logStreamingResponse(objection.response, metadata);
       return;
     }
   }
@@ -726,19 +809,18 @@ export async function* generateStreamingResponse(
     const calendarResponse = generateCalendarResponse(message);
     if (calendarResponse) {
       yield { type: "delta", content: calendarResponse };
-      yield {
-        type: "complete",
-        metadata: {
-          content: calendarResponse,
-          source: "knowledge_base",
-          xpAwarded: 10,
-          actions: [
-            { label: "Book Consultation", action: "book" },
-            { label: "Call Us", action: "call" },
-          ],
-          showDisclaimer: false,
-        },
+      const metadata = {
+        content: calendarResponse,
+        source: "knowledge_base" as const,
+        xpAwarded: 10,
+        actions: [
+          { label: "Book Consultation", action: "book" },
+          { label: "Call Us", action: "call" },
+        ],
+        showDisclaimer: false,
       };
+      yield { type: "complete", metadata };
+      await logStreamingResponse(calendarResponse, metadata);
       return;
     }
   }
@@ -752,17 +834,16 @@ export async function* generateStreamingResponse(
       ? Math.round(relevantKnowledge[0].xpReward * (relevantKnowledge[0].confidenceLevel / 10))
       : 5;
 
-    yield {
-      type: "complete",
-      metadata: {
-        content: response,
-        source: "knowledge_base",
-        modelUsed: "knowledge-base",
-        xpAwarded,
-        actions: generateActions(response, intent, relevantKnowledge),
-        showDisclaimer: relevantKnowledge.some((k) => k.requiresDisclaimer),
-      },
+    const metadata = {
+      content: response,
+      source: "knowledge_base" as const,
+      modelUsed: "knowledge-base",
+      xpAwarded,
+      actions: generateActions(response, intent, relevantKnowledge),
+      showDisclaimer: relevantKnowledge.some((k) => k.requiresDisclaimer),
     };
+    yield { type: "complete", metadata };
+    await logStreamingResponse(response, metadata);
     return;
   }
 
@@ -820,17 +901,16 @@ export async function* generateStreamingResponse(
         ? Math.round(relevantKnowledge[0].xpReward * (relevantKnowledge[0].confidenceLevel / 10))
         : 5;
 
-      yield {
-        type: "complete",
-        metadata: {
-          content: fullContent,
-          source: "ai",
-          modelUsed: config.model,
-          xpAwarded,
-          actions: generateActions(fullContent, intent, relevantKnowledge),
-          showDisclaimer: relevantKnowledge.some((k) => k.requiresDisclaimer),
-        },
+      const metadata = {
+        content: fullContent,
+        source: "ai" as const,
+        modelUsed: config.model,
+        xpAwarded,
+        actions: generateActions(fullContent, intent, relevantKnowledge),
+        showDisclaimer: relevantKnowledge.some((k) => k.requiresDisclaimer),
       };
+      yield { type: "complete", metadata };
+      await logStreamingResponse(fullContent, metadata);
       return;
     }
   } catch (error) {
@@ -845,15 +925,14 @@ export async function* generateStreamingResponse(
     ? Math.round(relevantKnowledge[0].xpReward * (relevantKnowledge[0].confidenceLevel / 10))
     : 5;
 
-  yield {
-    type: "complete",
-    metadata: {
-      content: fallbackResponse,
-      source: "knowledge_base",
-      modelUsed: "knowledge-base",
-      xpAwarded,
-      actions: generateActions(fallbackResponse, intent, relevantKnowledge),
-      showDisclaimer: relevantKnowledge.some((k) => k.requiresDisclaimer),
-    },
+  const metadata = {
+    content: fallbackResponse,
+    source: "knowledge_base" as const,
+    modelUsed: "knowledge-base",
+    xpAwarded,
+    actions: generateActions(fallbackResponse, intent, relevantKnowledge),
+    showDisclaimer: relevantKnowledge.some((k) => k.requiresDisclaimer),
   };
+  yield { type: "complete", metadata };
+  await logStreamingResponse(fallbackResponse, metadata);
 }
