@@ -21,8 +21,8 @@ export async function GET(request: NextRequest) {
       const dateTo = searchParams.get("dateTo");
 
       const analyticsData = await getConversationAnalytics(
-        dateFrom ? new Date(dateFrom) : undefined,
-        dateTo ? new Date(dateTo) : undefined
+        dateFrom || undefined,
+        dateTo || undefined
       );
 
       return NextResponse.json({

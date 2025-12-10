@@ -37,14 +37,25 @@ import { cn } from "@/lib/utils";
 interface KnowledgeItem {
   id: string;
   category: string;
+  subcategory?: string;
   topic: string;
   title: string;
   content: string;
+  summary?: string;
   keywords: string[];
+  intentPatterns?: string[];
+  responseTemplate?: string;
   confidence: number;
   usageCount: number;
   lastUsed?: string;
   status: "active" | "draft" | "archived";
+  source?: "static" | "database";
+  isEditable?: boolean;
+  requiresDisclaimer?: boolean;
+  legalDisclaimer?: string;
+  adviceLevel?: string;
+  relatedProducts?: string[];
+  xpReward?: number;
 }
 
 interface ConversationSummary {
@@ -61,6 +72,57 @@ interface ConversationSummary {
   summary?: string;
 }
 
+interface ConversationMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  intent?: string;
+  knowledge_items_used?: string[];
+  xp_awarded?: number;
+  confidence_score?: number;
+  response_time_ms?: number;
+  created_at: string;
+}
+
+interface ConversationDetail extends ConversationSummary {
+  messages: ConversationMessage[];
+  xpEarned?: number;
+  satisfactionRating?: number;
+}
+
+interface KnowledgeGap {
+  id: string;
+  query: string;
+  detected_intent?: string;
+  suggested_category?: string;
+  frequency: number;
+  priority: "high" | "medium" | "low";
+  status: "open" | "addressed" | "dismissed";
+  addressed_by_item_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface DraftKnowledgeItem {
+  category: string;
+  subcategory?: string;
+  topic: string;
+  title: string;
+  content: string;
+  summary: string;
+  keywords: string[];
+  intentPatterns: string[];
+  responseTemplate?: string;
+  requiresDisclaimer: boolean;
+  legalDisclaimer?: string;
+  adviceLevel: string;
+  relatedProducts?: string[];
+  xpReward: number;
+  confidence: number;
+  rationale?: string;
+  gapId?: string;
+}
+
 interface AnalyticsData {
   totalConversations: number;
   totalMessages: number;
@@ -74,7 +136,7 @@ interface AnalyticsData {
   dailyStats: { date: string; conversations: number; messages: number }[];
 }
 
-type TabType = "overview" | "knowledge" | "conversations" | "analytics" | "settings";
+type TabType = "overview" | "knowledge" | "gaps" | "conversations" | "analytics" | "settings";
 
 interface AIModelOption {
   key: string;
@@ -261,11 +323,29 @@ export default function BaileyAIManagementPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedConversation, setSelectedConversation] = useState<ConversationSummary | null>(null);
+  const [conversationDetail, setConversationDetail] = useState<ConversationDetail | null>(null);
+  const [isLoadingConversation, setIsLoadingConversation] = useState(false);
   const [editingKnowledge, setEditingKnowledge] = useState<KnowledgeItem | null>(null);
+  const [showKnowledgeEditor, setShowKnowledgeEditor] = useState(false);
+  const [isLoadingKnowledge, setIsLoadingKnowledge] = useState(false);
+  const [knowledgeCategories, setKnowledgeCategories] = useState<string[]>([]);
+  const [isSavingKnowledge, setIsSavingKnowledge] = useState(false);
+  const [knowledgeMessage, setKnowledgeMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Gaps State
+  const [gaps, setGaps] = useState<KnowledgeGap[]>([]);
+  const [isLoadingGaps, setIsLoadingGaps] = useState(false);
+  const [gapsPriorityFilter, setGapsPriorityFilter] = useState<string>("all");
+  const [selectedGap, setSelectedGap] = useState<KnowledgeGap | null>(null);
+  const [generatedDraft, setGeneratedDraft] = useState<DraftKnowledgeItem | null>(null);
+  const [isGeneratingDraft, setIsGeneratingDraft] = useState(false);
+  const [showDraftReviewModal, setShowDraftReviewModal] = useState(false);
+  const [gapsMessage, setGapsMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const tabs: { id: TabType; label: string; icon: React.ElementType }[] = [
     { id: "overview", label: "Overview", icon: BarChart3 },
     { id: "knowledge", label: "Knowledge Base", icon: BookOpen },
+    { id: "gaps", label: "Knowledge Gaps", icon: AlertCircle },
     { id: "conversations", label: "Conversations", icon: MessageSquare },
     { id: "analytics", label: "Analytics", icon: TrendingUp },
     { id: "settings", label: "AI Settings", icon: Settings },
@@ -358,6 +438,556 @@ export default function BaileyAIManagementPage() {
     loadSettings();
   }, []);
 
+  // Load conversations and analytics from API
+  useEffect(() => {
+    const loadConversationsAndAnalytics = async () => {
+      try {
+        // Fetch conversations
+        const convResponse = await fetch("/api/admin/conversations?pageSize=50");
+        if (convResponse.ok) {
+          const convData = await convResponse.json();
+          if (convData.success && convData.conversations) {
+            const mappedConversations: ConversationSummary[] = convData.conversations.map((c: {
+              id: string;
+              session_id: string;
+              user_email?: string;
+              created_at: string;
+              updated_at: string;
+              message_count: number;
+              lead_score: number;
+              lead_category: "hot" | "warm" | "cold" | null;
+              status: string;
+              primary_intent?: string;
+            }) => ({
+              id: c.id,
+              sessionId: c.session_id,
+              userEmail: c.user_email,
+              startedAt: c.created_at,
+              lastMessageAt: c.updated_at,
+              messageCount: c.message_count,
+              leadScore: c.lead_score || 0,
+              leadCategory: c.lead_category || "cold",
+              status: c.status || "active",
+              primaryIntent: c.primary_intent,
+            }));
+            if (mappedConversations.length > 0) {
+              setConversations(mappedConversations);
+            }
+          }
+        }
+
+        // Fetch analytics
+        const analyticsResponse = await fetch("/api/admin/conversations?analytics=true");
+        if (analyticsResponse.ok) {
+          const analyticsData = await analyticsResponse.json();
+          if (analyticsData.success && analyticsData.analytics) {
+            const a = analyticsData.analytics;
+            setAnalytics(prev => ({
+              ...prev,
+              totalConversations: a.totalConversations || prev.totalConversations,
+              totalMessages: a.totalMessages || prev.totalMessages,
+              avgLeadScore: a.avgLeadScore || prev.avgLeadScore,
+              leadDistribution: [
+                { category: "Hot", count: a.hotLeads || 0, percentage: a.totalConversations ? Math.round((a.hotLeads || 0) / a.totalConversations * 100) : 0 },
+                { category: "Warm", count: a.warmLeads || 0, percentage: a.totalConversations ? Math.round((a.warmLeads || 0) / a.totalConversations * 100) : 0 },
+                { category: "Cold", count: a.coldLeads || 0, percentage: a.totalConversations ? Math.round((a.coldLeads || 0) / a.totalConversations * 100) : 0 },
+              ],
+              topIntents: a.topIntents || prev.topIntents,
+            }));
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load conversations and analytics:", error);
+      }
+    };
+    loadConversationsAndAnalytics();
+  }, []);
+
+  // Fetch conversation details when a conversation is selected
+  useEffect(() => {
+    const loadConversationDetail = async () => {
+      if (!selectedConversation) {
+        setConversationDetail(null);
+        return;
+      }
+
+      setIsLoadingConversation(true);
+      try {
+        const response = await fetch(`/api/admin/conversations/${selectedConversation.id}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.conversation) {
+            const c = data.conversation;
+            setConversationDetail({
+              id: c.id,
+              sessionId: c.session_id,
+              userEmail: c.user_email,
+              startedAt: c.created_at || c.started_at,
+              lastMessageAt: c.updated_at || c.ended_at,
+              messageCount: c.message_count,
+              leadScore: c.lead_score || 0,
+              leadCategory: c.lead_category || "cold",
+              status: c.status || "active",
+              primaryIntent: c.primary_intent,
+              xpEarned: c.xp_earned,
+              satisfactionRating: c.satisfaction_rating,
+              messages: (c.messages || []).map((m: {
+                id: string;
+                role: "user" | "assistant";
+                content: string;
+                intent?: string;
+                knowledge_items_used?: string[];
+                xp_awarded?: number;
+                confidence_score?: number;
+                response_time_ms?: number;
+                created_at: string;
+              }) => ({
+                id: m.id,
+                role: m.role,
+                content: m.content,
+                intent: m.intent,
+                knowledge_items_used: m.knowledge_items_used,
+                xp_awarded: m.xp_awarded,
+                confidence_score: m.confidence_score,
+                response_time_ms: m.response_time_ms,
+                created_at: m.created_at,
+              })),
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load conversation details:", error);
+      } finally {
+        setIsLoadingConversation(false);
+      }
+    };
+    loadConversationDetail();
+  }, [selectedConversation]);
+
+  // Load knowledge items from API
+  useEffect(() => {
+    const loadKnowledgeItems = async () => {
+      setIsLoadingKnowledge(true);
+      try {
+        const response = await fetch("/api/admin/knowledge-base");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            const items: KnowledgeItem[] = data.data.items.map((item: {
+              id: string;
+              category: string;
+              subcategory?: string;
+              topic?: string;
+              title: string;
+              content: string;
+              summary?: string;
+              keywords?: string[];
+              intentPatterns?: string[];
+              responseTemplate?: string;
+              confidenceLevel?: number;
+              confidence?: number;
+              usageCount?: number;
+              lastUsed?: string;
+              isActive?: boolean;
+              source: "static" | "database";
+              isEditable?: boolean;
+              requiresDisclaimer?: boolean;
+              legalDisclaimer?: string;
+              adviceLevel?: string;
+              relatedProducts?: string[];
+              xpReward?: number;
+            }) => ({
+              id: item.id,
+              category: item.category,
+              subcategory: item.subcategory,
+              topic: item.topic || item.category,
+              title: item.title,
+              content: item.content,
+              summary: item.summary,
+              keywords: item.keywords || [],
+              intentPatterns: item.intentPatterns,
+              responseTemplate: item.responseTemplate,
+              confidence: item.confidenceLevel || item.confidence || 7,
+              usageCount: item.usageCount || 0,
+              lastUsed: item.lastUsed,
+              status: item.isActive === false ? "archived" : "active",
+              source: item.source,
+              isEditable: item.isEditable,
+              requiresDisclaimer: item.requiresDisclaimer,
+              legalDisclaimer: item.legalDisclaimer,
+              adviceLevel: item.adviceLevel,
+              relatedProducts: item.relatedProducts,
+              xpReward: item.xpReward,
+            }));
+            setKnowledge(items);
+            if (data.data.categories) {
+              setKnowledgeCategories(data.data.categories);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load knowledge items:", error);
+      } finally {
+        setIsLoadingKnowledge(false);
+      }
+    };
+    loadKnowledgeItems();
+  }, []);
+
+  // Handle saving knowledge item
+  const handleSaveKnowledgeItem = async (item: Partial<KnowledgeItem>) => {
+    setIsSavingKnowledge(true);
+    setKnowledgeMessage(null);
+
+    try {
+      const isUpdate = editingKnowledge && editingKnowledge.source === "database";
+      const action = isUpdate ? "update" : "create";
+
+      const response = await fetch("/api/admin/knowledge-base", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action,
+          id: isUpdate ? editingKnowledge.id : undefined,
+          item: {
+            category: item.category,
+            subcategory: item.subcategory,
+            topic: item.topic,
+            title: item.title,
+            content: item.content,
+            summary: item.summary,
+            keywords: item.keywords,
+            intentPatterns: item.intentPatterns,
+            responseTemplate: item.responseTemplate,
+            confidenceLevel: item.confidence,
+            requiresDisclaimer: item.requiresDisclaimer,
+            legalDisclaimer: item.legalDisclaimer,
+            adviceLevel: item.adviceLevel,
+            relatedProducts: item.relatedProducts,
+            xpReward: item.xpReward,
+          },
+          updates: isUpdate ? {
+            category: item.category,
+            subcategory: item.subcategory,
+            topic: item.topic,
+            title: item.title,
+            content: item.content,
+            summary: item.summary,
+            keywords: item.keywords,
+            intent_patterns: item.intentPatterns,
+            response_template: item.responseTemplate,
+            confidence_level: item.confidence,
+            requires_disclaimer: item.requiresDisclaimer,
+            legal_disclaimer: item.legalDisclaimer,
+            advice_level: item.adviceLevel,
+            related_products: item.relatedProducts,
+            xp_reward: item.xpReward,
+          } : undefined,
+        }),
+      });
+
+      if (response.ok) {
+        setKnowledgeMessage({ type: "success", text: isUpdate ? "Item updated successfully!" : "Item created successfully!" });
+        setShowKnowledgeEditor(false);
+        setEditingKnowledge(null);
+        // Refresh knowledge items
+        const refreshResponse = await fetch("/api/admin/knowledge-base");
+        if (refreshResponse.ok) {
+          const data = await refreshResponse.json();
+          if (data.success && data.data) {
+            const items: KnowledgeItem[] = data.data.items.map((i: {
+              id: string;
+              category: string;
+              subcategory?: string;
+              topic?: string;
+              title: string;
+              content: string;
+              summary?: string;
+              keywords?: string[];
+              confidenceLevel?: number;
+              confidence?: number;
+              usageCount?: number;
+              lastUsed?: string;
+              isActive?: boolean;
+              source: "static" | "database";
+              isEditable?: boolean;
+            }) => ({
+              id: i.id,
+              category: i.category,
+              subcategory: i.subcategory,
+              topic: i.topic || i.category,
+              title: i.title,
+              content: i.content,
+              summary: i.summary,
+              keywords: i.keywords || [],
+              confidence: i.confidenceLevel || i.confidence || 7,
+              usageCount: i.usageCount || 0,
+              status: i.isActive === false ? "archived" : "active",
+              source: i.source,
+              isEditable: i.isEditable,
+            }));
+            setKnowledge(items);
+          }
+        }
+      } else {
+        const data = await response.json();
+        setKnowledgeMessage({ type: "error", text: data.error || "Failed to save item" });
+      }
+    } catch (error) {
+      setKnowledgeMessage({ type: "error", text: "Network error. Please try again." });
+    } finally {
+      setIsSavingKnowledge(false);
+    }
+  };
+
+  // Handle deleting knowledge item
+  const handleDeleteKnowledge = async (item: KnowledgeItem) => {
+    if (!item.isEditable || item.source === "static") {
+      setKnowledgeMessage({ type: "error", text: "Static knowledge items cannot be deleted." });
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to delete "${item.title}"?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/admin/knowledge-base", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", id: item.id }),
+      });
+
+      if (response.ok) {
+        setKnowledgeMessage({ type: "success", text: "Item deleted successfully!" });
+        setKnowledge(prev => prev.filter(k => k.id !== item.id));
+      } else {
+        const data = await response.json();
+        setKnowledgeMessage({ type: "error", text: data.error || "Failed to delete item" });
+      }
+    } catch (error) {
+      setKnowledgeMessage({ type: "error", text: "Network error. Please try again." });
+    }
+  };
+
+  // Load knowledge gaps
+  useEffect(() => {
+    const loadGaps = async () => {
+      if (activeTab !== "gaps") return;
+
+      setIsLoadingGaps(true);
+      try {
+        const params = new URLSearchParams({ action: "gaps", pageSize: "100" });
+        if (gapsPriorityFilter !== "all") {
+          params.append("priority", gapsPriorityFilter);
+        }
+
+        const response = await fetch(`/api/admin/knowledge-base?${params.toString()}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data?.gaps) {
+            setGaps(data.data.gaps);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load gaps:", error);
+        setGapsMessage({ type: "error", text: "Failed to load knowledge gaps" });
+      } finally {
+        setIsLoadingGaps(false);
+      }
+    };
+    loadGaps();
+  }, [activeTab, gapsPriorityFilter]);
+
+  // Handle generating AI draft from gap
+  const handleGenerateDraft = async (gap: KnowledgeGap) => {
+    setSelectedGap(gap);
+    setIsGeneratingDraft(true);
+    setGapsMessage(null);
+
+    try {
+      const response = await fetch("/api/admin/knowledge-base", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "generate-draft",
+          gapId: gap.id,
+          gapQuery: gap.query,
+          gapIntent: gap.detected_intent,
+          frequency: gap.frequency,
+          suggestedCategory: gap.suggested_category,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data?.draft) {
+          setGeneratedDraft({
+            ...data.data.draft,
+            gapId: gap.id,
+            rationale: data.data.rationale,
+            confidence: 7,
+            xpReward: 10,
+          });
+          setShowDraftReviewModal(true);
+        }
+      } else {
+        const data = await response.json();
+        setGapsMessage({ type: "error", text: data.error || "Failed to generate draft" });
+      }
+    } catch (error) {
+      setGapsMessage({ type: "error", text: "Network error. Please try again." });
+    } finally {
+      setIsGeneratingDraft(false);
+    }
+  };
+
+  // Handle dismissing a gap
+  const handleDismissGap = async (gap: KnowledgeGap) => {
+    if (!confirm(`Dismiss this gap?\n\n"${gap.query}"\n\nThis marks it as not needing knowledge content.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/admin/knowledge-base", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "dismiss-gap", gapId: gap.id }),
+      });
+
+      if (response.ok) {
+        setGapsMessage({ type: "success", text: "Gap dismissed successfully" });
+        setGaps(prev => prev.filter(g => g.id !== gap.id));
+      } else {
+        const data = await response.json();
+        setGapsMessage({ type: "error", text: data.error || "Failed to dismiss gap" });
+      }
+    } catch (error) {
+      setGapsMessage({ type: "error", text: "Network error. Please try again." });
+    }
+  };
+
+  // Handle creating knowledge item from draft
+  const handleCreateFromDraft = async (draft: DraftKnowledgeItem) => {
+    setIsSavingKnowledge(true);
+
+    try {
+      const response = await fetch("/api/admin/knowledge-base", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "create",
+          gapId: draft.gapId,
+          item: {
+            category: draft.category,
+            subcategory: draft.subcategory,
+            topic: draft.topic,
+            title: draft.title,
+            content: draft.content,
+            summary: draft.summary,
+            keywords: draft.keywords,
+            intentPatterns: draft.intentPatterns,
+            responseTemplate: draft.responseTemplate,
+            confidenceLevel: draft.confidence,
+            requiresDisclaimer: draft.requiresDisclaimer,
+            legalDisclaimer: draft.legalDisclaimer,
+            adviceLevel: draft.adviceLevel,
+            relatedProducts: draft.relatedProducts,
+            xpReward: draft.xpReward,
+          },
+        }),
+      });
+
+      if (response.ok) {
+        setGapsMessage({ type: "success", text: "Knowledge item created and gap addressed!" });
+        setShowDraftReviewModal(false);
+        setGeneratedDraft(null);
+        setSelectedGap(null);
+        // Remove addressed gap from list
+        if (draft.gapId) {
+          setGaps(prev => prev.filter(g => g.id !== draft.gapId));
+        }
+        // Switch to knowledge tab to see the new item
+        setActiveTab("knowledge");
+        // Refresh knowledge items
+        const refreshResponse = await fetch("/api/admin/knowledge-base");
+        if (refreshResponse.ok) {
+          const data = await refreshResponse.json();
+          if (data.success && data.data) {
+            const items: KnowledgeItem[] = data.data.items.map((i: {
+              id: string;
+              category: string;
+              subcategory?: string;
+              topic?: string;
+              title: string;
+              content: string;
+              summary?: string;
+              keywords?: string[];
+              confidenceLevel?: number;
+              confidence?: number;
+              usageCount?: number;
+              isActive?: boolean;
+              source: "static" | "database";
+              isEditable?: boolean;
+            }) => ({
+              id: i.id,
+              category: i.category,
+              subcategory: i.subcategory,
+              topic: i.topic || i.category,
+              title: i.title,
+              content: i.content,
+              summary: i.summary,
+              keywords: i.keywords || [],
+              confidence: i.confidenceLevel || i.confidence || 7,
+              usageCount: i.usageCount || 0,
+              status: i.isActive === false ? "archived" : "active",
+              source: i.source,
+              isEditable: i.isEditable,
+            }));
+            setKnowledge(items);
+          }
+        }
+      } else {
+        const data = await response.json();
+        setGapsMessage({ type: "error", text: data.error || "Failed to create knowledge item" });
+      }
+    } catch (error) {
+      setGapsMessage({ type: "error", text: "Network error. Please try again." });
+    } finally {
+      setIsSavingKnowledge(false);
+    }
+  };
+
+  // Filter gaps by priority
+  const filteredGaps = gaps.filter(gap => {
+    if (gapsPriorityFilter === "all") return true;
+    return gap.priority === gapsPriorityFilter;
+  });
+
+  // Get priority badge styling
+  const getPriorityBadge = (priority: "high" | "medium" | "low") => {
+    switch (priority) {
+      case "high":
+        return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+      case "medium":
+        return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400";
+      case "low":
+        return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
+    }
+  };
+
+  // Get priority icon
+  const getPriorityIcon = (priority: "high" | "medium" | "low") => {
+    switch (priority) {
+      case "high":
+        return <Flame className="h-4 w-4 text-red-500" />;
+      case "medium":
+        return <AlertCircle className="h-4 w-4 text-amber-500" />;
+      case "low":
+        return <Target className="h-4 w-4 text-blue-500" />;
+    }
+  };
+
   // Save settings handler
   const handleSaveSettings = async () => {
     setIsSavingSettings(true);
@@ -385,9 +1015,66 @@ export default function BaileyAIManagementPage() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsRefreshing(false);
+    try {
+      // Fetch conversations
+      const convResponse = await fetch("/api/admin/conversations?pageSize=50");
+      if (convResponse.ok) {
+        const convData = await convResponse.json();
+        if (convData.success && convData.conversations) {
+          const mappedConversations: ConversationSummary[] = convData.conversations.map((c: {
+            id: string;
+            session_id: string;
+            user_email?: string;
+            created_at: string;
+            updated_at: string;
+            message_count: number;
+            lead_score: number;
+            lead_category: "hot" | "warm" | "cold" | null;
+            status: string;
+            primary_intent?: string;
+          }) => ({
+            id: c.id,
+            sessionId: c.session_id,
+            userEmail: c.user_email,
+            startedAt: c.created_at,
+            lastMessageAt: c.updated_at,
+            messageCount: c.message_count,
+            leadScore: c.lead_score || 0,
+            leadCategory: c.lead_category || "cold",
+            status: c.status || "active",
+            primaryIntent: c.primary_intent,
+          }));
+          if (mappedConversations.length > 0) {
+            setConversations(mappedConversations);
+          }
+        }
+      }
+
+      // Fetch analytics
+      const analyticsResponse = await fetch("/api/admin/conversations?analytics=true");
+      if (analyticsResponse.ok) {
+        const analyticsData = await analyticsResponse.json();
+        if (analyticsData.success && analyticsData.analytics) {
+          const a = analyticsData.analytics;
+          setAnalytics(prev => ({
+            ...prev,
+            totalConversations: a.totalConversations || prev.totalConversations,
+            totalMessages: a.totalMessages || prev.totalMessages,
+            avgLeadScore: a.avgLeadScore || prev.avgLeadScore,
+            leadDistribution: [
+              { category: "Hot", count: a.hotLeads || 0, percentage: a.totalConversations ? Math.round((a.hotLeads || 0) / a.totalConversations * 100) : 0 },
+              { category: "Warm", count: a.warmLeads || 0, percentage: a.totalConversations ? Math.round((a.warmLeads || 0) / a.totalConversations * 100) : 0 },
+              { category: "Cold", count: a.coldLeads || 0, percentage: a.totalConversations ? Math.round((a.coldLeads || 0) / a.totalConversations * 100) : 0 },
+            ],
+            topIntents: a.topIntents || prev.topIntents,
+          }));
+        }
+      }
+    } catch (error) {
+      console.error("Failed to refresh data:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -677,6 +1364,31 @@ export default function BaileyAIManagementPage() {
         {/* Knowledge Base Tab */}
         {activeTab === "knowledge" && (
           <div className="space-y-6">
+            {/* Success/Error Message */}
+            {knowledgeMessage && (
+              <div
+                className={cn(
+                  "p-4 rounded-lg flex items-center gap-3",
+                  knowledgeMessage.type === "success"
+                    ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400"
+                    : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400"
+                )}
+              >
+                {knowledgeMessage.type === "success" ? (
+                  <CheckCircle className="h-5 w-5" />
+                ) : (
+                  <XCircle className="h-5 w-5" />
+                )}
+                {knowledgeMessage.text}
+                <button
+                  onClick={() => setKnowledgeMessage(null)}
+                  className="ml-auto text-current opacity-70 hover:opacity-100"
+                >
+                  <XCircle className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+
             {/* Filters */}
             <div className="flex flex-wrap items-center gap-4">
               <div className="relative flex-1 min-w-[200px]">
@@ -695,11 +1407,19 @@ export default function BaileyAIManagementPage() {
                 className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
               >
                 <option value="all">All Categories</option>
-                <option value="compliance">Compliance</option>
-                <option value="telehealth">Telehealth</option>
-                <option value="employment">Employment</option>
-                <option value="privacy">Privacy</option>
-                <option value="practice">Practice</option>
+                {knowledgeCategories.length > 0 ? (
+                  knowledgeCategories.map(cat => (
+                    <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+                  ))
+                ) : (
+                  <>
+                    <option value="compliance">Compliance</option>
+                    <option value="telehealth">Telehealth</option>
+                    <option value="employment">Employment</option>
+                    <option value="privacy">Privacy</option>
+                    <option value="practice">Practice</option>
+                  </>
+                )}
               </select>
               <select
                 value={statusFilter}
@@ -711,7 +1431,13 @@ export default function BaileyAIManagementPage() {
                 <option value="draft">Draft</option>
                 <option value="archived">Archived</option>
               </select>
-              <button className="flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700 transition-colors">
+              <button
+                onClick={() => {
+                  setEditingKnowledge(null);
+                  setShowKnowledgeEditor(true);
+                }}
+                className="flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700 transition-colors"
+              >
                 <Plus className="h-4 w-4" />
                 Add Item
               </button>
@@ -719,58 +1445,330 @@ export default function BaileyAIManagementPage() {
 
             {/* Knowledge Items */}
             <div className="grid gap-4">
-              {filteredKnowledge.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className={cn("px-2 py-1 rounded-full text-xs font-medium", getStatusBadge(item.status))}>
-                          {item.status}
-                        </span>
-                        <span className="text-xs text-gray-500 capitalize">{item.category}</span>
-                        <span className="text-xs text-gray-500">Confidence: {item.confidence}/10</span>
-                      </div>
-                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-                        {item.title}
-                      </h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-                        {item.content}
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {item.keywords.map((keyword) => (
-                          <span
-                            key={keyword}
-                            className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs text-gray-600 dark:text-gray-400"
-                          >
-                            {keyword}
+              {isLoadingKnowledge ? (
+                <div className="flex items-center justify-center py-12">
+                  <RefreshCw className="h-8 w-8 text-teal-500 animate-spin" />
+                  <span className="ml-3 text-gray-500">Loading knowledge items...</span>
+                </div>
+              ) : filteredKnowledge.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  <BookOpen className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p>No knowledge items found.</p>
+                  <button
+                    onClick={() => {
+                      setEditingKnowledge(null);
+                      setShowKnowledgeEditor(true);
+                    }}
+                    className="mt-4 text-teal-600 hover:text-teal-700 font-medium"
+                  >
+                    Add your first item
+                  </button>
+                </div>
+              ) : (
+                filteredKnowledge.map((item) => (
+                  <div
+                    key={item.id}
+                    className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className={cn("px-2 py-1 rounded-full text-xs font-medium", getStatusBadge(item.status))}>
+                            {item.status}
                           </span>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 ml-4">
-                      <div className="text-right mr-4">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {item.usageCount} uses
+                          <span className="text-xs text-gray-500 capitalize">{item.category}</span>
+                          <span className="text-xs text-gray-500">Confidence: {item.confidence}/10</span>
+                          {item.source && (
+                            <span className={cn(
+                              "px-2 py-0.5 rounded text-xs font-medium",
+                              item.source === "static"
+                                ? "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400"
+                                : "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400"
+                            )}>
+                              {item.source === "static" ? "Built-in" : "Custom"}
+                            </span>
+                          )}
+                        </div>
+                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                          {item.title}
+                        </h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+                          {item.summary || item.content}
                         </p>
-                        {item.lastUsed && (
-                          <p className="text-xs text-gray-500">
-                            Last: {formatDate(item.lastUsed)}
-                          </p>
-                        )}
+                        <div className="flex flex-wrap gap-2">
+                          {item.keywords.slice(0, 5).map((keyword) => (
+                            <span
+                              key={keyword}
+                              className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs text-gray-600 dark:text-gray-400"
+                            >
+                              {keyword}
+                            </span>
+                          ))}
+                          {item.keywords.length > 5 && (
+                            <span className="px-2 py-1 text-xs text-gray-400">
+                              +{item.keywords.length - 5} more
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button className="p-2 text-gray-400 hover:text-red-500">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center gap-2 ml-4">
+                        <div className="text-right mr-4">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">
+                            {item.usageCount} uses
+                          </p>
+                          {item.lastUsed && (
+                            <p className="text-xs text-gray-500">
+                              Last: {formatDate(item.lastUsed)}
+                            </p>
+                          )}
+                          {item.xpReward && (
+                            <p className="text-xs text-teal-600 dark:text-teal-400 font-medium">
+                              +{item.xpReward} XP
+                            </p>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => {
+                            setEditingKnowledge(item);
+                            setShowKnowledgeEditor(true);
+                          }}
+                          disabled={!item.isEditable}
+                          className={cn(
+                            "p-2 rounded-lg transition-colors",
+                            item.isEditable
+                              ? "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                              : "text-gray-300 dark:text-gray-600 cursor-not-allowed"
+                          )}
+                          title={item.isEditable ? "Edit item" : "Built-in items cannot be edited"}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteKnowledge(item)}
+                          disabled={!item.isEditable}
+                          className={cn(
+                            "p-2 rounded-lg transition-colors",
+                            item.isEditable
+                              ? "text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                              : "text-gray-300 dark:text-gray-600 cursor-not-allowed"
+                          )}
+                          title={item.isEditable ? "Delete item" : "Built-in items cannot be deleted"}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Knowledge Gaps Tab */}
+        {activeTab === "gaps" && (
+          <div className="space-y-6">
+            {/* Success/Error Message */}
+            {gapsMessage && (
+              <div
+                className={cn(
+                  "p-4 rounded-lg flex items-center gap-3",
+                  gapsMessage.type === "success"
+                    ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400"
+                    : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400"
+                )}
+              >
+                {gapsMessage.type === "success" ? (
+                  <CheckCircle className="h-5 w-5" />
+                ) : (
+                  <XCircle className="h-5 w-5" />
+                )}
+                {gapsMessage.text}
+                <button
+                  onClick={() => setGapsMessage(null)}
+                  className="ml-auto text-current opacity-70 hover:opacity-100"
+                >
+                  <XCircle className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+
+            {/* Header and Filters */}
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Knowledge Gaps
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Queries that couldn&apos;t be answered - create knowledge items to fill the gaps
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <select
+                  value={gapsPriorityFilter}
+                  onChange={(e) => setGapsPriorityFilter(e.target.value)}
+                  className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                >
+                  <option value="all">All Priorities</option>
+                  <option value="high">🔥 High Priority</option>
+                  <option value="medium">⚠️ Medium Priority</option>
+                  <option value="low">ℹ️ Low Priority</option>
+                </select>
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded font-medium">
+                    {filteredGaps.length} gaps
+                  </span>
                 </div>
-              ))}
+              </div>
+            </div>
+
+            {/* Priority Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 border border-red-200 dark:border-red-800">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-lg">
+                    <Flame className="h-5 w-5 text-red-600 dark:text-red-400" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-red-700 dark:text-red-400">
+                      {gaps.filter(g => g.priority === "high").length}
+                    </p>
+                    <p className="text-sm text-red-600 dark:text-red-500">High Priority</p>
+                  </div>
+                </div>
+                <p className="text-xs text-red-500 dark:text-red-400 mt-2">
+                  Asked 5+ times - urgent attention needed
+                </p>
+              </div>
+              <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 border border-amber-200 dark:border-amber-800">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-amber-100 dark:bg-amber-900/40 rounded-lg">
+                    <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-amber-700 dark:text-amber-400">
+                      {gaps.filter(g => g.priority === "medium").length}
+                    </p>
+                    <p className="text-sm text-amber-600 dark:text-amber-500">Medium Priority</p>
+                  </div>
+                </div>
+                <p className="text-xs text-amber-500 dark:text-amber-400 mt-2">
+                  Asked 3-4 times - should address soon
+                </p>
+              </div>
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-lg">
+                    <Target className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">
+                      {gaps.filter(g => g.priority === "low").length}
+                    </p>
+                    <p className="text-sm text-blue-600 dark:text-blue-500">Low Priority</p>
+                  </div>
+                </div>
+                <p className="text-xs text-blue-500 dark:text-blue-400 mt-2">
+                  Asked 1-2 times - review when time permits
+                </p>
+              </div>
+            </div>
+
+            {/* Gaps List */}
+            <div className="space-y-4">
+              {isLoadingGaps ? (
+                <div className="flex items-center justify-center py-12">
+                  <RefreshCw className="h-8 w-8 text-teal-500 animate-spin" />
+                  <span className="ml-3 text-gray-500">Loading knowledge gaps...</span>
+                </div>
+              ) : filteredGaps.length === 0 ? (
+                <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                  <CheckCircle className="h-12 w-12 mx-auto mb-3 text-green-500 opacity-50" />
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">
+                    No Knowledge Gaps!
+                  </h3>
+                  <p className="text-gray-500">
+                    {gapsPriorityFilter === "all"
+                      ? "Your knowledge base is covering all common queries."
+                      : `No ${gapsPriorityFilter} priority gaps at the moment.`}
+                  </p>
+                </div>
+              ) : (
+                filteredGaps.map((gap) => (
+                  <div
+                    key={gap.id}
+                    className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-3">
+                          <span className={cn("px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1", getPriorityBadge(gap.priority))}>
+                            {getPriorityIcon(gap.priority)}
+                            {gap.priority.charAt(0).toUpperCase() + gap.priority.slice(1)} Priority
+                          </span>
+                          <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs font-medium text-gray-600 dark:text-gray-400">
+                            Asked {gap.frequency}x
+                          </span>
+                          {gap.detected_intent && (
+                            <span className="px-2 py-1 bg-teal-50 dark:bg-teal-900/30 rounded text-xs text-teal-600 dark:text-teal-400">
+                              Intent: {gap.detected_intent}
+                            </span>
+                          )}
+                        </div>
+
+                        <blockquote className="text-lg text-gray-900 dark:text-white border-l-4 border-teal-500 pl-4 mb-3 italic">
+                          &quot;{gap.query}&quot;
+                        </blockquote>
+
+                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                          {gap.suggested_category && (
+                            <span className="flex items-center gap-1">
+                              <BookOpen className="h-4 w-4" />
+                              Suggested: {gap.suggested_category}
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            First asked: {formatDate(gap.created_at)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-2">
+                        <button
+                          onClick={() => handleGenerateDraft(gap)}
+                          disabled={isGeneratingDraft}
+                          className={cn(
+                            "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                            isGeneratingDraft
+                              ? "bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed"
+                              : "bg-teal-600 text-white hover:bg-teal-700"
+                          )}
+                        >
+                          {isGeneratingDraft && selectedGap?.id === gap.id ? (
+                            <>
+                              <RefreshCw className="h-4 w-4 animate-spin" />
+                              Generating...
+                            </>
+                          ) : (
+                            <>
+                              <Zap className="h-4 w-4" />
+                              Generate Draft
+                            </>
+                          )}
+                        </button>
+                        <button
+                          onClick={() => handleDismissGap(gap)}
+                          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        >
+                          <XCircle className="h-4 w-4" />
+                          Dismiss
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}
@@ -1290,6 +2288,617 @@ export default function BaileyAIManagementPage() {
           </div>
         )}
       </div>
+
+      {/* Conversation Viewer Modal */}
+      {selectedConversation && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-black/50 transition-opacity"
+              onClick={() => setSelectedConversation(null)}
+            />
+
+            {/* Modal */}
+            <div className="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-h-[90vh] flex flex-col">
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-100 dark:bg-teal-900/30">
+                    <MessageSquare className="h-6 w-6 text-teal-600 dark:text-teal-400" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                      Conversation Details
+                    </h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Session: {selectedConversation.sessionId.slice(0, 20)}...
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedConversation(null)}
+                  className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <XCircle className="h-6 w-6" />
+                </button>
+              </div>
+
+              {/* Conversation Info */}
+              <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Lead Score</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      {getLeadCategoryIcon(conversationDetail?.leadCategory || selectedConversation.leadCategory)}
+                      <span className="text-lg font-bold text-gray-900 dark:text-white">
+                        {conversationDetail?.leadScore || selectedConversation.leadScore}
+                      </span>
+                      <span className="text-sm text-gray-500 capitalize">
+                        ({conversationDetail?.leadCategory || selectedConversation.leadCategory})
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</p>
+                    <span className={cn(
+                      "inline-block mt-1 px-2 py-1 rounded-full text-xs font-medium",
+                      getStatusBadge(conversationDetail?.status || selectedConversation.status)
+                    )}>
+                      {conversationDetail?.status || selectedConversation.status}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Messages</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">
+                      {conversationDetail?.messageCount || selectedConversation.messageCount}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">XP Earned</p>
+                    <p className="text-lg font-bold text-teal-600 dark:text-teal-400 mt-1">
+                      +{conversationDetail?.xpEarned || 0} XP
+                    </p>
+                  </div>
+                </div>
+                {(conversationDetail?.userEmail || selectedConversation.userEmail) && (
+                  <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <span className="font-medium">Email:</span> {conversationDetail?.userEmail || selectedConversation.userEmail}
+                    </p>
+                  </div>
+                )}
+                {(conversationDetail?.primaryIntent || selectedConversation.primaryIntent) && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    <span className="font-medium">Primary Intent:</span>{" "}
+                    <span className="capitalize">{(conversationDetail?.primaryIntent || selectedConversation.primaryIntent)?.replace("_", " ")}</span>
+                  </p>
+                )}
+              </div>
+
+              {/* Messages Timeline */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                {isLoadingConversation ? (
+                  <div className="flex items-center justify-center py-12">
+                    <RefreshCw className="h-8 w-8 text-teal-500 animate-spin" />
+                    <span className="ml-3 text-gray-500">Loading messages...</span>
+                  </div>
+                ) : conversationDetail?.messages && conversationDetail.messages.length > 0 ? (
+                  conversationDetail.messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={cn(
+                        "flex",
+                        message.role === "user" ? "justify-end" : "justify-start"
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "max-w-[80%] rounded-2xl px-4 py-3",
+                          message.role === "user"
+                            ? "bg-teal-600 text-white rounded-br-sm"
+                            : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-sm"
+                        )}
+                      >
+                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                        <div className={cn(
+                          "flex flex-wrap items-center gap-2 mt-2 text-xs",
+                          message.role === "user" ? "text-teal-100" : "text-gray-500 dark:text-gray-400"
+                        )}>
+                          <span>{formatDate(message.created_at)}</span>
+                          {message.role === "assistant" && (
+                            <>
+                              {message.xp_awarded && message.xp_awarded > 0 && (
+                                <span className="flex items-center gap-1 text-teal-600 dark:text-teal-400 font-medium">
+                                  <Zap className="h-3 w-3" />
+                                  +{message.xp_awarded} XP
+                                </span>
+                              )}
+                              {message.confidence_score && (
+                                <span className="text-gray-400">
+                                  Confidence: {Math.round(message.confidence_score * 100)}%
+                                </span>
+                              )}
+                              {message.response_time_ms && (
+                                <span className="text-gray-400">
+                                  {message.response_time_ms}ms
+                                </span>
+                              )}
+                            </>
+                          )}
+                        </div>
+                        {message.role === "assistant" && message.knowledge_items_used && message.knowledge_items_used.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {message.knowledge_items_used.map((item, idx) => (
+                              <span
+                                key={idx}
+                                className="px-2 py-0.5 bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 rounded text-xs"
+                              >
+                                {item}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {message.intent && message.role === "user" && (
+                          <div className="mt-2">
+                            <span className="px-2 py-0.5 bg-white/20 rounded text-xs capitalize">
+                              Intent: {message.intent.replace("_", " ")}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-12 text-gray-500">
+                    <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p>No messages found for this conversation.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-500">
+                    Started: {formatDate(conversationDetail?.startedAt || selectedConversation.startedAt)}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setSelectedConversation(null)}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    >
+                      Close
+                    </button>
+                    <button
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-colors"
+                    >
+                      <Download className="h-4 w-4" />
+                      Export
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Knowledge Editor Modal */}
+      {showKnowledgeEditor && (
+        <KnowledgeEditorModal
+          item={editingKnowledge}
+          categories={knowledgeCategories.length > 0 ? knowledgeCategories : ["compliance", "telehealth", "employment", "privacy", "practice", "general"]}
+          onSave={handleSaveKnowledgeItem}
+          onClose={() => {
+            setShowKnowledgeEditor(false);
+            setEditingKnowledge(null);
+          }}
+          isSaving={isSavingKnowledge}
+        />
+      )}
+
+      {/* Draft Review Modal */}
+      {showDraftReviewModal && generatedDraft && selectedGap && (
+        <DraftReviewModal
+          draft={generatedDraft}
+          gap={selectedGap}
+          onAccept={handleCreateFromDraft}
+          onEdit={(editedDraft) => {
+            setGeneratedDraft(editedDraft);
+          }}
+          onReject={() => {
+            setShowDraftReviewModal(false);
+            setGeneratedDraft(null);
+            setSelectedGap(null);
+          }}
+          onClose={() => {
+            setShowDraftReviewModal(false);
+            setGeneratedDraft(null);
+            setSelectedGap(null);
+          }}
+          isCreating={isSavingKnowledge}
+        />
+      )}
+    </div>
+  );
+}
+
+// Knowledge Editor Modal Component
+function KnowledgeEditorModal({
+  item,
+  categories,
+  onSave,
+  onClose,
+  isSaving,
+}: {
+  item: KnowledgeItem | null;
+  categories: string[];
+  onSave: (item: Partial<KnowledgeItem>) => void;
+  onClose: () => void;
+  isSaving: boolean;
+}) {
+  const [formData, setFormData] = useState<Partial<KnowledgeItem>>({
+    category: item?.category || categories[0] || "general",
+    subcategory: item?.subcategory || "",
+    topic: item?.topic || "",
+    title: item?.title || "",
+    content: item?.content || "",
+    summary: item?.summary || "",
+    keywords: item?.keywords || [],
+    intentPatterns: item?.intentPatterns || [],
+    responseTemplate: item?.responseTemplate || "",
+    confidence: item?.confidence || 7,
+    requiresDisclaimer: item?.requiresDisclaimer || false,
+    legalDisclaimer: item?.legalDisclaimer || "",
+    adviceLevel: item?.adviceLevel || "general",
+    xpReward: item?.xpReward || 10,
+  });
+  const [keywordInput, setKeywordInput] = useState("");
+  const [intentInput, setIntentInput] = useState("");
+
+  const handleAddKeyword = () => {
+    if (keywordInput.trim() && !formData.keywords?.includes(keywordInput.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        keywords: [...(prev.keywords || []), keywordInput.trim().toLowerCase()],
+      }));
+      setKeywordInput("");
+    }
+  };
+
+  const handleRemoveKeyword = (keyword: string) => {
+    setFormData(prev => ({
+      ...prev,
+      keywords: prev.keywords?.filter(k => k !== keyword) || [],
+    }));
+  };
+
+  const handleAddIntent = () => {
+    if (intentInput.trim() && !formData.intentPatterns?.includes(intentInput.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        intentPatterns: [...(prev.intentPatterns || []), intentInput.trim()],
+      }));
+      setIntentInput("");
+    }
+  };
+
+  const handleRemoveIntent = (intent: string) => {
+    setFormData(prev => ({
+      ...prev,
+      intentPatterns: prev.intentPatterns?.filter(i => i !== intent) || [],
+    }));
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex min-h-full items-center justify-center p-4">
+        {/* Backdrop */}
+        <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={onClose} />
+
+        {/* Modal */}
+        <div className="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-h-[90vh] flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-100 dark:bg-teal-900/30">
+                <BookOpen className="h-6 w-6 text-teal-600 dark:text-teal-400" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  {item ? "Edit Knowledge Item" : "Add New Knowledge Item"}
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {item ? "Update existing knowledge base entry" : "Create a new knowledge base entry"}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <XCircle className="h-6 w-6" />
+            </button>
+          </div>
+
+          {/* Form */}
+          <div className="flex-1 overflow-y-auto p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Left Column */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Title *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    placeholder="e.g., AHPRA Advertising Guidelines"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Category *
+                    </label>
+                    <select
+                      value={formData.category}
+                      onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    >
+                      {categories.map(cat => (
+                        <option key={cat} value={cat}>
+                          {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Subcategory
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.subcategory}
+                      onChange={(e) => setFormData(prev => ({ ...prev, subcategory: e.target.value }))}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      placeholder="e.g., Marketing"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Topic
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.topic}
+                    onChange={(e) => setFormData(prev => ({ ...prev, topic: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    placeholder="e.g., Advertising Rules"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Summary
+                  </label>
+                  <textarea
+                    value={formData.summary}
+                    onChange={(e) => setFormData(prev => ({ ...prev, summary: e.target.value }))}
+                    rows={2}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    placeholder="Brief summary shown in search results..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Content *
+                  </label>
+                  <textarea
+                    value={formData.content}
+                    onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+                    rows={6}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    placeholder="Detailed knowledge content..."
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {formData.content?.length || 0} characters
+                  </p>
+                </div>
+              </div>
+
+              {/* Right Column */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Keywords
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={keywordInput}
+                      onChange={(e) => setKeywordInput(e.target.value)}
+                      onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddKeyword())}
+                      className="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      placeholder="Add keyword..."
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddKeyword}
+                      className="px-3 py-2 bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 rounded-lg hover:bg-teal-200 dark:hover:bg-teal-900/50"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {formData.keywords?.map(keyword => (
+                      <span
+                        key={keyword}
+                        className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-sm text-gray-700 dark:text-gray-300"
+                      >
+                        {keyword}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveKeyword(keyword)}
+                          className="text-gray-400 hover:text-red-500"
+                        >
+                          <XCircle className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Intent Patterns
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={intentInput}
+                      onChange={(e) => setIntentInput(e.target.value)}
+                      onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddIntent())}
+                      className="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      placeholder='e.g., "how do I advertise"'
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddIntent}
+                      className="px-3 py-2 bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 rounded-lg hover:bg-teal-200 dark:hover:bg-teal-900/50"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {formData.intentPatterns?.map(intent => (
+                      <span
+                        key={intent}
+                        className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/30 rounded text-sm text-blue-700 dark:text-blue-300"
+                      >
+                        {intent}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveIntent(intent)}
+                          className="text-blue-400 hover:text-red-500"
+                        >
+                          <XCircle className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Response Template
+                  </label>
+                  <textarea
+                    value={formData.responseTemplate}
+                    onChange={(e) => setFormData(prev => ({ ...prev, responseTemplate: e.target.value }))}
+                    rows={3}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    placeholder="Template for AI responses..."
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Confidence Level (1-10)
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="10"
+                      value={formData.confidence}
+                      onChange={(e) => setFormData(prev => ({ ...prev, confidence: parseInt(e.target.value) || 7 }))}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      XP Reward
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={formData.xpReward}
+                      onChange={(e) => setFormData(prev => ({ ...prev, xpReward: parseInt(e.target.value) || 10 }))}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                  <input
+                    type="checkbox"
+                    id="requiresDisclaimer"
+                    checked={formData.requiresDisclaimer}
+                    onChange={(e) => setFormData(prev => ({ ...prev, requiresDisclaimer: e.target.checked }))}
+                    className="rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                  />
+                  <label htmlFor="requiresDisclaimer" className="text-sm text-amber-700 dark:text-amber-400">
+                    Requires legal disclaimer
+                  </label>
+                </div>
+
+                {formData.requiresDisclaimer && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Legal Disclaimer
+                    </label>
+                    <textarea
+                      value={formData.legalDisclaimer}
+                      onChange={(e) => setFormData(prev => ({ ...prev, legalDisclaimer: e.target.value }))}
+                      rows={2}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      placeholder="This is general information only..."
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+            <div className="flex items-center justify-end gap-3">
+              <button
+                onClick={onClose}
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => onSave(formData)}
+                disabled={isSaving || !formData.title || !formData.content}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSaving ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-4 w-4" />
+                    {item ? "Update Item" : "Create Item"}
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1365,6 +2974,521 @@ function StatCard({
       <div className="mt-3">
         <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
         <p className="text-sm text-gray-500">{title}</p>
+      </div>
+    </div>
+  );
+}
+
+// Draft Review Modal Component
+function DraftReviewModal({
+  draft,
+  gap,
+  onAccept,
+  onEdit,
+  onReject,
+  onClose,
+  isCreating,
+}: {
+  draft: DraftKnowledgeItem;
+  gap: KnowledgeGap;
+  onAccept: (draft: DraftKnowledgeItem) => void;
+  onEdit: (draft: DraftKnowledgeItem) => void;
+  onReject: () => void;
+  onClose: () => void;
+  isCreating: boolean;
+}) {
+  const [editMode, setEditMode] = useState(false);
+  const [formData, setFormData] = useState<DraftKnowledgeItem>(draft);
+  const [keywordInput, setKeywordInput] = useState("");
+  const [intentInput, setIntentInput] = useState("");
+
+  const handleAddKeyword = () => {
+    if (keywordInput.trim() && !formData.keywords.includes(keywordInput.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        keywords: [...prev.keywords, keywordInput.trim().toLowerCase()],
+      }));
+      setKeywordInput("");
+    }
+  };
+
+  const handleRemoveKeyword = (keyword: string) => {
+    setFormData(prev => ({
+      ...prev,
+      keywords: prev.keywords.filter(k => k !== keyword),
+    }));
+  };
+
+  const handleAddIntent = () => {
+    if (intentInput.trim() && !formData.intentPatterns.includes(intentInput.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        intentPatterns: [...prev.intentPatterns, intentInput.trim()],
+      }));
+      setIntentInput("");
+    }
+  };
+
+  const handleRemoveIntent = (intent: string) => {
+    setFormData(prev => ({
+      ...prev,
+      intentPatterns: prev.intentPatterns.filter(i => i !== intent),
+    }));
+  };
+
+  const handleSaveEdits = () => {
+    onEdit(formData);
+    setEditMode(false);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex min-h-full items-center justify-center p-4">
+        {/* Backdrop */}
+        <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={onClose} />
+
+        {/* Modal */}
+        <div className="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-h-[90vh] flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600">
+                <Zap className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  AI-Generated Draft
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Review, edit, and publish to fill the knowledge gap
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <XCircle className="h-6 w-6" />
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {/* Original Gap Context */}
+            <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 border border-amber-200 dark:border-amber-800">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-amber-800 dark:text-amber-300 mb-1">
+                    Original Query (asked {gap.frequency} times)
+                  </p>
+                  <blockquote className="text-amber-700 dark:text-amber-200 italic">
+                    &quot;{gap.query}&quot;
+                  </blockquote>
+                  {gap.detected_intent && (
+                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
+                      Detected intent: {gap.detected_intent}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Draft Confidence */}
+            {formData.rationale && (
+              <div className="bg-teal-50 dark:bg-teal-900/20 rounded-xl p-4 border border-teal-200 dark:border-teal-800">
+                <div className="flex items-start gap-3">
+                  <Target className="h-5 w-5 text-teal-600 dark:text-teal-400 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-teal-800 dark:text-teal-300 mb-1">
+                      AI Rationale (Confidence: {formData.confidence}/10)
+                    </p>
+                    <p className="text-teal-700 dark:text-teal-200 text-sm">
+                      {formData.rationale}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Draft Content */}
+            {editMode ? (
+              <div className="space-y-4">
+                {/* Title */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  />
+                </div>
+
+                {/* Category & Topic */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Category
+                    </label>
+                    <select
+                      value={formData.category}
+                      onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    >
+                      <option value="compliance">Compliance</option>
+                      <option value="telehealth">Telehealth</option>
+                      <option value="employment">Employment</option>
+                      <option value="privacy">Privacy</option>
+                      <option value="practice">Practice</option>
+                      <option value="general">General</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Topic
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.topic}
+                      onChange={(e) => setFormData(prev => ({ ...prev, topic: e.target.value }))}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Summary */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Summary
+                  </label>
+                  <textarea
+                    value={formData.summary}
+                    onChange={(e) => setFormData(prev => ({ ...prev, summary: e.target.value }))}
+                    rows={2}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  />
+                </div>
+
+                {/* Content */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Content
+                  </label>
+                  <textarea
+                    value={formData.content}
+                    onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+                    rows={6}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  />
+                </div>
+
+                {/* Response Template */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Response Template
+                  </label>
+                  <textarea
+                    value={formData.responseTemplate || ""}
+                    onChange={(e) => setFormData(prev => ({ ...prev, responseTemplate: e.target.value }))}
+                    rows={4}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    placeholder="Conversational response template for Bailey AI..."
+                  />
+                </div>
+
+                {/* Keywords */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Keywords
+                  </label>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={keywordInput}
+                      onChange={(e) => setKeywordInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddKeyword())}
+                      className="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      placeholder="Add keyword..."
+                    />
+                    <button
+                      onClick={handleAddKeyword}
+                      className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {formData.keywords.map((keyword) => (
+                      <span
+                        key={keyword}
+                        className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-sm flex items-center gap-1"
+                      >
+                        {keyword}
+                        <button
+                          onClick={() => handleRemoveKeyword(keyword)}
+                          className="text-gray-400 hover:text-red-500"
+                        >
+                          <XCircle className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Intent Patterns */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Intent Patterns
+                  </label>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={intentInput}
+                      onChange={(e) => setIntentInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddIntent())}
+                      className="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      placeholder="Add intent pattern..."
+                    />
+                    <button
+                      onClick={handleAddIntent}
+                      className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {formData.intentPatterns.map((intent) => (
+                      <span
+                        key={intent}
+                        className="px-2 py-1 bg-teal-50 dark:bg-teal-900/30 rounded text-sm text-teal-700 dark:text-teal-400 flex items-center gap-1"
+                      >
+                        {intent}
+                        <button
+                          onClick={() => handleRemoveIntent(intent)}
+                          className="text-teal-400 hover:text-red-500"
+                        >
+                          <XCircle className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Settings Row */}
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      XP Reward
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.xpReward}
+                      onChange={(e) => setFormData(prev => ({ ...prev, xpReward: parseInt(e.target.value) || 10 }))}
+                      min={0}
+                      max={100}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Advice Level
+                    </label>
+                    <select
+                      value={formData.adviceLevel}
+                      onChange={(e) => setFormData(prev => ({ ...prev, adviceLevel: e.target.value }))}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    >
+                      <option value="general">General</option>
+                      <option value="educational">Educational</option>
+                      <option value="specific">Specific</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center">
+                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.requiresDisclaimer}
+                        onChange={(e) => setFormData(prev => ({ ...prev, requiresDisclaimer: e.target.checked }))}
+                        className="w-4 h-4 text-teal-600 rounded focus:ring-teal-500"
+                      />
+                      Requires Disclaimer
+                    </label>
+                  </div>
+                </div>
+
+                {/* Legal Disclaimer */}
+                {formData.requiresDisclaimer && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Legal Disclaimer
+                    </label>
+                    <textarea
+                      value={formData.legalDisclaimer || ""}
+                      onChange={(e) => setFormData(prev => ({ ...prev, legalDisclaimer: e.target.value }))}
+                      rows={2}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      placeholder="Legal disclaimer to show with responses..."
+                    />
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* Read-only View */
+              <div className="space-y-6">
+                {/* Title & Category */}
+                <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-5">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">
+                        {formData.category} {formData.subcategory && `/ ${formData.subcategory}`}
+                      </p>
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                        {formData.title}
+                      </h3>
+                      {formData.topic && (
+                        <p className="text-sm text-gray-500 mt-1">Topic: {formData.topic}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-3 py-1 bg-teal-100 dark:bg-teal-900/30 rounded-full text-xs font-medium text-teal-700 dark:text-teal-400">
+                        +{formData.xpReward} XP
+                      </span>
+                      {formData.requiresDisclaimer && (
+                        <span className="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 rounded-full text-xs font-medium text-amber-700 dark:text-amber-400">
+                          Disclaimer
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Summary */}
+                  <div className="mb-4">
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Summary</p>
+                    <p className="text-gray-600 dark:text-gray-400">{formData.summary}</p>
+                  </div>
+
+                  {/* Content */}
+                  <div className="mb-4">
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content</p>
+                    <div className="prose prose-sm dark:prose-invert max-w-none">
+                      <p className="text-gray-600 dark:text-gray-400 whitespace-pre-wrap">
+                        {formData.content}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Response Template */}
+                  {formData.responseTemplate && (
+                    <div className="mb-4">
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Response Template</p>
+                      <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                        <p className="text-gray-600 dark:text-gray-400 text-sm italic whitespace-pre-wrap">
+                          {formData.responseTemplate}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Keywords */}
+                  <div className="mb-4">
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Keywords</p>
+                    <div className="flex flex-wrap gap-2">
+                      {formData.keywords.map((keyword) => (
+                        <span
+                          key={keyword}
+                          className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs text-gray-700 dark:text-gray-300"
+                        >
+                          {keyword}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Intent Patterns */}
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Intent Patterns</p>
+                    <div className="flex flex-wrap gap-2">
+                      {formData.intentPatterns.map((intent) => (
+                        <span
+                          key={intent}
+                          className="px-2 py-1 bg-teal-100 dark:bg-teal-900/30 rounded text-xs text-teal-700 dark:text-teal-400"
+                        >
+                          {intent}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer Actions */}
+          <div className="flex items-center justify-between p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+            <button
+              onClick={onReject}
+              className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+            >
+              <Trash2 className="h-4 w-4" />
+              Reject Draft
+            </button>
+
+            <div className="flex items-center gap-3">
+              {editMode ? (
+                <>
+                  <button
+                    onClick={() => setEditMode(false)}
+                    className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveEdits}
+                    className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+                  >
+                    <CheckCircle className="h-4 w-4" />
+                    Save Edits
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setEditMode(true)}
+                    className="flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <Edit className="h-4 w-4" />
+                    Edit Draft
+                  </button>
+                  <button
+                    onClick={() => onAccept(formData)}
+                    disabled={isCreating}
+                    className={cn(
+                      "flex items-center gap-2 px-6 py-2 rounded-lg font-medium transition-colors",
+                      isCreating
+                        ? "bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed"
+                        : "bg-gradient-to-r from-teal-600 to-emerald-600 text-white hover:from-teal-700 hover:to-emerald-700"
+                    )}
+                  >
+                    {isCreating ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                        Publishing...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="h-4 w-4" />
+                        Accept & Publish
+                      </>
+                    )}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
