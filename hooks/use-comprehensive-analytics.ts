@@ -1,17 +1,20 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { analytics } from "@/lib/analytics/comprehensive-tracker";
 
 /**
  * Comprehensive Analytics Hook
  * Automatically tracks page views on route changes
  * Provides methods for manual event tracking
+ *
+ * NOTE: This hook no longer uses useSearchParams to avoid requiring
+ * Suspense boundaries. Query params are extracted from window.location.search
+ * on the client side instead.
  */
 export function useComprehensiveAnalytics(userId?: string) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   // Initialize analytics on mount
   useEffect(() => {
@@ -25,11 +28,13 @@ export function useComprehensiveAnalytics(userId?: string) {
   // Track page views on route change
   useEffect(() => {
     if (pathname) {
+      // Get search params from window.location to avoid useSearchParams Suspense requirement
+      const queryParams = typeof window !== "undefined" ? window.location.search : "";
       analytics.trackPageView({
-        query_params: searchParams?.toString() || undefined,
+        query_params: queryParams || undefined,
       });
     }
-  }, [pathname, searchParams]);
+  }, [pathname]);
 
   // Identify user when userId changes
   useEffect(() => {
