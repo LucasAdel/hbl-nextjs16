@@ -26,7 +26,37 @@ function ResetPasswordContent() {
     const verifySession = async () => {
       const supabase = createClient();
 
-      // Check for token_hash and type in URL (direct link from email)
+      // FIRST: Check for tokens in URL hash fragment (Supabase recovery links)
+      // Hash fragments are only accessible client-side
+      if (typeof window !== "undefined" && window.location.hash) {
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get("access_token");
+        const refreshToken = hashParams.get("refresh_token");
+        const type = hashParams.get("type");
+
+        if (accessToken && type === "recovery") {
+          // Set the session from the hash tokens
+          const { data, error: sessionError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken || "",
+          });
+
+          if (sessionError || !data.session) {
+            setError("This password reset link has expired or is invalid. Please request a new one.");
+            setIsVerifying(false);
+            return;
+          }
+
+          // Clear the hash from URL for security
+          window.history.replaceState(null, "", window.location.pathname);
+
+          setHasValidSession(true);
+          setIsVerifying(false);
+          return;
+        }
+      }
+
+      // Check for token_hash and type in URL query params (direct link from email)
       const token_hash = searchParams.get("token_hash");
       const type = searchParams.get("type");
 
