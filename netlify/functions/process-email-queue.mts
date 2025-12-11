@@ -1,4 +1,4 @@
-import type { Config } from "@netlify/functions";
+import type { Config, Context } from "@netlify/functions";
 import { createClient } from "@supabase/supabase-js";
 
 // Email templates mapping
@@ -9,7 +9,7 @@ const TEMPLATE_SUBJECTS: Record<string, string> = {
   welcome_4_cta: "Ready for a Legal Health Check? Book Your Free Consultation",
 };
 
-export default async (req: Request) => {
+export default async (req: Request, context: Context) => {
   console.log("🕐 Processing email queue...");
 
   // Use Netlify.env for environment variables

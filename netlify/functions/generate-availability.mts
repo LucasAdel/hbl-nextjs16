@@ -1,4 +1,4 @@
-import type { Config } from "@netlify/functions";
+import type { Config, Context } from "@netlify/functions";
 import { createClient } from "@supabase/supabase-js";
 
 /**
@@ -174,7 +174,7 @@ function generateSlotsForDate(date: Date): SlotData[] {
   return slots;
 }
 
-export default async (req: Request) => {
+export default async (req: Request, context: Context) => {
   console.log("🎰 Generating randomized availability slots...");
 
   // Use Netlify.env for environment variables

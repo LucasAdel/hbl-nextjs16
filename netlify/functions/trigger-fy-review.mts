@@ -1,4 +1,4 @@
-import type { Config } from "@netlify/functions";
+import type { Config, Context } from "@netlify/functions";
 import { createClient } from "@supabase/supabase-js";
 
 /**
@@ -14,7 +14,7 @@ import { createClient } from "@supabase/supabase-js";
  * - Partnership Agreements
  */
 
-export default async (req: Request) => {
+export default async (req: Request, context: Context) => {
   console.log("📅 Triggering Australian FY document review reminders...");
 
   // Use Netlify.env for environment variables
