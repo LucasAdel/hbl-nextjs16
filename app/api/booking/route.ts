@@ -47,6 +47,7 @@ export async function POST(request: NextRequest) {
       practiceType,
       practiceWebsite,
       uploadedFiles,
+      slotId, // Optional: ID of availability slot being booked
     } = body;
 
     // Validate required fields
@@ -110,6 +111,54 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate and block availability slot if provided
+    let availabilitySlotId: string | null = null;
+    if (slotId) {
+      // Validate slot is still available
+      const { data: slot, error: slotError } = await supabase
+        .from("availability_slots")
+        .select("*")
+        .eq("id", slotId)
+        .single();
+
+      if (slotError || !slot) {
+        return NextResponse.json(
+          { error: "Selected time slot not found. Please select another time." },
+          { status: 404 }
+        );
+      }
+
+      // Check if slot is still available
+      if (!slot.is_available || slot.blocked_by_calendar || slot.blocked_by_booking) {
+        return NextResponse.json(
+          { error: "This time slot is no longer available. Please select another time." },
+          { status: 409 }
+        );
+      }
+
+      // Atomically block the slot to prevent race conditions
+      const { error: blockError } = await supabase
+        .from("availability_slots")
+        .update({
+          blocked_by_booking: true,
+          is_available: false,
+        })
+        .eq("id", slotId)
+        .eq("is_available", true) // Only update if still available
+        .eq("blocked_by_booking", false);
+
+      if (blockError) {
+        console.error("Error blocking slot:", blockError);
+        return NextResponse.json(
+          { error: "Failed to reserve time slot. Please try again." },
+          { status: 500 }
+        );
+      }
+
+      availabilitySlotId = slotId;
+      console.log(`Blocked availability slot: ${slotId}`);
+    }
+
     // Convert date/time to ISO timestamp format
     const durationMinutes = getConsultationDuration(consultationType);
     const { start: startDateTime, end: endDateTime } = createEventDates(
@@ -137,6 +186,7 @@ export async function POST(request: NextRequest) {
         practiceWebsite: practiceWebsite || "",
         uploadedFiles: uploadedFiles || [],
       } : null,
+      availability_slot_id: availabilitySlotId,
     };
 
     console.log("Attempting insert with data:", JSON.stringify(bookingData, null, 2));
@@ -149,10 +199,33 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error("Booking insert error:", error.message, error.code, error.details);
+
+      // If booking failed and we blocked a slot, unblock it
+      if (availabilitySlotId) {
+        await supabase
+          .from("availability_slots")
+          .update({
+            blocked_by_booking: false,
+            is_available: true,
+            booking_id: null,
+          })
+          .eq("id", availabilitySlotId);
+      }
+
       return NextResponse.json(
         { error: "Failed to create booking. Please try again." },
         { status: 500 }
       );
+    }
+
+    // Link the slot to the booking
+    if (availabilitySlotId && data.id) {
+      await supabase
+        .from("availability_slots")
+        .update({ booking_id: data.id })
+        .eq("id", availabilitySlotId);
+
+      console.log(`Linked availability slot ${availabilitySlotId} to booking ${data.id}`);
     }
 
     // Create Google Calendar event

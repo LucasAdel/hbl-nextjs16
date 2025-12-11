@@ -236,6 +236,191 @@ export async function isCalendarConnected(): Promise<boolean> {
   return tokens !== null;
 }
 
+// =====================================================
+// CALENDAR EVENT LISTING & CONFLICT DETECTION
+// For availability slot synchronization
+// =====================================================
+
+export interface CalendarEvent {
+  id: string;
+  summary: string;
+  start: Date;
+  end: Date;
+  isAllDay: boolean;
+}
+
+export interface CalendarEventsResult {
+  success: boolean;
+  events: CalendarEvent[];
+  error?: string;
+}
+
+export interface ConflictResult {
+  hasConflict: boolean;
+  conflictingEvent?: CalendarEvent;
+}
+
+/**
+ * List all calendar events within a date range
+ * Used for syncing availability slots with Google Calendar
+ */
+export async function listCalendarEvents(
+  startDate: Date,
+  endDate: Date
+): Promise<CalendarEventsResult> {
+  try {
+    const accessToken = await getValidAccessToken();
+
+    if (!accessToken) {
+      console.log("No valid access token for calendar sync");
+      return {
+        success: false,
+        events: [],
+        error: "No valid access token - calendar not connected",
+      };
+    }
+
+    // Set time to cover full days in Adelaide timezone
+    const timeMin = new Date(startDate);
+    timeMin.setHours(0, 0, 0, 0);
+
+    const timeMax = new Date(endDate);
+    timeMax.setHours(23, 59, 59, 999);
+
+    const params = new URLSearchParams({
+      timeMin: timeMin.toISOString(),
+      timeMax: timeMax.toISOString(),
+      singleEvents: "true", // Expand recurring events
+      orderBy: "startTime",
+      maxResults: "250", // Max allowed by API
+      timeZone: "Australia/Adelaide",
+    });
+
+    const response = await fetch(
+      `https://www.googleapis.com/calendar/v3/calendars/primary/events?${params}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Failed to list calendar events:", errorText);
+      return {
+        success: false,
+        events: [],
+        error: `API error: ${response.status}`,
+      };
+    }
+
+    const data = await response.json();
+    const events: CalendarEvent[] = [];
+
+    for (const item of data.items || []) {
+      // Skip cancelled events
+      if (item.status === "cancelled") continue;
+
+      // Handle all-day events vs timed events
+      const isAllDay = !item.start?.dateTime;
+
+      let start: Date;
+      let end: Date;
+
+      if (isAllDay) {
+        // All-day events have date only (no time)
+        start = new Date(item.start.date);
+        end = new Date(item.end.date);
+      } else {
+        start = new Date(item.start.dateTime);
+        end = new Date(item.end.dateTime);
+      }
+
+      events.push({
+        id: item.id,
+        summary: item.summary || "Busy",
+        start,
+        end,
+        isAllDay,
+      });
+    }
+
+    console.log(`Listed ${events.length} calendar events from ${startDate.toDateString()} to ${endDate.toDateString()}`);
+
+    return {
+      success: true,
+      events,
+    };
+  } catch (error) {
+    console.error("Error listing calendar events:", error);
+    return {
+      success: false,
+      events: [],
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+/**
+ * Check if a time slot conflicts with any calendar events
+ * Uses overlap detection: slotStart < eventEnd && slotEnd > eventStart
+ */
+export function hasCalendarConflict(
+  slotStart: Date,
+  slotEnd: Date,
+  events: CalendarEvent[]
+): ConflictResult {
+  for (const event of events) {
+    // All-day events block the entire day
+    if (event.isAllDay) {
+      const slotDate = slotStart.toDateString();
+      const eventDate = event.start.toDateString();
+
+      // Check if slot date falls within the all-day event range
+      if (slotStart >= event.start && slotStart < event.end) {
+        return {
+          hasConflict: true,
+          conflictingEvent: event,
+        };
+      }
+      continue;
+    }
+
+    // Standard overlap detection for timed events
+    // Conflict exists if: slotStart < eventEnd AND slotEnd > eventStart
+    if (slotStart < event.end && slotEnd > event.start) {
+      return {
+        hasConflict: true,
+        conflictingEvent: event,
+      };
+    }
+  }
+
+  return { hasConflict: false };
+}
+
+/**
+ * Get events for a specific date
+ * Helper function for quick date-based lookups
+ */
+export function getEventsForDate(
+  date: Date,
+  events: CalendarEvent[]
+): CalendarEvent[] {
+  const dateString = date.toDateString();
+
+  return events.filter((event) => {
+    if (event.isAllDay) {
+      // All-day events span multiple days
+      return date >= event.start && date < event.end;
+    }
+    return event.start.toDateString() === dateString;
+  });
+}
+
 // Parse time string like "9:00 AM" to hours/minutes
 export function parseTimeString(timeStr: string): { hours: number; minutes: number } {
   const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);

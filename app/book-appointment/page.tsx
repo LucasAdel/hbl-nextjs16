@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import {
   Calendar,
   Clock,
@@ -23,6 +23,7 @@ import {
   CreditCard,
   Tag,
   Shield,
+  Loader2,
 } from "lucide-react";
 
 interface ConsultationType {
@@ -41,6 +42,15 @@ interface UploadedFile {
   size: number;
   type: string;
   file: File;
+}
+
+interface AvailabilitySlot {
+  id: string;
+  slot_date: string;
+  start_time: string;
+  end_time: string;
+  duration_minutes: number;
+  is_available: boolean;
 }
 
 const consultationTypes: ConsultationType[] = [
@@ -130,15 +140,11 @@ const practiceTypes = [
   "Other Healthcare",
 ];
 
-const timeSlots = [
-  "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
-  "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM", "3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM",
-];
-
 export default function BookAppointmentPage() {
   const [selectedConsultation, setSelectedConsultation] = useState<ConsultationType | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState("");
+  const [selectedSlot, setSelectedSlot] = useState<AvailabilitySlot | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
@@ -156,6 +162,66 @@ export default function BookAppointmentPage() {
     practiceWebsite: "",
     message: "",
   });
+
+  // Dynamic availability state
+  const [availableSlots, setAvailableSlots] = useState<Record<string, AvailabilitySlot[]>>({});
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [slotsError, setSlotsError] = useState("");
+
+  // Fetch available slots when month changes
+  useEffect(() => {
+    async function fetchSlots() {
+      setLoadingSlots(true);
+      setSlotsError("");
+
+      try {
+        const startDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+        const endDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+
+        const response = await fetch(
+          `/api/availability/slots?startDate=${startDate.toISOString().split("T")[0]}&endDate=${endDate.toISOString().split("T")[0]}`
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+          setAvailableSlots(data.slots);
+        } else {
+          setSlotsError("Unable to load available times. Please try again.");
+        }
+      } catch (err) {
+        console.error("Failed to fetch slots:", err);
+        setSlotsError("Unable to load available times. Please try again.");
+      } finally {
+        setLoadingSlots(false);
+      }
+    }
+
+    fetchSlots();
+  }, [currentMonth]);
+
+  // Get slots for selected date
+  const slotsForSelectedDate = useMemo(() => {
+    if (!selectedDate) return [];
+    const dateKey = selectedDate.toISOString().split("T")[0];
+    return availableSlots[dateKey] || [];
+  }, [selectedDate, availableSlots]);
+
+  // Format time from HH:MM:SS to h:mm AM/PM
+  const formatSlotTime = (time: string) => {
+    const [hours, minutes] = time.split(":");
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
+
+  // Check if a date has available slots
+  const dateHasSlots = (day: number) => {
+    const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+    const dateKey = date.toISOString().split("T")[0];
+    return (availableSlots[dateKey] || []).length > 0;
+  };
 
   // Calendar helpers
   const getDaysInMonth = (date: Date) => {
