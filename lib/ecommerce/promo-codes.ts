@@ -46,57 +46,9 @@ export interface PromoValidationResult {
   code?: PromoCode;
 }
 
-// Sample promo codes (in production, these come from database)
-export const SAMPLE_PROMO_CODES: PromoCode[] = [
-  {
-    id: "promo_1",
-    code: "WELCOME10",
-    type: "percentage",
-    value: 10,
-    usageCount: 0,
-    startsAt: "2025-01-01",
-    expiresAt: "2025-12-31",
-    isActive: true,
-    description: "10% off for new customers",
-  },
-  {
-    id: "promo_2",
-    code: "SAVE50",
-    type: "fixed",
-    value: 5000, // $50 in cents
-    minPurchase: 20000, // Min $200 purchase
-    usageCount: 0,
-    startsAt: "2025-01-01",
-    expiresAt: "2025-06-30",
-    isActive: true,
-    description: "$50 off orders over $200",
-  },
-  {
-    id: "promo_3",
-    code: "BUNDLE20",
-    type: "bundle",
-    value: 20, // 20% off bundles
-    usageCount: 0,
-    startsAt: "2025-01-01",
-    expiresAt: "2025-12-31",
-    isActive: true,
-    applicableCategories: ["employment", "compliance"],
-    description: "20% off when buying employment + compliance documents",
-  },
-  {
-    id: "promo_4",
-    code: "VIP25",
-    type: "percentage",
-    value: 25,
-    maxDiscount: 10000, // Max $100 discount
-    usageCount: 0,
-    perUserLimit: 1,
-    startsAt: "2025-01-01",
-    expiresAt: "2025-12-31",
-    isActive: true,
-    description: "25% off up to $100 - VIP customers only",
-  },
-];
+// Promo codes - empty by default, add codes via database or admin panel
+// WARNING: Do not add sample/placeholder codes here - they will be active in production!
+export const SAMPLE_PROMO_CODES: PromoCode[] = [];
 
 /**
  * Find promo code by code string

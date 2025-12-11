@@ -288,14 +288,10 @@ export default function BookAppointmentPage() {
     setIsDragOver(false);
   }, []);
 
-  // Coupon handling
+  // Coupon handling - no active codes by default
   const applyCoupon = () => {
-    // Simple coupon validation - in production this would check against backend
-    const validCoupons: Record<string, number> = {
-      "WELCOME10": 10,
-      "HBL20": 20,
-      "NEWCLIENT": 15,
-    };
+    // No promo codes active - add codes via database/admin when needed
+    const validCoupons: Record<string, number> = {};
 
     const code = couponCode.toUpperCase().trim();
     if (validCoupons[code]) {

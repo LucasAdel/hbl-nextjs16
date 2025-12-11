@@ -3,7 +3,7 @@
  * Manages scheduled email sequences, triggers, and automated campaigns
  */
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 
 // Email sequence types - must match database enum
 export type SequenceType =
@@ -332,7 +332,8 @@ export async function enrollInSequence(
   sequenceType: SequenceType,
   triggerData: Record<string, unknown> = {}
 ): Promise<{ success: boolean; enrollmentId?: string; error?: string }> {
-  const supabase = await createClient();
+  // Use service role client to bypass RLS for server-side operations
+  const supabase = createServiceRoleClient();
   const sequence = EMAIL_SEQUENCES[sequenceType];
 
   if (!sequence || !sequence.isActive) {
@@ -388,7 +389,7 @@ export async function removeFromSequence(
   sequenceType: SequenceType,
   reason: string = "manual"
 ): Promise<boolean> {
-  const supabase = await createClient();
+  const supabase = createServiceRoleClient();
 
   const { error } = await supabase
     .from("email_sequence_enrollments")
@@ -410,7 +411,7 @@ export async function removeFromSequence(
 export async function advanceSequence(
   enrollmentId: string
 ): Promise<{ success: boolean; nextStep?: number; completed?: boolean }> {
-  const supabase = await createClient();
+  const supabase = createServiceRoleClient();
 
   // Get current enrollment
   const { data: enrollment, error: fetchError } = await supabase
@@ -459,7 +460,7 @@ export async function advanceSequence(
  * Get pending emails that need to be sent
  */
 export async function getPendingSequenceEmails(): Promise<SequenceEnrollment[]> {
-  const supabase = await createClient();
+  const supabase = createServiceRoleClient();
 
   const { data, error } = await supabase
     .from("email_sequence_enrollments")
@@ -497,7 +498,7 @@ export async function trackEmailEvent(
   event: "sent" | "opened" | "clicked" | "bounced" | "unsubscribed",
   metadata: Record<string, unknown> = {}
 ): Promise<void> {
-  const supabase = await createClient();
+  const supabase = createServiceRoleClient();
 
   await supabase.from("email_sequence_events").insert({
     enrollment_id: enrollmentId,
@@ -528,7 +529,7 @@ export async function getSequenceAnalytics(
   openRate: number;
   clickRate: number;
 }> {
-  const supabase = await createClient();
+  const supabase = createServiceRoleClient();
 
   // Get enrollment counts
   const { data: enrollments } = await supabase

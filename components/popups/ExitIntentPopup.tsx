@@ -160,19 +160,19 @@ export function ExitIntentPopup({
         return (
           <>
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <ShoppingCart className="h-8 w-8 text-orange-500" />
               </div>
-              <h2 className="font-blair text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              <h2 className="font-blair text-2xl font-bold text-gray-900 mb-2">
                 Wait! Don't Leave Empty-Handed
               </h2>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-600">
                 Complete your order now and get <span className="font-bold text-tiffany">{discountPercent}% off</span> your purchase!
               </p>
             </div>
 
-            <div className="bg-gradient-to-r from-tiffany/10 to-blue-500/10 dark:from-tiffany/20 dark:to-blue-500/20 rounded-xl p-4 mb-6 text-center">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Your exclusive discount code:</p>
+            <div className="bg-gradient-to-r from-tiffany/10 to-blue-500/10 rounded-xl p-4 mb-6 text-center">
+              <p className="text-sm text-gray-600 mb-1">Your exclusive discount code:</p>
               <p className="font-mono text-2xl font-bold text-tiffany">{discountCode}</p>
             </div>
           </>
@@ -182,20 +182,20 @@ export function ExitIntentPopup({
         return (
           <>
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FileText className="h-8 w-8 text-purple-500" />
               </div>
-              <h2 className="font-blair text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              <h2 className="font-blair text-2xl font-bold text-gray-900 mb-2">
                 Get Free Legal Resources
               </h2>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-600">
                 Subscribe and receive our top 3 legal templates absolutely free!
               </p>
             </div>
 
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-6">
-              <p className="font-medium text-gray-900 dark:text-white mb-3">You'll receive:</p>
-              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+            <div className="bg-gray-100 rounded-xl p-4 mb-6">
+              <p className="font-medium text-gray-900 mb-3">You'll receive:</p>
+              <ul className="space-y-2 text-sm text-gray-600">
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-green-500" />
                   Practice Compliance Checklist
@@ -220,10 +220,10 @@ export function ExitIntentPopup({
               <div className="w-16 h-16 bg-tiffany/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Mail className="h-8 w-8 text-tiffany" />
               </div>
-              <h2 className="font-blair text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                Join 700+ Medical Professionals
+              <h2 className="font-blair text-2xl font-bold text-gray-900 mb-2">
+                Join 700<span className="font-montserrat font-normal">+</span> Medical Professionals
               </h2>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-600">
                 Get exclusive legal insights, compliance updates, and industry news delivered to your inbox.
               </p>
             </div>
@@ -233,7 +233,7 @@ export function ExitIntentPopup({
               {SOCIAL_PROOF_STATS.map((stat) => (
                 <div key={stat.label} className="text-center">
                   <p className="text-xl font-bold text-tiffany">{stat.value}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</p>
+                  <p className="text-xs text-gray-500">{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -273,12 +273,12 @@ export function ExitIntentPopup({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", duration: 0.5 }}
-            className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 overflow-hidden"
+            className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 overflow-hidden"
           >
             {/* Close Button */}
             <button
               onClick={dismiss}
-              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100"
               aria-label="Close popup"
             >
               <X className="h-5 w-5" />
@@ -303,13 +303,13 @@ export function ExitIntentPopup({
                 animate={{ opacity: 1, y: 0 }}
                 className="text-center py-4"
               >
-                <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <CheckCircle2 className="h-8 w-8 text-green-500" />
                 </div>
-                <h3 className="font-blair text-xl font-bold text-gray-900 dark:text-white mb-2">
+                <h3 className="font-blair text-xl font-bold text-gray-900 mb-2">
                   You're All Set!
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                <p className="text-gray-600 mb-4">
                   {message}
                 </p>
 
@@ -327,7 +327,7 @@ export function ExitIntentPopup({
 
                 <button
                   onClick={dismiss}
-                  className="w-full mt-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  className="w-full mt-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
                 >
                   Continue Browsing
                 </button>
@@ -345,7 +345,7 @@ export function ExitIntentPopup({
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Enter your email address"
-                      className="w-full pl-12 pr-4 py-3.5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-tiffany focus:border-transparent"
+                      className="w-full pl-12 pr-4 py-3.5 border border-gray-200 bg-white rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-tiffany focus:border-transparent"
                       disabled={status === "loading"}
                     />
                   </div>
@@ -376,13 +376,13 @@ export function ExitIntentPopup({
                 {/* No Thanks Link */}
                 <button
                   onClick={dismiss}
-                  className="w-full text-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 mt-4 py-2 transition-colors"
+                  className="w-full text-center text-sm text-gray-500 hover:text-gray-700 mt-4 py-2 transition-colors"
                 >
                   No thanks, I'll pass
                 </button>
 
                 {/* Privacy Note */}
-                <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-4">
+                <p className="text-center text-xs text-gray-400 mt-4">
                   We respect your privacy. Unsubscribe at any time.
                 </p>
               </>

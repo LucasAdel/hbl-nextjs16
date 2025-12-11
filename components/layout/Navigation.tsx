@@ -3,14 +3,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Search, Command } from "lucide-react";
+import { Menu, X, Search, Command, ShoppingCart } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
+import { useCartStore } from "@/lib/stores/cart-store";
 
 const Navigation: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [focusIndex, setFocusIndex] = useState(-1);
+  const [cartMounted, setCartMounted] = useState(false);
   const pathname = usePathname();
+  const { openCart, getTotalItems } = useCartStore();
   const menuRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
@@ -61,6 +64,11 @@ const Navigation: React.FC = () => {
     setIsOpen(false);
     setFocusIndex(-1);
   }, [pathname]);
+
+  // Hydration check for cart (prevents SSR mismatch)
+  useEffect(() => {
+    setCartMounted(true);
+  }, []);
 
   // Focus trap for mobile menu
   useEffect(() => {
@@ -197,6 +205,20 @@ const Navigation: React.FC = () => {
             </kbd>
           </button>
 
+          {/* Cart Button */}
+          {cartMounted && getTotalItems() > 0 && (
+            <button
+              onClick={openCart}
+              className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              aria-label={`Open cart with ${getTotalItems()} items`}
+            >
+              <ShoppingCart className="w-5 h-5" />
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                {getTotalItems() > 99 ? "99+" : getTotalItems()}
+              </span>
+            </button>
+          )}
+
           {/* User Menu / Auth Buttons */}
           <UserMenu />
 
@@ -227,6 +249,21 @@ const Navigation: React.FC = () => {
           >
             <Search className="w-5 h-5" />
           </button>
+
+          {/* Mobile Cart Button */}
+          {cartMounted && getTotalItems() > 0 && (
+            <button
+              onClick={openCart}
+              className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+              aria-label={`Open cart with ${getTotalItems()} items`}
+            >
+              <ShoppingCart className="w-5 h-5" />
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                {getTotalItems() > 9 ? "9+" : getTotalItems()}
+              </span>
+            </button>
+          )}
+
           <button
             ref={mobileButtonRef}
             type="button"

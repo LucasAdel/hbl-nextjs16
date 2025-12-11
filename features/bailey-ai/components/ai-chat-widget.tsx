@@ -116,7 +116,7 @@ const ChatButton: React.FC<{ onClick: () => void; hasNewMessage: boolean }> = ({
   const [showBubble, setShowBubble] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowBubble(false), 8000);
+    const timer = setTimeout(() => setShowBubble(false), 10000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -156,9 +156,9 @@ const ChatButton: React.FC<{ onClick: () => void; hasNewMessage: boolean }> = ({
           <motion.span
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500"
+            className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white text-xs font-bold"
           >
-            <Sparkles className="h-3 w-3" />
+            1
           </motion.span>
         )}
       </motion.button>

@@ -11,7 +11,7 @@ const anthropic = new Anthropic({
 });
 
 // System prompt for legal assistant
-const SYSTEM_PROMPT = `You are a helpful legal assistant for Hamilton Bailey Law, a law firm specializing in legal services for medical practitioners in Australia.
+const SYSTEM_PROMPT = `You are a helpful legal assistant for Hamilton Bailey Law, a law firm specialising in legal services for medical practitioners in Australia.
 
 Your role is to:
 1. Answer general questions about medical practice law in Australia

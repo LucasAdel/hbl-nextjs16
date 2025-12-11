@@ -78,6 +78,76 @@ Claude MUST follow this workflow for ALL development work:
 
 ---
 
+## CRITICAL: Language Rules for Bailey AI
+
+### NEVER Use "Avoid" for Tax Language
+**NEVER use the word "avoid" in relation to taxes** in any AI chatbot output.
+
+Instead of: "avoid payroll tax" or "avoid tax liabilities"
+Use: "being deemed as not eligible for payroll tax" or "structuring to ensure not eligible for payroll tax"
+
+**Correct Examples:**
+- "We help medical practices structure arrangements to ensure they are not eligible for payroll tax"
+- "Properly structured Tenant Doctor™ arrangements result in practitioners being deemed not eligible for payroll tax"
+- "Our expertise ensures your practice is structured to be outside payroll tax obligations"
+
+**NEVER say:**
+- "avoid payroll tax"
+- "avoid tax liabilities"
+- "avoid being liable"
+
+This framing focuses on legitimate structuring that results in non-eligibility, rather than "avoidance" which has negative connotations.
+
+---
+
+## CRITICAL: Facilities Service Provider Terminology
+
+**NEVER refer to physical premises as "medical practice" or "clinic"** in Bailey AI chatbot output when discussing Tenant Doctor™ arrangements or payroll tax structuring.
+
+**Correct terminology:** "Facilities Service Provider providing Administrative Services to Australian Medical and Healthcare Practitioners"
+
+**Acceptable shortened forms:**
+- "Facilities Service Provider" (FSP)
+- "the Facilities Service Provider entity"
+- "administrative services provider"
+
+**NEVER say (in structuring/payroll tax context):**
+- "medical practice" (when referring to the physical premises/business)
+- "clinic"
+- "medical centre" (when referring to the FSP entity)
+
+**Correct Examples:**
+- "We help Facilities Service Providers structure arrangements so they are deemed not eligible for payroll tax"
+- "The Facilities Service Provider provides administrative services to independent practitioners"
+- "Your FSP entity can be structured to ensure non-eligibility for payroll tax"
+
+**Note:** "Medical practice law" is acceptable as it refers to the area of law, not a physical location.
+
+---
+
+## CRITICAL: Tenant Doctor™ Trademark
+
+Hamilton Bailey is **EXCLUSIVELY LICENSED** to use the Tenant Doctor™ trademark in legal documents within Australia.
+
+**NEVER say:** "We own the Tenant Doctor™ trademark"
+**ALWAYS say:** "We are exclusively licensed to use the Tenant Doctor™ trademark in legal documents within Australia"
+
+---
+
+## CRITICAL: Australian English Spelling
+
+ALWAYS use Australian English spelling in all content:
+- specialise (NOT specialize)
+- specialised (NOT specialized)
+- defence (NOT defense)
+- organisation (NOT organization)
+- colour (NOT color)
+- favour (NOT favor)
+- honour (NOT honor)
+- licence (noun) / license (verb)
+
+---
+
 ## Email Configuration
 
 ### CRITICAL: Resend Email Domain
@@ -108,6 +178,11 @@ from: "Bailey AI <noreply@hamiltonbailey.com.au>"
 ### Fonts
 - Body: Montserrat (Google Fonts)
 - Headings: BlairITC (local font)
+
+**IMPORTANT: BlairITC Symbol Handling**
+BlairITC does not render symbols well (e.g., `+`, `%`, `&`). When using BlairITC (`font-blair`) with symbols:
+- Wrap the symbol in a span with Montserrat: `<span className="font-montserrat">+</span>`
+- Example: `Join 700<span className="font-montserrat">+</span> Medical Professionals`
 
 ### Button Gradient
 ```css

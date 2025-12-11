@@ -378,9 +378,6 @@ export function CartSidebar() {
                           {promoError}
                         </p>
                       )}
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                        Try: WELCOME10, SAVE50, BUNDLE20, or VIP25
-                      </p>
                     </div>
                   )}
                 </div>

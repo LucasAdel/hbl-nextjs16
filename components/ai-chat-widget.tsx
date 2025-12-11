@@ -81,7 +81,7 @@ const ChatButton: React.FC<{ onClick: () => void; hasNewMessage: boolean }> = ({
   const [showBubble, setShowBubble] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowBubble(false), 8000);
+    const timer = setTimeout(() => setShowBubble(false), 10000);
     return () => clearTimeout(timer);
   }, []);
 

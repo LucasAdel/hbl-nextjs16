@@ -595,9 +595,6 @@ export default function CartPage() {
                               {promoError}
                             </p>
                           )}
-                          <p className="text-xs text-gray-500">
-                            Try: WELCOME10, SAVE50, BUNDLE20, or VIP25
-                          </p>
                         </div>
                       )}
                     </div>
