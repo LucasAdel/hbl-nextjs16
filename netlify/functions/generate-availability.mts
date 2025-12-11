@@ -1,4 +1,4 @@
-import type { Config, Context } from "@netlify/functions";
+import type { Config } from "@netlify/functions";
 import { createClient } from "@supabase/supabase-js";
 
 /**
@@ -174,17 +174,18 @@ function generateSlotsForDate(date: Date): SlotData[] {
   return slots;
 }
 
-export default async function handler(request: Request, context: Context) {
+export default async (req: Request) => {
   console.log("🎰 Generating randomized availability slots...");
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  // Use Netlify.env for environment variables
+  const supabaseUrl = Netlify.env.get("NEXT_PUBLIC_SUPABASE_URL");
+  const supabaseServiceKey = Netlify.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
   if (!supabaseUrl || !supabaseServiceKey) {
     console.error("Missing Supabase configuration");
     return new Response(
       JSON.stringify({ error: "Missing Supabase configuration" }),
-      { status: 500 }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 
@@ -243,7 +244,7 @@ export default async function handler(request: Request, context: Context) {
         console.error("Error inserting slots:", insertError);
         return new Response(
           JSON.stringify({ error: "Failed to insert slots", details: insertError.message }),
-          { status: 500 }
+          { status: 500, headers: { "Content-Type": "application/json" } }
         );
       }
     }
@@ -262,16 +263,17 @@ export default async function handler(request: Request, context: Context) {
         totalSlots: allSlots.length,
         slotsByDay,
         message: `Generated ${allSlots.length} availability slots for the next 14 days`,
-      })
+      }),
+      { headers: { "Content-Type": "application/json" } }
     );
   } catch (error) {
     console.error("Slot generation error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to generate availability slots" }),
-      { status: 500 }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
-}
+};
 
 // Netlify scheduled function configuration
 // Runs daily at midnight ACST (Adelaide time)

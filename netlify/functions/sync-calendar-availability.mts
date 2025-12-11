@@ -1,4 +1,4 @@
-import type { Config, Context } from "@netlify/functions";
+import type { Config } from "@netlify/functions";
 import { createClient } from "@supabase/supabase-js";
 
 /**
@@ -18,8 +18,6 @@ import { createClient } from "@supabase/supabase-js";
  */
 
 const CALENDAR_EMAIL = "lw@hamiltonbailey.com";
-const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 
 interface StoredTokens {
   access_token: string;
@@ -81,6 +79,9 @@ async function updateStoredTokens(
 async function getValidAccessToken(
   supabase: SupabaseClientAny
 ): Promise<string | null> {
+  const googleClientId = Netlify.env.get("NEXT_PUBLIC_GOOGLE_CLIENT_ID");
+  const googleClientSecret = Netlify.env.get("GOOGLE_CLIENT_SECRET");
+
   const tokens = await getStoredTokens(supabase);
   if (!tokens) return null;
 
@@ -94,8 +95,8 @@ async function getValidAccessToken(
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
-      client_id: GOOGLE_CLIENT_ID!,
-      client_secret: GOOGLE_CLIENT_SECRET!,
+      client_id: googleClientId!,
+      client_secret: googleClientSecret!,
       refresh_token: tokens.refresh_token,
       grant_type: "refresh_token",
     }),
@@ -241,17 +242,18 @@ async function updateSyncState(
   }
 }
 
-export default async function handler(request: Request, context: Context) {
+export default async (req: Request) => {
   console.log("🔄 Syncing calendar availability...");
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  // Use Netlify.env for environment variables
+  const supabaseUrl = Netlify.env.get("NEXT_PUBLIC_SUPABASE_URL");
+  const supabaseServiceKey = Netlify.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
   if (!supabaseUrl || !supabaseServiceKey) {
     console.error("Missing Supabase configuration");
     return new Response(
       JSON.stringify({ error: "Missing Supabase configuration" }),
-      { status: 500 }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 
@@ -268,7 +270,8 @@ export default async function handler(request: Request, context: Context) {
         JSON.stringify({
           success: false,
           message: "Calendar not connected - no access token",
-        })
+        }),
+        { headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -359,7 +362,8 @@ export default async function handler(request: Request, context: Context) {
         blockedCount,
         unblockedCount,
         message: "Calendar sync completed successfully",
-      })
+      }),
+      { headers: { "Content-Type": "application/json" } }
     );
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
@@ -369,10 +373,10 @@ export default async function handler(request: Request, context: Context) {
 
     return new Response(
       JSON.stringify({ error: "Calendar sync failed", details: errorMessage }),
-      { status: 500 }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
-}
+};
 
 // Netlify scheduled function configuration
 // Runs every 10 minutes

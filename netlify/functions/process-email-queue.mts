@@ -1,4 +1,4 @@
-import type { Config, Context } from "@netlify/functions";
+import type { Config } from "@netlify/functions";
 import { createClient } from "@supabase/supabase-js";
 
 // Email templates mapping
@@ -9,19 +9,20 @@ const TEMPLATE_SUBJECTS: Record<string, string> = {
   welcome_4_cta: "Ready for a Legal Health Check? Book Your Free Consultation",
 };
 
-export default async function handler(request: Request, context: Context) {
+export default async (req: Request) => {
   console.log("🕐 Processing email queue...");
 
-  // Verify environment variables
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const resendApiKey = process.env.RESEND_API_KEY;
-  const sendgridApiKey = process.env.SENDGRID_API_KEY;
+  // Use Netlify.env for environment variables
+  const supabaseUrl = Netlify.env.get("NEXT_PUBLIC_SUPABASE_URL");
+  const supabaseServiceKey = Netlify.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const resendApiKey = Netlify.env.get("RESEND_API_KEY");
+  const sendgridApiKey = Netlify.env.get("SENDGRID_API_KEY");
 
   if (!supabaseUrl || !supabaseServiceKey) {
     console.error("Missing Supabase configuration");
     return new Response(JSON.stringify({ error: "Missing Supabase configuration" }), {
       status: 500,
+      headers: { "Content-Type": "application/json" },
     });
   }
 
@@ -29,7 +30,7 @@ export default async function handler(request: Request, context: Context) {
     console.error("No email provider configured (need RESEND_API_KEY or SENDGRID_API_KEY)");
     return new Response(
       JSON.stringify({ error: "No email provider configured" }),
-      { status: 500 }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 
@@ -49,12 +50,16 @@ export default async function handler(request: Request, context: Context) {
       console.error("Error fetching pending enrollments:", fetchError);
       return new Response(JSON.stringify({ error: fetchError.message }), {
         status: 500,
+        headers: { "Content-Type": "application/json" },
       });
     }
 
     if (!pendingEnrollments || pendingEnrollments.length === 0) {
       console.log("No pending emails to process");
-      return new Response(JSON.stringify({ success: true, processed: 0 }));
+      return new Response(
+        JSON.stringify({ success: true, processed: 0 }),
+        { headers: { "Content-Type": "application/json" } }
+      );
     }
 
     console.log(`Found ${pendingEnrollments.length} pending emails`);
@@ -151,16 +156,17 @@ export default async function handler(request: Request, context: Context) {
         processed,
         errors,
         total: pendingEnrollments.length,
-      })
+      }),
+      { headers: { "Content-Type": "application/json" } }
     );
   } catch (error) {
     console.error("Email queue processing error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to process email queue" }),
-      { status: 500 }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
-}
+};
 
 // Sequence step type with optional send window
 interface SequenceStep {

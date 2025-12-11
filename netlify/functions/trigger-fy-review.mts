@@ -1,4 +1,4 @@
-import type { Config, Context } from "@netlify/functions";
+import type { Config } from "@netlify/functions";
 import { createClient } from "@supabase/supabase-js";
 
 /**
@@ -14,17 +14,18 @@ import { createClient } from "@supabase/supabase-js";
  * - Partnership Agreements
  */
 
-export default async function handler(request: Request, context: Context) {
+export default async (req: Request) => {
   console.log("📅 Triggering Australian FY document review reminders...");
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  // Use Netlify.env for environment variables
+  const supabaseUrl = Netlify.env.get("NEXT_PUBLIC_SUPABASE_URL");
+  const supabaseServiceKey = Netlify.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
   if (!supabaseUrl || !supabaseServiceKey) {
     console.error("Missing Supabase configuration");
     return new Response(
       JSON.stringify({ error: "Missing Supabase configuration" }),
-      { status: 500 }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 
@@ -49,13 +50,15 @@ export default async function handler(request: Request, context: Context) {
       console.error("Error fetching eligible customers:", fetchError);
       return new Response(JSON.stringify({ error: fetchError.message }), {
         status: 500,
+        headers: { "Content-Type": "application/json" },
       });
     }
 
     if (!eligibleCustomers || eligibleCustomers.length === 0) {
       console.log("No eligible customers for FY review reminders");
       return new Response(
-        JSON.stringify({ success: true, enrolled: 0, message: "No eligible customers" })
+        JSON.stringify({ success: true, enrolled: 0, message: "No eligible customers" }),
+        { headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -116,16 +119,17 @@ export default async function handler(request: Request, context: Context) {
         skipped,
         totalEligible: uniqueEmails.length,
         fyYear: currentYear,
-      })
+      }),
+      { headers: { "Content-Type": "application/json" } }
     );
   } catch (error) {
     console.error("FY review trigger error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to trigger FY review reminders" }),
-      { status: 500 }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
-}
+};
 
 // Netlify scheduled function configuration
 // Runs annually on May 1st at 9:00 AM ACST (Adelaide time)
