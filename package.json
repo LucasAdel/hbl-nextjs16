@@ -86,6 +86,7 @@
     "eslint": "^9",
     "eslint-config-next": "^16.0.7",
     "jsdom": "^27.2.0",
+    "puppeteer": "^24.32.1",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.0.15"

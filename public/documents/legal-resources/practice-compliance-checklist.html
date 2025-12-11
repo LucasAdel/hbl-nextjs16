@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Practice Compliance Checklist - Hamilton Bailey Law</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --tiffany: #0D9488;
+      --tiffany-dark: #0F766E;
+      --gray-900: #111827;
+      --gray-700: #374151;
+      --gray-600: #4B5563;
+      --gray-500: #6B7280;
+      --gray-200: #E5E7EB;
+      --gray-100: #F3F4F6;
+    }
+
+    @page {
+      size: A4;
+      margin: 20mm 15mm 25mm 15mm;
+    }
+
+    @media print {
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .page-break { page-break-before: always; }
+      .no-break { page-break-inside: avoid; }
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 10pt;
+      line-height: 1.5;
+      color: var(--gray-700);
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--tiffany);
+      margin-bottom: 25px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--tiffany) 0%, var(--tiffany-dark) 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 16pt;
+    }
+
+    .logo-text {
+      font-size: 14pt;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+
+    .logo-tagline {
+      font-size: 8pt;
+      color: var(--gray-500);
+    }
+
+    .header-contact {
+      text-align: right;
+      font-size: 8pt;
+      color: var(--gray-500);
+    }
+
+    /* Title Section */
+    .title-section {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 25px;
+      background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+      border-radius: 12px;
+    }
+
+    h1 {
+      font-size: 22pt;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 11pt;
+      color: var(--tiffany-dark);
+      font-weight: 500;
+    }
+
+    /* Introduction */
+    .intro {
+      background: var(--gray-100);
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      border-left: 4px solid var(--tiffany);
+    }
+
+    .intro p {
+      font-size: 10pt;
+      margin-bottom: 10px;
+    }
+
+    .intro p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Section Headers */
+    h2 {
+      font-size: 13pt;
+      font-weight: 700;
+      color: var(--tiffany-dark);
+      margin-top: 25px;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h2 .number {
+      background: var(--tiffany);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10pt;
+    }
+
+    h3 {
+      font-size: 11pt;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-top: 15px;
+      margin-bottom: 8px;
+    }
+
+    /* Checklist Items */
+    .checklist {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 15px 0;
+    }
+
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .checklist li:last-child {
+      border-bottom: none;
+    }
+
+    .checkbox {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--gray-300);
+      border-radius: 3px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .checklist li span {
+      flex: 1;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+      font-size: 9pt;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border: 1px solid var(--gray-200);
+    }
+
+    th {
+      background: var(--gray-100);
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+
+    /* Key Contacts Box */
+    .contacts-box {
+      background: #f0fdfa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 25px;
+    }
+
+    .contacts-box h3 {
+      color: var(--tiffany-dark);
+      margin-top: 0;
+    }
+
+    .contacts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 12px;
+    }
+
+    .contact-item {
+      font-size: 9pt;
+    }
+
+    .contact-item strong {
+      color: var(--gray-900);
+    }
+
+    /* Disclaimer */
+    .disclaimer {
+      margin-top: 30px;
+      padding: 15px;
+      background: #fef3c7;
+      border-radius: 8px;
+      font-size: 8pt;
+      color: var(--gray-600);
+    }
+
+    .disclaimer strong {
+      color: var(--gray-900);
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 30px;
+      padding-top: 15px;
+      border-top: 1px solid var(--gray-200);
+      text-align: center;
+      font-size: 8pt;
+      color: var(--gray-500);
+    }
+
+    .footer-logo {
+      color: var(--tiffany);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">HB</div>
+      <div>
+        <div class="logo-text">Hamilton Bailey</div>
+        <div class="logo-tagline">Medical Practice Law Specialists</div>
+      </div>
+    </div>
+    <div class="header-contact">
+      hamiltonbailey.com<br>
+      Adelaide, South Australia
+    </div>
+  </div>
+
+  <div class="title-section">
+    <h1>Practice Compliance Checklist</h1>
+    <div class="subtitle">A Comprehensive Guide for Australian Medical Practices</div>
+  </div>
+
+  <div class="intro">
+    <p>This compliance checklist is designed to help medical practice owners, practice managers, and healthcare professionals identify and address key regulatory obligations.</p>
+    <p><strong>How to use:</strong> Review each section and mark items as complete. Schedule regular reviews to maintain compliance.</p>
+  </div>
+
+  <h2><span class="number">1</span> Professional Registration &amp; Credentials</h2>
+
+  <h3>AHPRA Registration</h3>
+  <ul class="checklist">
+    <li><div class="checkbox"></div><span>All practitioners hold current registration with AHPRA</span></li>
+    <li><div class="checkbox"></div><span>Registration details are publicly displayed as required</span></li>
+    <li><div class="checkbox"></div><span>Annual registration renewal processes are documented and calendared</span></li>
+    <li><div class="checkbox"></div><span>Continuing Professional Development (CPD) requirements are being met</span></li>
+    <li><div class="checkbox"></div><span>Practitioner registration conditions (if any) are documented and complied with</span></li>
+    <li><div class="checkbox"></div><span>Locum and visiting practitioners' registration status is verified before engagement</span></li>
+  </ul>
+
+  <h3>Medicare Provider Numbers</h3>
+  <ul class="checklist">
+    <li><div class="checkbox"></div><span>All eligible practitioners hold current Medicare provider numbers</span></li>
+    <li><div class="checkbox"></div><span>Provider number applications for new practitioners are processed promptly</span></li>
+    <li><div class="checkbox"></div><span>Billing practices align with Medicare Benefits Schedule (MBS) requirements</span></li>
+    <li><div class="checkbox"></div><span>Bulk billing policies are clearly documented and communicated to patients</span></li>
+  </ul>
+
+  <h2><span class="number">2</span> Privacy &amp; Information Management</h2>
+
+  <h3>Privacy Act Compliance</h3>
+  <ul class="checklist">
+    <li><div class="checkbox"></div><span>Practice has a current Privacy Policy complying with the Australian Privacy Principles (APPs)</span></li>
+    <li><div class="checkbox"></div><span>Privacy Policy is readily accessible to patients (displayed in practice and on website)</span></li>
+    <li><div class="checkbox"></div><span>Privacy Collection Statement is provided to patients at or before the time of collection</span></li>
+    <li><div class="checkbox"></div><span>Staff have received training on privacy obligations and handling of personal information</span></li>
+    <li><div class="checkbox"></div><span>Procedures exist for responding to access and correction requests within required timeframes</span></li>
+  </ul>
+
+  <h3>Health Records Management</h3>
+  <ul class="checklist">
+    <li><div class="checkbox"></div><span>Patient health records maintained in accordance with state/territory health records legislation</span></li>
+    <li><div class="checkbox"></div><span>Records retention periods comply with legal requirements (minimum 7 years for adults; until age 25 for children)</span></li>
+    <li><div class="checkbox"></div><span>Electronic health records systems meet security and backup requirements</span></li>
+    <li><div class="checkbox"></div><span>My Health Record participation and upload procedures are documented</span></li>
+    <li><div class="checkbox"></div><span>Processes exist for secure destruction of records after retention periods expire</span></li>
+  </ul>
+
+  <h3>Data Breach Response</h3>
+  <ul class="checklist">
+    <li><div class="checkbox"></div><span>Notifiable Data Breaches scheme obligations are understood</span></li>
+    <li><div class="checkbox"></div><span>Data breach response plan is documented and staff are trained</span></li>
+    <li><div class="checkbox"></div><span>Contact details for the Office of the Australian Information Commissioner (OAIC) are accessible</span></li>
+  </ul>
+
+  <div class="page-break"></div>
+
+  <h2><span class="number">3</span> Workplace Health &amp; Safety</h2>
+
+  <h3>General WHS Obligations</h3>
+  <ul class="checklist">
+    <li><div class="checkbox"></div><span>Practice is registered with the relevant state/territory WHS regulator</span></li>
+    <li><div class="checkbox"></div><span>WHS policy is current and communicated to all workers</span></li>
+    <li><div class="checkbox"></div><span>Risk assessments have been conducted for all work activities</span></li>
+    <li><div class="checkbox"></div><span>Incident reporting procedures are in place and understood by staff</span></li>
+    <li><div class="checkbox"></div><span>Workers' compensation insurance is current and adequate</span></li>
+  </ul>
+
+  <h3>Infection Prevention &amp; Control</h3>
+  <ul class="checklist">
+    <li><div class="checkbox"></div><span>Infection control policy aligns with NHMRC Australian Guidelines</span></li>
+    <li><div class="checkbox"></div><span>Hand hygiene facilities and products are readily available</span></li>
+    <li><div class="checkbox"></div><span>Personal protective equipment (PPE) is provided and training given on correct use</span></li>
+    <li><div class="checkbox"></div><span>Sharps disposal procedures comply with relevant standards</span></li>
+    <li><div class="checkbox"></div><span>Cleaning and sterilisation protocols are documented and followed</span></li>
+    <li><div class="checkbox"></div><span>Vaccination policy for staff is in place (including influenza and COVID-19 as applicable)</span></li>
+  </ul>
+
+  <h2><span class="number">4</span> Employment &amp; Engagement</h2>
+
+  <h3>Employment Compliance</h3>
+  <ul class="checklist">
+    <li><div class="checkbox"></div><span>Employment contracts are in writing and comply with the Fair Work Act 2009 (Cth)</span></li>
+    <li><div class="checkbox"></div><span>Correct Award coverage has been identified (Health Professionals Award, Nurses Award, etc.)</span></li>
+    <li><div class="checkbox"></div><span>Pay rates meet or exceed Award minimum rates</span></li>
+    <li><div class="checkbox"></div><span>Superannuation contributions are made in accordance with the Superannuation Guarantee</span></li>
+    <li><div class="checkbox"></div><span>Leave entitlements are correctly calculated and provided</span></li>
+    <li><div class="checkbox"></div><span>Payslips are issued within one working day of payment</span></li>
+  </ul>
+
+  <h3>Contractor Arrangements</h3>
+  <ul class="checklist">
+    <li><div class="checkbox"></div><span>Independent contractor arrangements are properly structured and documented</span></li>
+    <li><div class="checkbox"></div><span>Sham contracting risks have been assessed</span></li>
+    <li><div class="checkbox"></div><span>Service agreements address key terms including fees, GST, insurance, and termination</span></li>
+    <li><div class="checkbox"></div><span>Contractor ABNs have been verified</span></li>
+  </ul>
+
+  <h2><span class="number">5</span> Medicare &amp; Billing Compliance</h2>
+  <ul class="checklist">
+    <li><div class="checkbox"></div><span>Billing procedures comply with the Health Insurance Act 1973 (Cth)</span></li>
+    <li><div class="checkbox"></div><span>MBS item number selection processes are documented and auditable</span></li>
+    <li><div class="checkbox"></div><span>Informed financial consent is obtained for private fees</span></li>
+    <li><div class="checkbox"></div><span>Patient accounts and receipts meet prescribed requirements</span></li>
+    <li><div class="checkbox"></div><span>Internal audits of Medicare billing are conducted regularly</span></li>
+    <li><div class="checkbox"></div><span>Staff involved in billing have received appropriate training</span></li>
+  </ul>
+
+  <h2><span class="number">6</span> Professional Indemnity &amp; Insurance</h2>
+  <ul class="checklist">
+    <li><div class="checkbox"></div><span>Professional indemnity insurance is current and adequate for all practitioners</span></li>
+    <li><div class="checkbox"></div><span>Public liability insurance is in place</span></li>
+    <li><div class="checkbox"></div><span>Workers' compensation insurance is current</span></li>
+    <li><div class="checkbox"></div><span>Business insurance (property, equipment, business interruption) is adequate</span></li>
+    <li><div class="checkbox"></div><span>Cyber liability insurance has been considered</span></li>
+    <li><div class="checkbox"></div><span>Insurance notification obligations are understood</span></li>
+  </ul>
+
+  <div class="page-break"></div>
+
+  <h2><span class="number">7</span> Advertising &amp; Marketing</h2>
+  <ul class="checklist">
+    <li><div class="checkbox"></div><span>All advertising complies with the National Law and AHPRA guidelines</span></li>
+    <li><div class="checkbox"></div><span>No use of testimonials in advertising</span></li>
+    <li><div class="checkbox"></div><span>Qualifications and titles used are accurate and not misleading</span></li>
+    <li><div class="checkbox"></div><span>Before and after images (if used) comply with guidelines</span></li>
+    <li><div class="checkbox"></div><span>Social media content has been reviewed for compliance</span></li>
+    <li><div class="checkbox"></div><span>Website includes required privacy policy</span></li>
+  </ul>
+
+  <h2><span class="number">8</span> Medicines &amp; Therapeutic Goods</h2>
+  <ul class="checklist">
+    <li><div class="checkbox"></div><span>Prescribing practices comply with state/territory requirements</span></li>
+    <li><div class="checkbox"></div><span>Prescription records are maintained as required</span></li>
+    <li><div class="checkbox"></div><span>Schedule 8 (controlled substances) handling procedures are documented</span></li>
+    <li><div class="checkbox"></div><span>Drug storage meets Therapeutic Goods Administration (TGA) requirements</span></li>
+    <li><div class="checkbox"></div><span>Medical devices used are registered on the Australian Register of Therapeutic Goods (ARTG)</span></li>
+  </ul>
+
+  <h2><span class="number">9</span> Telehealth &amp; Digital Health</h2>
+  <ul class="checklist">
+    <li><div class="checkbox"></div><span>Telehealth services comply with AHPRA and Medical Board guidelines</span></li>
+    <li><div class="checkbox"></div><span>Informed consent processes address telehealth-specific matters</span></li>
+    <li><div class="checkbox"></div><span>Technology platforms meet privacy and security requirements</span></li>
+    <li><div class="checkbox"></div><span>Medicare telehealth billing requirements are understood and followed</span></li>
+    <li><div class="checkbox"></div><span>Cybersecurity measures are in place and regularly reviewed</span></li>
+    <li><div class="checkbox"></div><span>Multi-factor authentication is used for sensitive systems</span></li>
+  </ul>
+
+  <h2><span class="number">10</span> Mandatory Reporting &amp; Notifications</h2>
+  <ul class="checklist">
+    <li><div class="checkbox"></div><span>Mandatory reporting obligations under the National Law are understood</span></li>
+    <li><div class="checkbox"></div><span>Processes exist for making notifications to AHPRA where required</span></li>
+    <li><div class="checkbox"></div><span>Child protection mandatory reporting obligations (state/territory specific) are understood</span></li>
+    <li><div class="checkbox"></div><span>Elder abuse reporting obligations are understood</span></li>
+    <li><div class="checkbox"></div><span>Processes exist for responding to coronial investigations</span></li>
+  </ul>
+
+  <h2><span class="number">11</span> Corporate Governance</h2>
+  <ul class="checklist">
+    <li><div class="checkbox"></div><span>Business structure complies with corporate practice rules (state/territory specific)</span></li>
+    <li><div class="checkbox"></div><span>Company (if applicable) complies with Corporations Act requirements</span></li>
+    <li><div class="checkbox"></div><span>ABN is current and registered with the Australian Business Register</span></li>
+    <li><div class="checkbox"></div><span>GST registration (if applicable) is current</span></li>
+    <li><div class="checkbox"></div><span>Business name registration is current</span></li>
+  </ul>
+
+  <h2><span class="number">12</span> Quality &amp; Accreditation</h2>
+  <ul class="checklist">
+    <li><div class="checkbox"></div><span>Practice accreditation status is current (RACGP, AGPAL, QPA, or equivalent)</span></li>
+    <li><div class="checkbox"></div><span>Accreditation standards are integrated into practice policies</span></li>
+    <li><div class="checkbox"></div><span>Quality improvement activities are documented</span></li>
+    <li><div class="checkbox"></div><span>Patient feedback mechanisms are in place</span></li>
+    <li><div class="checkbox"></div><span>Clinical governance framework is documented</span></li>
+  </ul>
+
+  <div class="contacts-box no-break">
+    <h3>Key Regulatory Contacts</h3>
+    <div class="contacts-grid">
+      <div class="contact-item">
+        <strong>AHPRA</strong><br>
+        www.ahpra.gov.au | 1300 419 495
+      </div>
+      <div class="contact-item">
+        <strong>Medicare</strong><br>
+        www.servicesaustralia.gov.au | 132 150
+      </div>
+      <div class="contact-item">
+        <strong>OAIC</strong><br>
+        www.oaic.gov.au | 1300 363 992
+      </div>
+      <div class="contact-item">
+        <strong>Fair Work Ombudsman</strong><br>
+        www.fairwork.gov.au | 13 13 94
+      </div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>Disclaimer:</strong> This checklist is intended as a general guide only and does not constitute legal advice. Compliance requirements may vary depending on your specific circumstances, location, and the nature of your practice. Laws and regulations change frequently. We strongly recommend seeking independent legal advice to ensure your practice meets all applicable compliance obligations.
+  </div>
+
+  <div class="footer">
+    <div class="footer-logo">Hamilton Bailey Law</div>
+    <p>© 2024 Hamilton Bailey. All rights reserved. | hamiltonbailey.com</p>
+  </div>
+</body>
+</html>

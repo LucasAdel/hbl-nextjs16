@@ -3,6 +3,8 @@ import {
   generateResponse,
   generateStreamingResponse,
   getBaileyAISettings,
+  detectIntent,
+  checkAndAlertLead,
   type StreamChunk,
 } from "@/features/bailey-ai/lib";
 import { checkRateLimit, getClientIdentifier } from "@/lib/rate-limiter";
@@ -53,6 +55,19 @@ export async function POST(request: NextRequest) {
 
     // Get or create conversation from database
     const conversation = await getOrCreateConversation(conversationKey, userEmail);
+
+    // Detect intent
+    const intent = detectIntent(message);
+
+    // Check for contact info and send lead alert (non-blocking)
+    checkAndAlertLead(
+      message,
+      conversation.id,
+      conversationKey,
+      conversation.messages || [],
+      userEmail,
+      intent
+    ).catch((err) => console.error("Lead alert error:", err));
 
     // Store user message
     const userMessage: ChatMessage = {

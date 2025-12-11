@@ -547,10 +547,10 @@ export function AIChatWidget() {
         inputEl?.focus();
         break;
       case "call":
-        window.location.href = "tel:0882128585";
+        window.open("tel:0881215167", "_self");
         break;
       case "email":
-        window.location.href = "mailto:info@hblegal.com.au";
+        window.open("mailto:admin@hamiltonbailey.com.au", "_self");
         break;
       default:
         if (url) window.location.href = url;

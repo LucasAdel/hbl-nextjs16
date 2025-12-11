@@ -280,6 +280,244 @@
   --color-secondary-foreground: #e2e8f0;
 }
 
+/* ===== FORCE LIGHT MODE (for Codex pages) ===== */
+/*
+ * Tailwind CSS v4 uses @media (prefers-color-scheme: dark) for dark: variants.
+ * To force light mode on Codex pages, we override all dark mode styles when
+ * data-force-light="true" is set on the HTML element.
+ */
+
+/* Force light color scheme */
+html[data-force-light="true"],
+html[data-force-light="true"] * {
+  color-scheme: light !important;
+}
+
+/* Reset CSS custom properties to light mode values */
+html[data-force-light="true"] {
+  --color-background: #FFFFFF;
+  --color-foreground: #2E3338;
+  --color-border: #E5E7EB;
+  --color-input: #E5E7EB;
+  --color-card: #FFFFFF;
+  --color-card-foreground: #1e293b;
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #1e293b;
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #64748b;
+  --color-accent: #f1f5f9;
+  --color-accent-foreground: #1e293b;
+  --color-secondary: #f1f5f9;
+  --color-secondary-foreground: #1e293b;
+}
+
+/*
+ * CODEX LIGHT MODE OVERRIDES
+ * These use @layer utilities so they have proper specificity
+ */
+@layer utilities {
+  /* When forced light mode is active, override dark mode backgrounds */
+  html[data-force-light="true"] .bg-white {
+    background-color: #FFFFFF !important;
+  }
+
+  html[data-force-light="true"] .bg-slate-50 {
+    background-color: #f8fafc !important;
+  }
+
+  html[data-force-light="true"] .bg-slate-100 {
+    background-color: #f1f5f9 !important;
+  }
+
+  /* Text colors for forced light mode */
+  html[data-force-light="true"] .text-slate-900 {
+    color: #0f172a !important;
+  }
+
+  html[data-force-light="true"] .text-slate-800 {
+    color: #1e293b !important;
+  }
+
+  html[data-force-light="true"] .text-slate-700 {
+    color: #334155 !important;
+  }
+
+  html[data-force-light="true"] .text-slate-600 {
+    color: #475569 !important;
+  }
+
+  html[data-force-light="true"] .text-slate-500 {
+    color: #64748b !important;
+  }
+
+  html[data-force-light="true"] .text-slate-400 {
+    color: #94a3b8 !important;
+  }
+
+  /* Border colors for forced light mode */
+  html[data-force-light="true"] .border-slate-200 {
+    border-color: #e2e8f0 !important;
+  }
+
+  html[data-force-light="true"] .border-slate-300 {
+    border-color: #cbd5e1 !important;
+  }
+}
+
+/*
+ * Override Tailwind's dark: variant styles via media query with high specificity
+ * This targets all elements when system prefers dark but we want light
+ */
+@media (prefers-color-scheme: dark) {
+  /* Background overrides */
+  html[data-force-light="true"] nav,
+  html[data-force-light="true"] header,
+  html[data-force-light="true"] aside > div,
+  html[data-force-light="true"] .bg-white {
+    background-color: #FFFFFF !important;
+  }
+
+  html[data-force-light="true"] .bg-slate-50,
+  html[data-force-light="true"] footer > div {
+    background-color: #f8fafc !important;
+  }
+
+  html[data-force-light="true"] .bg-slate-100,
+  html[data-force-light="true"] button.bg-slate-100 {
+    background-color: #f1f5f9 !important;
+  }
+
+  /* Text color overrides - ensure proper contrast for light mode */
+  html[data-force-light="true"] h1,
+  html[data-force-light="true"] h2,
+  html[data-force-light="true"] h3,
+  html[data-force-light="true"] h4,
+  html[data-force-light="true"] .text-slate-900,
+  html[data-force-light="true"] .font-semibold,
+  html[data-force-light="true"] .font-bold {
+    color: #0f172a !important;
+  }
+
+  html[data-force-light="true"] p,
+  html[data-force-light="true"] li,
+  html[data-force-light="true"] .text-slate-700,
+  html[data-force-light="true"] .text-slate-600 {
+    color: #334155 !important;
+  }
+
+  html[data-force-light="true"] .text-slate-500,
+  html[data-force-light="true"] .text-slate-400,
+  html[data-force-light="true"] span.text-xs,
+  html[data-force-light="true"] nav a {
+    color: #64748b !important;
+  }
+
+  /* Border color overrides */
+  html[data-force-light="true"] .border-slate-200,
+  html[data-force-light="true"] .border-slate-300,
+  html[data-force-light="true"] nav,
+  html[data-force-light="true"] .border-b,
+  html[data-force-light="true"] .border-t {
+    border-color: #e2e8f0 !important;
+  }
+
+  /* Specific component overrides for Codex */
+
+  /* Table of Contents */
+  html[data-force-light="true"] aside .rounded-xl {
+    background-color: #FFFFFF !important;
+    border-color: #e2e8f0 !important;
+  }
+
+  html[data-force-light="true"] aside button {
+    color: #475569 !important;
+  }
+
+  html[data-force-light="true"] aside button:hover {
+    background-color: #f1f5f9 !important;
+  }
+
+  /* Progress bar background */
+  html[data-force-light="true"] .bg-slate-200 {
+    background-color: #e2e8f0 !important;
+  }
+
+  /* Active TOC item - keep tiffany color */
+  html[data-force-light="true"] aside button.bg-tiffany-100 {
+    background-color: #ccfbf1 !important;
+    color: #0f766e !important;
+  }
+
+  /* Tags and badges */
+  html[data-force-light="true"] .bg-tiffany-100 {
+    background-color: #ccfbf1 !important;
+  }
+
+  html[data-force-light="true"] .text-tiffany-700 {
+    color: #0f766e !important;
+  }
+
+  html[data-force-light="true"] .bg-amber-100 {
+    background-color: #fef3c7 !important;
+  }
+
+  html[data-force-light="true"] .text-amber-700 {
+    color: #b45309 !important;
+  }
+
+  html[data-force-light="true"] .bg-green-100 {
+    background-color: #dcfce7 !important;
+  }
+
+  html[data-force-light="true"] .text-green-700 {
+    color: #15803d !important;
+  }
+
+  html[data-force-light="true"] .bg-blue-100 {
+    background-color: #dbeafe !important;
+  }
+
+  html[data-force-light="true"] .text-blue-700 {
+    color: #1d4ed8 !important;
+  }
+
+  html[data-force-light="true"] .bg-purple-100 {
+    background-color: #f3e8ff !important;
+  }
+
+  html[data-force-light="true"] .text-purple-700 {
+    color: #7e22ce !important;
+  }
+
+  /* Code blocks - keep dark for readability */
+  html[data-force-light="true"] pre {
+    background-color: #1e293b !important;
+    color: #f1f5f9 !important;
+  }
+
+  html[data-force-light="true"] code:not(pre code) {
+    background-color: #f1f5f9 !important;
+    color: #2AAFA2 !important;
+  }
+
+  /* Blockquotes */
+  html[data-force-light="true"] blockquote {
+    background-color: #f8fafc !important;
+    color: #475569 !important;
+  }
+
+  /* Quick actions card */
+  html[data-force-light="true"] aside .space-y-4 button {
+    background-color: #f1f5f9 !important;
+    color: #334155 !important;
+  }
+
+  html[data-force-light="true"] aside .space-y-4 button:hover {
+    background-color: #ccfbf1 !important;
+    color: #0f766e !important;
+  }
+}
+
 /* ===== BASE STYLES ===== */
 @layer base {
   * {

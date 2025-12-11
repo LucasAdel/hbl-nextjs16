@@ -321,19 +321,29 @@ function generateNotificationPool(): NotificationData[] {
   return shuffleArray(notifications, seed + 1);
 }
 
-// Generate realistic variable intervals (30-90 seconds, weighted toward 45-60)
-function generateIntervals(count: number, seed: number): number[] {
+// Generate realistic variable intervals based on user preference
+// Normal pages: 4-11 minutes, Codex pages: 5-12 minutes
+function generateIntervals(count: number, seed: number, isCodexPage: boolean = false): number[] {
   const random = seededRandom(seed);
   const intervals: number[] = [];
 
   for (let i = 0; i < count; i++) {
-    // Bell curve distribution centered around 50 seconds
-    const u1 = random();
-    const u2 = random();
-    const gaussian = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-    // Scale: mean 50 seconds, std dev 15 seconds, clamped 30-90
-    const interval = Math.max(30, Math.min(90, 50 + gaussian * 15));
-    intervals.push(interval * 1000); // Convert to milliseconds
+    let minSeconds: number;
+    let maxSeconds: number;
+
+    if (isCodexPage) {
+      // Codex pages: 5-12 minutes (300-720 seconds)
+      minSeconds = 300;
+      maxSeconds = 720;
+    } else {
+      // Normal pages: 4-11 minutes (240-660 seconds)
+      minSeconds = 240;
+      maxSeconds = 660;
+    }
+
+    // Random interval within the range
+    const randomInterval = minSeconds + random() * (maxSeconds - minSeconds);
+    intervals.push(randomInterval * 1000); // Convert to milliseconds
   }
 
   return intervals;
@@ -394,17 +404,29 @@ export function SocialProofNotifications({
 }: SocialProofNotificationsProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [dismissed, setDismissed] = useState(false);
+  const [isCodexPage, setIsCodexPage] = useState(false);
   const notificationIndexRef = useRef(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Check if we're on a /codex/ page and adjust settings accordingly
+  useEffect(() => {
+    const onCodexPage = typeof window !== 'undefined' && window.location.pathname.includes('/codex/');
+    setIsCodexPage(onCodexPage);
+  }, []);
+
+  // Reduce display duration by 60% on codex pages (7000ms -> 2800ms)
+  // Also change position to bottom-right on codex pages
+  const effectiveDisplayDuration = isCodexPage ? Math.round(displayDuration * 0.4) : displayDuration;
+  const effectivePosition = isCodexPage ? 'bottom-right' : position;
 
   // Pre-generate notification pool and intervals (memoized per session)
   const { pool, intervals } = useMemo(() => {
     const seed = Math.floor(Date.now() / (1000 * 60 * 60));
     return {
       pool: generateNotificationPool(),
-      intervals: generateIntervals(250, seed),
+      intervals: generateIntervals(250, seed, isCodexPage),
     };
-  }, []);
+  }, [isCodexPage]);
 
   const showNextNotification = useCallback(() => {
     if (dismissed) return;
@@ -427,15 +449,19 @@ export function SocialProofNotifications({
     setNotifications((prev) => [...prev.slice(-(maxNotifications - 1)), notification]);
     notificationIndexRef.current++;
 
-    // Auto-remove after display duration
+    // Auto-remove after display duration (use effective duration for codex pages)
     setTimeout(() => {
       setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
-    }, displayDuration);
+    }, effectiveDisplayDuration);
 
     // Schedule next notification with variable interval
-    const nextInterval = intervals[index % intervals.length];
+    // On codex pages, increase interval by 2.5x to reduce frequency by 60%
+    let nextInterval = intervals[index % intervals.length];
+    if (isCodexPage) {
+      nextInterval = nextInterval * 2.5; // Reduce frequency by 60% (appear 40% as often)
+    }
     timeoutRef.current = setTimeout(showNextNotification, nextInterval);
-  }, [pool, intervals, maxNotifications, displayDuration, dismissed]);
+  }, [pool, intervals, maxNotifications, effectiveDisplayDuration, isCodexPage, dismissed]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -462,7 +488,7 @@ export function SocialProofNotifications({
   if (!enabled || notifications.length === 0) return null;
 
   return (
-    <div className={`fixed ${positionClasses[position]} z-40 flex flex-col gap-2`}>
+    <div className={`fixed ${positionClasses[effectivePosition as keyof typeof positionClasses]} z-40 flex flex-col gap-2`}>
       {notifications.map((notification) => (
         <div
           key={notification.id}

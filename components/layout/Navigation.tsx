@@ -16,11 +16,6 @@ const Navigation: React.FC = () => {
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const navItemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
 
-  // Hide navigation on portal and codex routes (they have their own navigation)
-  if (pathname?.startsWith("/portal") || pathname?.startsWith("/codex")) {
-    return null;
-  }
-
   // Navigation items
   const navItems = [
     { name: "About", path: "/about" },
@@ -31,6 +26,9 @@ const Navigation: React.FC = () => {
     { name: "Client Intake", path: "/client-intake" },
     { name: "Contact", path: "/contact" },
   ];
+
+  // Check if we should hide navigation (portal and codex have their own navigation)
+  const shouldHideNav = pathname?.startsWith("/portal") || pathname?.startsWith("/codex");
 
   useEffect(() => {
     // Check scroll position on mount and add scroll listener
@@ -125,6 +123,12 @@ const Navigation: React.FC = () => {
       navItemRefs.current[lastIndex]?.focus();
     }
   };
+
+  // Hide navigation on portal and codex routes (they have their own navigation)
+  // This check is placed after all hooks to comply with React's rules of hooks
+  if (shouldHideNav) {
+    return null;
+  }
 
   const navigationClasses = `
     fixed top-0 left-0 right-0 z-[200] transition-all duration-300

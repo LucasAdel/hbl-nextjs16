@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employment Contract Essentials Guide - Hamilton Bailey Law</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --tiffany: #0D9488;
+      --tiffany-dark: #0F766E;
+      --gray-900: #111827;
+      --gray-700: #374151;
+      --gray-600: #4B5563;
+      --gray-500: #6B7280;
+      --gray-200: #E5E7EB;
+      --gray-100: #F3F4F6;
+    }
+
+    @page {
+      size: A4;
+      margin: 20mm 15mm 25mm 15mm;
+    }
+
+    @media print {
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .page-break { page-break-before: always; }
+      .no-break { page-break-inside: avoid; }
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 10pt;
+      line-height: 1.5;
+      color: var(--gray-700);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--tiffany);
+      margin-bottom: 25px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--tiffany) 0%, var(--tiffany-dark) 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 16pt;
+    }
+
+    .logo-text {
+      font-size: 14pt;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+
+    .logo-tagline {
+      font-size: 8pt;
+      color: var(--gray-500);
+    }
+
+    .header-contact {
+      text-align: right;
+      font-size: 8pt;
+      color: var(--gray-500);
+    }
+
+    .title-section {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 25px;
+      background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+      border-radius: 12px;
+    }
+
+    h1 {
+      font-size: 22pt;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 11pt;
+      color: var(--tiffany-dark);
+      font-weight: 500;
+    }
+
+    .intro {
+      background: var(--gray-100);
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      border-left: 4px solid var(--tiffany);
+    }
+
+    .intro p {
+      font-size: 10pt;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 13pt;
+      font-weight: 700;
+      color: var(--tiffany-dark);
+      margin-top: 25px;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    h3 {
+      font-size: 11pt;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-top: 15px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin-bottom: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+      font-size: 9pt;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border: 1px solid var(--gray-200);
+    }
+
+    th {
+      background: var(--gray-100);
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+
+    ul, ol {
+      margin: 10px 0 15px 20px;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    .highlight-box {
+      background: #f0fdfa;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      border-left: 4px solid var(--tiffany);
+    }
+
+    .highlight-box h4 {
+      font-size: 10pt;
+      font-weight: 600;
+      color: var(--tiffany-dark);
+      margin-bottom: 8px;
+    }
+
+    .warning-box {
+      background: #fef3c7;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      border-left: 4px solid #f59e0b;
+    }
+
+    .warning-box h4 {
+      font-size: 10pt;
+      font-weight: 600;
+      color: #b45309;
+      margin-bottom: 8px;
+    }
+
+    .example-clause {
+      background: var(--gray-100);
+      padding: 12px 15px;
+      border-radius: 6px;
+      font-style: italic;
+      font-size: 9pt;
+      margin: 10px 0;
+      border-left: 3px solid var(--gray-400);
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 0;
+      margin: 15px 0;
+    }
+
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .checkbox {
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--gray-300);
+      border-radius: 3px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .two-column {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .disclaimer {
+      margin-top: 30px;
+      padding: 15px;
+      background: #fef3c7;
+      border-radius: 8px;
+      font-size: 8pt;
+      color: var(--gray-600);
+    }
+
+    .footer {
+      margin-top: 30px;
+      padding-top: 15px;
+      border-top: 1px solid var(--gray-200);
+      text-align: center;
+      font-size: 8pt;
+      color: var(--gray-500);
+    }
+
+    .footer-logo {
+      color: var(--tiffany);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">HB</div>
+      <div>
+        <div class="logo-text">Hamilton Bailey</div>
+        <div class="logo-tagline">Medical Practice Law Specialists</div>
+      </div>
+    </div>
+    <div class="header-contact">
+      hamiltonbailey.com<br>
+      Adelaide, South Australia
+    </div>
+  </div>
+
+  <div class="title-section">
+    <h1>Employment Contract Essentials</h1>
+    <div class="subtitle">A Guide for Australian Medical Practices</div>
+  </div>
+
+  <div class="intro">
+    <p>A well-drafted employment contract is the foundation of a successful employment relationship. For medical practices, contracts must navigate the Fair Work Act, relevant Awards, professional registration requirements, and healthcare-specific obligations.</p>
+    <p>This guide outlines the essential elements for employment contracts covering medical practitioners, nurses, allied health professionals, and administrative staff.</p>
+  </div>
+
+  <h2>The Legal Framework</h2>
+
+  <h3>National Employment Standards (NES)</h3>
+  <p>The NES provides 11 minimum entitlements that cannot be excluded or reduced by contract:</p>
+
+  <div class="two-column">
+    <div>
+      <ol>
+        <li>Maximum weekly hours (38 hours plus reasonable additional hours)</li>
+        <li>Requests for flexible working arrangements</li>
+        <li>Parental leave (up to 12 months unpaid)</li>
+        <li>Annual leave (4 weeks per year)</li>
+        <li>Personal/carer's leave (10 days per year)</li>
+        <li>Community service leave</li>
+      </ol>
+    </div>
+    <div>
+      <ol start="7">
+        <li>Long service leave (per state/territory)</li>
+        <li>Public holidays</li>
+        <li>Notice of termination and redundancy pay</li>
+        <li>Fair Work Information Statement</li>
+        <li>Casual Employment Information Statement</li>
+      </ol>
+    </div>
+  </div>
+
+  <h3>Relevant Modern Awards</h3>
+  <table>
+    <tr>
+      <th>Employee Type</th>
+      <th>Likely Award Coverage</th>
+    </tr>
+    <tr>
+      <td>Medical practitioners (employed)</td>
+      <td>May be Award-free; check specific circumstances</td>
+    </tr>
+    <tr>
+      <td>Registered nurses / Enrolled nurses</td>
+      <td>Nurses Award 2020</td>
+    </tr>
+    <tr>
+      <td>Practice managers / Receptionists</td>
+      <td>Health Professionals and Support Services Award 2020</td>
+    </tr>
+    <tr>
+      <td>Allied health professionals</td>
+      <td>Health Professionals and Support Services Award 2020</td>
+    </tr>
+  </table>
+
+  <div class="page-break"></div>
+
+  <h2>Essential Contract Terms</h2>
+
+  <h3>1. Parties and Position</h3>
+  <p>Clearly identify the employing entity, employee's full name, position title, reporting structure, location(s) of work, and commencement date.</p>
+
+  <div class="example-clause">
+    "The Employer engages the Employee in the position of [Position Title], reporting to the [Reporting Manager]. The Employee's principal place of work will be [Address], though the Employee may be required to work at other locations as reasonably directed."
+  </div>
+
+  <h3>2. Employment Type</h3>
+  <p>Specify the type of engagement:</p>
+  <ul>
+    <li><strong>Full-time</strong> — ongoing, with guaranteed hours</li>
+    <li><strong>Part-time</strong> — ongoing, with guaranteed hours less than full-time</li>
+    <li><strong>Casual</strong> — no guaranteed hours, casual loading in lieu of leave entitlements</li>
+    <li><strong>Fixed-term</strong> — for a specified period or project</li>
+  </ul>
+
+  <div class="warning-box">
+    <h4>Fixed-Term Contract Limitations (from 6 December 2023)</h4>
+    <p>Fixed-term contracts generally cannot exceed 2 years (including renewals) and cannot be renewed more than once.</p>
+  </div>
+
+  <h3>3. Remuneration and Benefits</h3>
+  <p>Address all components of the remuneration package:</p>
+  <ul>
+    <li><strong>Base salary or wages</strong> — annual salary or hourly rate; confirm if inclusive/exclusive of superannuation</li>
+    <li><strong>Superannuation</strong> — currently 11.5%, increasing to 12% from 1 July 2025</li>
+    <li><strong>Allowances</strong> — uniform, travel, professional development, on-call</li>
+    <li><strong>Salary sacrifice</strong> — availability and administrative requirements</li>
+  </ul>
+
+  <h3>4. Hours of Work</h3>
+  <p>Specify ordinary hours, spread of hours, overtime arrangements, on-call provisions, and time recording requirements.</p>
+
+  <h3>5. Leave Entitlements</h3>
+  <p>While NES provides minimums, contracts may enhance entitlements:</p>
+  <ul>
+    <li><strong>Annual leave</strong> — 4 weeks minimum; additional leave, loading, restrictions</li>
+    <li><strong>Personal/carer's leave</strong> — 10 days minimum; evidence requirements</li>
+    <li><strong>Parental leave</strong> — Government-funded and employer-provided</li>
+    <li><strong>Study leave</strong> — professional development, conference, examination leave</li>
+  </ul>
+
+  <div class="page-break"></div>
+
+  <h3>6. Professional Obligations</h3>
+  <p>For registered health practitioners, include provisions addressing:</p>
+
+  <div class="highlight-box">
+    <h4>Registration Requirements</h4>
+    <p>"The Employee must maintain current registration with AHPRA and the relevant National Board throughout their employment. The Employee must immediately notify the Employer of any change to their registration status, any conditions or undertakings imposed, or any notifications made to AHPRA concerning them."</p>
+  </div>
+
+  <ul>
+    <li><strong>Professional indemnity insurance</strong> — minimum coverage requirements</li>
+    <li><strong>Medicare provider number</strong> — obtain and maintain for practice location(s)</li>
+    <li><strong>Continuing professional development</strong> — responsibility and employer support</li>
+  </ul>
+
+  <h3>7. Confidentiality</h3>
+  <p>Medical practice employees access highly sensitive patient information. Confidentiality provisions should cover:</p>
+  <ul>
+    <li>Patient health information and records</li>
+    <li>Practice financial information</li>
+    <li>Business strategies and plans</li>
+    <li>Staff personal information</li>
+    <li>Any information designated as confidential</li>
+  </ul>
+  <p><strong>Important:</strong> Confidentiality obligations should continue after termination.</p>
+
+  <h3>8. Intellectual Property</h3>
+  <p>Address ownership of intellectual property created during employment, including clinical protocols, research, educational materials, and software systems.</p>
+
+  <h3>9. Restraint of Trade</h3>
+  <p>Post-employment restraints may be appropriate for practitioners with patient relationships. For restraints to be enforceable, they must be reasonable in terms of:</p>
+  <ul>
+    <li><strong>Geographic scope</strong> — reasonable for the practice's catchment area</li>
+    <li><strong>Duration</strong> — typically 6–12 months is more likely enforceable</li>
+    <li><strong>Scope of activities</strong> — distinguish between practice and patient solicitation</li>
+  </ul>
+
+  <div class="warning-box">
+    <h4>Drafting Tip</h4>
+    <p>Use cascading provisions (e.g., 12/6/3 months; 10/5/2 km) to maximise enforceability. Overly broad restraints risk being entirely struck out.</p>
+  </div>
+
+  <div class="page-break"></div>
+
+  <h3>10. Termination</h3>
+
+  <p><strong>Notice of Termination (NES Minimums):</strong></p>
+  <table>
+    <tr>
+      <th>Period of Service</th>
+      <th>Minimum Notice</th>
+    </tr>
+    <tr>
+      <td>Up to 1 year</td>
+      <td>1 week</td>
+    </tr>
+    <tr>
+      <td>1–3 years</td>
+      <td>2 weeks</td>
+    </tr>
+    <tr>
+      <td>3–5 years</td>
+      <td>3 weeks</td>
+    </tr>
+    <tr>
+      <td>Over 5 years</td>
+      <td>4 weeks</td>
+    </tr>
+    <tr>
+      <td>Over 45 years old with 2+ years service</td>
+      <td>Add 1 week</td>
+    </tr>
+  </table>
+
+  <p>Also address payment in lieu of notice, summary dismissal grounds, and return of property obligations.</p>
+
+  <h3>11. Policies and Procedures</h3>
+  <p>Incorporate workplace policies by reference. Key policies include:</p>
+  <ul>
+    <li>Code of Conduct</li>
+    <li>Privacy and Confidentiality Policy</li>
+    <li>Work Health and Safety Policy</li>
+    <li>Anti-discrimination and Harassment Policy</li>
+    <li>Social Media Policy</li>
+    <li>Infection Control Policy</li>
+  </ul>
+
+  <h2>Common Pitfalls to Avoid</h2>
+  <ol>
+    <li><strong>Failing to identify Award coverage</strong> — employees retain Award entitlements unless properly contracted out</li>
+    <li><strong>Inadequate record-keeping</strong> — maintain time and wage records for 7 years</li>
+    <li><strong>Sham contracting</strong> — misclassifying employees as contractors attracts penalties</li>
+    <li><strong>Unenforceable restraints</strong> — overly broad restraints may be struck out entirely</li>
+    <li><strong>Failing to provide required documents</strong> — Fair Work Information Statement is mandatory</li>
+    <li><strong>Unlawful deductions</strong> — require written authorisation and employee benefit</li>
+  </ol>
+
+  <h2>Contract Review Checklist</h2>
+  <ul class="checklist">
+    <li><div class="checkbox"></div><span>Parties correctly identified</span></li>
+    <li><div class="checkbox"></div><span>Position, duties, and reporting line clear</span></li>
+    <li><div class="checkbox"></div><span>Employment type specified (full-time, part-time, casual, fixed-term)</span></li>
+    <li><div class="checkbox"></div><span>Commencement date and any probation period stated</span></li>
+    <li><div class="checkbox"></div><span>Remuneration clearly stated (base salary, superannuation, allowances)</span></li>
+    <li><div class="checkbox"></div><span>Hours of work and overtime arrangements addressed</span></li>
+    <li><div class="checkbox"></div><span>Leave entitlements meet or exceed NES minimums</span></li>
+    <li><div class="checkbox"></div><span>Professional registration and insurance requirements included</span></li>
+    <li><div class="checkbox"></div><span>Confidentiality obligations appropriate</span></li>
+    <li><div class="checkbox"></div><span>Restraint of trade provisions reasonable (if included)</span></li>
+    <li><div class="checkbox"></div><span>Termination provisions comply with NES</span></li>
+    <li><div class="checkbox"></div><span>Policies incorporated by reference</span></li>
+  </ul>
+
+  <div class="disclaimer">
+    <strong>Disclaimer:</strong> This guide provides general information about employment contracts for medical practices in Australia. It does not constitute legal advice and should not be relied upon as such. Employment law is complex and subject to frequent change. We strongly recommend seeking independent legal advice before entering into or varying employment arrangements.
+  </div>
+
+  <div class="footer">
+    <div class="footer-logo">Hamilton Bailey Law</div>
+    <p>© 2024 Hamilton Bailey. All rights reserved. | hamiltonbailey.com</p>
+  </div>
+</body>
+</html>

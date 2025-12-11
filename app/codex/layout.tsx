@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { CodexHeader } from "@/components/codex/CodexHeader";
 import { CodexFooter } from "@/components/codex/CodexFooter";
+import { CodexThemeForcer } from "@/components/codex/CodexThemeForcer";
 
 export const metadata: Metadata = {
   title: {
@@ -91,13 +92,16 @@ export default function CodexLayout({
 }) {
   return (
     <>
+      {/* Force light mode for all Codex pages */}
+      <CodexThemeForcer />
+
       {/* JSON-LD Structured Data */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-white via-gray-50/30 to-tiffany-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 antialiased">
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-white via-gray-50/30 to-tiffany-50/20 antialiased">
         {/* Skip to main content for accessibility */}
         <a
           href="#main-content"

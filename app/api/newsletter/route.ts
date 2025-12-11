@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/server";
 import { checkRateLimit, getClientIdentifier, RATE_LIMITS } from "@/lib/rate-limiter";
 import { trackError, createErrorResponse } from "@/lib/error-tracking";
 import { enrollInSequence } from "@/lib/email-automation";
@@ -46,7 +46,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
+    // Verify environment variables are set
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error("Missing Supabase environment variables");
+      return NextResponse.json(
+        { error: "Server configuration error. Please contact support." },
+        { status: 500 }
+      );
+    }
+
+    const supabase = createServiceRoleClient();
 
     // Check if email already exists
     const { data: existing } = await supabase
@@ -83,7 +92,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) {
-      console.error("Newsletter subscription error:", error);
+      console.error("Newsletter subscription error:", JSON.stringify(error, null, 2));
+      console.error("Error code:", error.code);
+      console.error("Error message:", error.message);
+      console.error("Error details:", error.details);
 
       // Handle unique constraint violation gracefully
       if (error.code === "23505") {
@@ -93,8 +105,13 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      // Return more detailed error in development/staging
+      const isDev = process.env.NODE_ENV !== "production";
       return NextResponse.json(
-        { error: "Failed to subscribe. Please try again." },
+        {
+          error: "Failed to subscribe. Please try again.",
+          ...(isDev && { debug: { code: error.code, message: error.message } })
+        },
         { status: 500 }
       );
     }
@@ -133,7 +150,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
+    const supabase = createServiceRoleClient();
 
     // Mark as unsubscribed instead of deleting
     const { error } = await supabase
