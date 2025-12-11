@@ -215,6 +215,33 @@ async function checkReferralPurchase(supabase: SupabaseClient, email: string): P
 }
 
 /**
+ * Update booking status to "confirmed" after payment
+ */
+async function updateBookingStatusAfterPayment(
+  supabase: SupabaseClient,
+  session: Stripe.Checkout.Session
+): Promise<void> {
+  const db = getUntypedClient(supabase);
+  const bookingId = session.metadata?.bookingId;
+
+  if (!bookingId) {
+    console.log("No booking ID in session metadata, skipping booking update");
+    return;
+  }
+
+  try {
+    await db
+      .from("advanced_bookings")
+      .update({ status: "confirmed" })
+      .eq("id", bookingId);
+
+    console.log(`Booking confirmed: ${bookingId}`);
+  } catch (error) {
+    console.error("Error updating booking status:", error);
+  }
+}
+
+/**
  * Handle successful checkout
  */
 async function handleCheckoutComplete(session: Stripe.Checkout.Session): Promise<void> {
@@ -227,6 +254,9 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session): Promise
     console.error("No customer email in session:", session.id);
     return;
   }
+
+  // Update booking status if this checkout includes a booking
+  await updateBookingStatusAfterPayment(supabase, session);
 
   // Only process document purchases
   if (purchaseType !== "document") {
@@ -303,7 +333,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session): Promise
 }
 
 /**
- * Handle refund
+ * Handle refund and cancel associated booking
  */
 async function handleRefund(charge: Stripe.Charge): Promise<void> {
   const supabase = createServiceRoleClient();
@@ -323,6 +353,58 @@ async function handleRefund(charge: Stripe.Charge): Promise<void> {
     .eq("stripe_payment_intent", paymentIntent);
 
   console.log(`Purchase refunded: ${paymentIntent}`);
+}
+
+/**
+ * Handle payment failure - cancel associated booking
+ */
+async function handlePaymentFailure(session: Stripe.Checkout.Session): Promise<void> {
+  const supabase = createServiceRoleClient();
+  const db = getUntypedClient(supabase);
+  const bookingId = session.metadata?.bookingId;
+
+  if (!bookingId) {
+    console.log("No booking ID in failed session, skipping");
+    return;
+  }
+
+  try {
+    // Mark booking as cancelled since payment failed
+    await db
+      .from("advanced_bookings")
+      .update({ status: "cancelled" })
+      .eq("id", bookingId);
+
+    console.log(`Booking cancelled due to payment failure: ${bookingId}`);
+  } catch (error) {
+    console.error("Error cancelling booking on payment failure:", error);
+  }
+}
+
+/**
+ * Handle checkout session expiration
+ */
+async function handleCheckoutExpired(session: Stripe.Checkout.Session): Promise<void> {
+  const supabase = createServiceRoleClient();
+  const db = getUntypedClient(supabase);
+  const bookingId = session.metadata?.bookingId;
+
+  if (!bookingId) {
+    console.log("No booking ID in expired session, skipping");
+    return;
+  }
+
+  try {
+    // Mark booking as pending payment (user can try again)
+    await db
+      .from("advanced_bookings")
+      .update({ status: "pending" })
+      .eq("id", bookingId);
+
+    console.log(`Booking reset to pending due to checkout expiration: ${bookingId}`);
+  } catch (error) {
+    console.error("Error resetting booking on checkout expiration:", error);
+  }
 }
 
 /**
@@ -386,6 +468,23 @@ export async function POST(request: NextRequest) {
       case "charge.refunded": {
         const charge = event.data.object as Stripe.Charge;
         await handleRefund(charge);
+        break;
+      }
+
+      case "checkout.session.expired": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        await handleCheckoutExpired(session);
+        break;
+      }
+
+      case "payment_intent.payment_failed": {
+        // Get the associated checkout session
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        const checkout = paymentIntent.charges.data[0];
+        if (checkout?.metadata?.bookingId) {
+          const mockSession = { metadata: checkout.metadata } as Stripe.Checkout.Session;
+          await handlePaymentFailure(mockSession);
+        }
         break;
       }
 

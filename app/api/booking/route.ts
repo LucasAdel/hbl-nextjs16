@@ -119,6 +119,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Create booking in advanced_bookings table with all required fields
+    // Status is "pending_payment" until Stripe webhook confirms payment
     const bookingData = {
       client_name: name,
       client_email: email,
@@ -128,7 +129,7 @@ export async function POST(request: NextRequest) {
       event_type_id: selectedEventType.id,
       event_type_name: consultationType || selectedEventType.name,
       location_type: "video",
-      status: "pending",
+      status: "pending_payment",
       notes: message || null,
       timezone: "Australia/Adelaide",
       custom_answers: practiceType || practiceWebsite ? {

@@ -478,7 +478,7 @@ class ChatPersistenceService {
   async createNewConversation(): Promise<ChatConversation> {
     const sessionId = this.generateSessionId();
     const conversation: ChatConversation = {
-      id: crypto.randomUUID(),
+      id: this.generateUUID(),
       sessionId,
       startedAt: new Date(),
       lastMessageAt: new Date(),
@@ -1302,6 +1302,16 @@ class ChatPersistenceService {
 
   private generateSessionId(): string {
     return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  private generateUUID(): string {
+    // UUID v4 implementation that works in browser context
+    // crypto.randomUUID() is not available on client-side
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+      const r = (Math.random() * 16) | 0;
+      const v = c === "x" ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
   }
 
   private getDeviceType(): string {
