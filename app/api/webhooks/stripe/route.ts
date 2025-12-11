@@ -356,32 +356,6 @@ async function handleRefund(charge: Stripe.Charge): Promise<void> {
 }
 
 /**
- * Handle payment failure - cancel associated booking
- */
-async function handlePaymentFailure(session: Stripe.Checkout.Session): Promise<void> {
-  const supabase = createServiceRoleClient();
-  const db = getUntypedClient(supabase);
-  const bookingId = session.metadata?.bookingId;
-
-  if (!bookingId) {
-    console.log("No booking ID in failed session, skipping");
-    return;
-  }
-
-  try {
-    // Mark booking as cancelled since payment failed
-    await db
-      .from("advanced_bookings")
-      .update({ status: "cancelled" })
-      .eq("id", bookingId);
-
-    console.log(`Booking cancelled due to payment failure: ${bookingId}`);
-  } catch (error) {
-    console.error("Error cancelling booking on payment failure:", error);
-  }
-}
-
-/**
  * Handle checkout session expiration
  */
 async function handleCheckoutExpired(session: Stripe.Checkout.Session): Promise<void> {
@@ -478,13 +452,10 @@ export async function POST(request: NextRequest) {
       }
 
       case "payment_intent.payment_failed": {
-        // Get the associated checkout session
-        const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        const checkout = paymentIntent.charges.data[0];
-        if (checkout?.metadata?.bookingId) {
-          const mockSession = { metadata: checkout.metadata } as Stripe.Checkout.Session;
-          await handlePaymentFailure(mockSession);
-        }
+        // Payment failed - log for debugging
+        // Note: bookingId passed via checkout.session metadata
+        // checkout.session.expired will handle cleanup
+        console.log("Payment intent failed:", event.data.object.id);
         break;
       }
 
