@@ -164,7 +164,7 @@ export function ArticleContent({ content }: ArticleContentProps) {
         return (
           <pre
             key={index}
-            className="bg-slate-900 text-slate-100 rounded-xl p-5 my-8 overflow-x-auto text-sm font-mono border border-slate-800 shadow-lg"
+            className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl p-5 my-8 overflow-x-auto text-sm font-mono border border-slate-200 dark:border-slate-800 shadow-lg"
           >
             <code>{code}</code>
           </pre>

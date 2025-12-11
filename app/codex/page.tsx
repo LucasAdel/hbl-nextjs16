@@ -410,11 +410,11 @@ export default function LibraryPage() {
       {/* CTA Section */}
       <section className="py-16 bg-gray-50 dark:bg-slate-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-r from-gray-900 to-gray-800 dark:from-slate-800 dark:to-slate-700 rounded-2xl p-8 md:p-12 text-center text-white">
+          <div className="bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 rounded-2xl p-8 md:p-12 text-center text-slate-900 dark:text-white">
             <h3 className="text-2xl md:text-3xl font-bold mb-4">
               Need Personalised Legal Advice?
             </h3>
-            <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
+            <p className="text-slate-600 dark:text-gray-300 mb-6 max-w-2xl mx-auto">
               Our library provides general guidance, but every situation is
               unique. Book a consultation with our experts for tailored advice.
             </p>
@@ -427,7 +427,7 @@ export default function LibraryPage() {
               </Link>
               <Link
                 href="/tools/compliance-quiz"
-                className="px-6 py-3 bg-white/10 text-white border border-white/30 rounded-lg font-semibold hover:bg-white/20 transition-colors"
+                className="px-6 py-3 bg-slate-300/30 dark:bg-white/10 text-slate-900 dark:text-white border border-slate-400 dark:border-white/30 rounded-lg font-semibold hover:bg-slate-300/50 dark:hover:bg-white/20 transition-colors"
               >
                 Take Compliance Quiz
               </Link>

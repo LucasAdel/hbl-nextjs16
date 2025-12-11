@@ -365,9 +365,127 @@ html[data-force-light="true"] {
 }
 
 /*
- * Override Tailwind's dark: variant styles via media query with high specificity
- * This targets all elements when system prefers dark but we want light
+ * Override Tailwind's dark: variant styles
+ * These rules apply whenever data-force-light is set, regardless of system preference
+ * When CodexThemeForcer removes the "dark" class, we still need to override the
+ * base light colors that should apply instead
  */
+
+/* Force light mode for entire codex section */
+html[data-force-light="true"] {
+  --color-background: #ffffff;
+  --color-foreground: #0f172a;
+}
+
+/* Override all dark: variant classes by targeting descendants */
+html[data-force-light="true"] [class*="dark:bg-slate-"] {
+  background-color: inherit !important;
+}
+
+html[data-force-light="true"] [class*="dark:text-"] {
+  color: inherit !important;
+}
+
+/* Specific background overrides for dark variants */
+html[data-force-light="true"] .dark\:bg-slate-800,
+html[data-force-light="true"] .dark\:bg-slate-900 {
+  background-color: #ffffff !important;
+}
+
+html[data-force-light="true"] .dark\:bg-slate-800\/60 {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+html[data-force-light="true"] .dark\:bg-slate-800\/50 {
+  background-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+html[data-force-light="true"] .dark\:text-white {
+  color: #0f172a !important;
+}
+
+html[data-force-light="true"] .dark\:text-gray-300 {
+  color: #334155 !important;
+}
+
+html[data-force-light="true"] .dark\:text-gray-400 {
+  color: #475569 !important;
+}
+
+html[data-force-light="true"] .dark\:text-slate-400 {
+  color: #475569 !important;
+}
+
+html[data-force-light="true"] .dark\:border-slate-600 {
+  border-color: #cbd5e1 !important;
+}
+
+html[data-force-light="true"] .dark\:border-slate-700 {
+  border-color: #cbd5e1 !important;
+}
+
+html[data-force-light="true"] .dark\:border-slate-800 {
+  border-color: #cbd5e1 !important;
+}
+
+html[data-force-light="true"] .dark\:text-tiffany-400 {
+  color: #0f766e !important;
+}
+
+html[data-force-light="true"] .dark\:text-tiffany-300 {
+  color: #0f766e !important;
+}
+
+html[data-force-light="true"] .dark\:hover\:text-tiffany-400:hover {
+  color: #0f766e !important;
+}
+
+html[data-force-light="true"] .dark\:hover\:text-white:hover {
+  color: #0f172a !important;
+}
+
+html[data-force-light="true"] .dark\:hover\:bg-slate-600:hover {
+  background-color: #f1f5f9 !important;
+}
+
+html[data-force-light="true"] .dark\:hover\:bg-slate-800:hover {
+  background-color: #f1f5f9 !important;
+}
+
+html[data-force-light="true"] .dark\:hover\:border-tiffany-500:hover {
+  border-color: #0f766e !important;
+}
+
+html[data-force-light="true"] .dark\:from-slate-800 {
+  background-color: #ffffff !important;
+}
+
+html[data-force-light="true"] .dark\:to-slate-700 {
+  background-color: #ffffff !important;
+}
+
+html[data-force-light="true"] .dark\:bg-tiffany-900\/30 {
+  background-color: #ccfbf1 !important;
+}
+
+html[data-force-light="true"] .dark\:bg-yellow-900\/30 {
+  background-color: #fef3c7 !important;
+}
+
+html[data-force-light="true"] .dark\:border-yellow-700\/50 {
+  border-color: #fcd34d !important;
+}
+
+html[data-force-light="true"] .dark\:text-yellow-300 {
+  color: #fcd34d !important;
+}
+
+/* Override gradient backgrounds - force light gradients */
+html[data-force-light="true"] .bg-gradient-to-br {
+  background: linear-gradient(135deg, #f0fdfa, #ffffff, #b2dfdb) !important;
+}
+
+/* Media query for dark mode system preference - apply overrides */
 @media (prefers-color-scheme: dark) {
   /* Background overrides */
   html[data-force-light="true"] nav,
