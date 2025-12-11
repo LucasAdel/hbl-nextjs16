@@ -402,15 +402,16 @@
 - [x] Lead emailer integration with streaming endpoint <!-- Completed: 2024-12-10 -->
 - [x] Professional email template with HBL branding <!-- Completed: 2024-12-10 -->
 - [x] Phone number E.164 formatting for macOS FaceTime compatibility <!-- Completed: 2024-12-10 -->
-- [x] Chat button notification badge (red "1" indicator) <!-- Completed: 2025-12-11 -->
+- [x] Chat button notification badge (red "1" indicator) <!-- Completed: 2025-12-11 - CURRENT STATE: Hardcoded "1" badge showing for all users when hasNewMessage is true (proactive message indicator) -->
 - [ ] **FUTURE: Multitenancy chat badge - track per-user unread message counts**
-  - [ ] Track actual unread message counts per user in database
-  - [ ] Pass user ID to chat widget component
-  - [ ] Fetch unread count from database via API
-  - [ ] Display dynamic count instead of hardcoded "1"
-  - [ ] Update badge when new messages arrive in real-time
-  - [ ] Clear unread count when user opens chat
-  - [ ] NOTE: Currently badge shows "1" for all users (proactive message indicator only)
+  - [ ] CURRENT STATE: Badge displays hardcoded "1" for all users
+  - [ ] NOT YET: Tracking actual unread message counts per user in database
+  - [ ] NOT YET: Passing user ID to chat widget component
+  - [ ] NOT YET: Fetching unread count from database via API
+  - [ ] NOT YET: Displaying dynamic count instead of hardcoded "1"
+  - [ ] NOT YET: Updating badge when new messages arrive in real-time
+  - [ ] NOT YET: Clearing unread count when user opens chat
+  - [ ] NOTE: Currently shows "1" for all users (proactive message indicator only, not per-user unread tracking)
 - [ ] AI conversation analytics dashboard
 - [ ] Lead scoring based on chat interactions
 - [ ] Automated follow-up email sequences
