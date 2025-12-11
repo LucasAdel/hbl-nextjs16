@@ -152,7 +152,11 @@ const ChatButton: React.FC<{ onClick: () => void; hasNewMessage: boolean }> = ({
         aria-label="Open chat"
       >
         <MessageCircle className="h-6 w-6" />
-        {hasNewMessage && (
+        {/* TODO: Re-enable badge when multitenancy tracking is implemented
+            CURRENT STATE: Hardcoded "1" badge shown for all users (not per-user)
+            FUTURE: Track actual unread message counts per user via database
+        */}
+        {/* hasNewMessage && (
           <motion.span
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -160,7 +164,7 @@ const ChatButton: React.FC<{ onClick: () => void; hasNewMessage: boolean }> = ({
           >
             1
           </motion.span>
-        )}
+        ) */}
       </motion.button>
     </motion.div>
   );
