@@ -402,6 +402,15 @@
 - [x] Lead emailer integration with streaming endpoint <!-- Completed: 2024-12-10 -->
 - [x] Professional email template with HBL branding <!-- Completed: 2024-12-10 -->
 - [x] Phone number E.164 formatting for macOS FaceTime compatibility <!-- Completed: 2024-12-10 -->
+- [x] Chat button notification badge (red "1" indicator) <!-- Completed: 2025-12-11 -->
+- [ ] **FUTURE: Multitenancy chat badge - track per-user unread message counts**
+  - [ ] Track actual unread message counts per user in database
+  - [ ] Pass user ID to chat widget component
+  - [ ] Fetch unread count from database via API
+  - [ ] Display dynamic count instead of hardcoded "1"
+  - [ ] Update badge when new messages arrive in real-time
+  - [ ] Clear unread count when user opens chat
+  - [ ] NOTE: Currently badge shows "1" for all users (proactive message indicator only)
 - [ ] AI conversation analytics dashboard
 - [ ] Lead scoring based on chat interactions
 - [ ] Automated follow-up email sequences
