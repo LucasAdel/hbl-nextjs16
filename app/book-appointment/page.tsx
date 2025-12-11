@@ -244,8 +244,11 @@ export default function BookAppointmentPage() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const dayOfWeek = date.getDay();
-    // Disable weekends (0 = Sunday, 6 = Saturday) and past dates
-    return dayOfWeek === 0 || dayOfWeek === 6 || date < today;
+    // Disable weekends (0 = Sunday, 6 = Saturday), past dates, and dates without available slots
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    const isPast = date < today;
+    const hasNoSlots = !dateHasSlots(day);
+    return isWeekend || isPast || hasNoSlots;
   };
 
   const isSelectedDate = (day: number) => {
@@ -387,8 +390,8 @@ export default function BookAppointmentPage() {
   };
 
   const handleProceedToPayment = () => {
-    if (!formData.name || !formData.email || !selectedDate || !selectedTime) {
-      setError("Please fill in all required fields");
+    if (!formData.name || !formData.email || !selectedDate || !selectedSlot) {
+      setError("Please fill in all required fields including selecting a time slot");
       return;
     }
     setError("");
@@ -402,6 +405,36 @@ export default function BookAppointmentPage() {
     setError("");
 
     try {
+      // Validate the selected slot is still available (if using dynamic slots)
+      if (selectedSlot) {
+        const validationResponse = await fetch("/api/availability/validate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ slotId: selectedSlot.id }),
+        });
+
+        const validationData = await validationResponse.json();
+
+        if (!validationData.available) {
+          setError(validationData.reason || "This time slot is no longer available. Please select another time.");
+          setIsSubmitting(false);
+          // Clear the selected slot and refresh slots
+          setSelectedSlot(null);
+          setSelectedTime("");
+          // Trigger a refresh of available slots
+          const startDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+          const endDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+          const slotsResponse = await fetch(
+            `/api/availability/slots?startDate=${startDate.toISOString().split("T")[0]}&endDate=${endDate.toISOString().split("T")[0]}`
+          );
+          const slotsData = await slotsResponse.json();
+          if (slotsData.success) {
+            setAvailableSlots(slotsData.slots);
+          }
+          return;
+        }
+      }
+
       // Upload files first if any
       let fileUrls: string[] = [];
       if (uploadedFiles.length > 0) {
@@ -424,7 +457,7 @@ export default function BookAppointmentPage() {
         }
       }
 
-      // Create booking
+      // Create booking with slotId for dynamic slot blocking
       const bookingResponse = await fetch("/api/booking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -439,12 +472,27 @@ export default function BookAppointmentPage() {
           practiceType: formData.practiceType,
           practiceWebsite: formData.practiceWebsite,
           uploadedFiles: fileUrls,
+          slotId: selectedSlot?.id, // Include slot ID for atomic blocking
         }),
       });
 
       const bookingData = await bookingResponse.json();
 
       if (!bookingResponse.ok) {
+        // If slot conflict, refresh the slots list
+        if (bookingResponse.status === 409) {
+          setSelectedSlot(null);
+          setSelectedTime("");
+          const startDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+          const endDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+          const slotsResponse = await fetch(
+            `/api/availability/slots?startDate=${startDate.toISOString().split("T")[0]}&endDate=${endDate.toISOString().split("T")[0]}`
+          );
+          const slotsData = await slotsResponse.json();
+          if (slotsData.success) {
+            setAvailableSlots(slotsData.slots);
+          }
+        }
         throw new Error(bookingData.error || "Failed to create booking");
       }
 
@@ -806,25 +854,49 @@ export default function BookAppointmentPage() {
                     <div className="mt-6">
                       <label className="block text-sm font-medium text-gray-700 mb-3">
                         Available Times
+                        {loadingSlots && (
+                          <Loader2 className="inline h-4 w-4 ml-2 animate-spin text-tiffany" />
+                        )}
                       </label>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 gap-2">
-                        {timeSlots.map((time) => (
-                          <button
-                            key={time}
-                            onClick={() => selectedDate && setSelectedTime(time)}
-                            disabled={!selectedDate}
-                            className={`px-3 py-3.5 sm:px-4 sm:py-3 border rounded-xl text-sm font-medium transition-all min-h-[48px] ${
-                              selectedTime === time
-                                ? "bg-tiffany text-white border-tiffany shadow-md"
-                                : !selectedDate
-                                ? "border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50"
-                                : "border-gray-300 hover:border-tiffany hover:bg-tiffany/5 text-gray-700 active:bg-tiffany/10"
-                            }`}
-                          >
-                            <span>{time}</span>
-                          </button>
-                        ))}
-                      </div>
+
+                      {slotsError && (
+                        <div className="p-3 bg-red-50 border border-red-200 rounded-lg mb-3">
+                          <p className="text-sm text-red-600">{slotsError}</p>
+                        </div>
+                      )}
+
+                      {selectedDate && !loadingSlots && slotsForSelectedDate.length === 0 && (
+                        <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-center">
+                          <p className="text-sm text-amber-800">
+                            No available times for this date. Please select another day.
+                          </p>
+                        </div>
+                      )}
+
+                      {selectedDate && slotsForSelectedDate.length > 0 && (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 gap-2">
+                          {slotsForSelectedDate.map((slot) => (
+                            <button
+                              key={slot.id}
+                              onClick={() => {
+                                setSelectedTime(formatSlotTime(slot.start_time));
+                                setSelectedSlot(slot);
+                              }}
+                              className={`px-3 py-3.5 sm:px-4 sm:py-3 border rounded-xl text-sm font-medium transition-all min-h-[48px] ${
+                                selectedSlot?.id === slot.id
+                                  ? "bg-tiffany text-white border-tiffany shadow-md"
+                                  : "border-gray-300 hover:border-tiffany hover:bg-tiffany/5 text-gray-700 active:bg-tiffany/10"
+                              }`}
+                            >
+                              <span>{formatSlotTime(slot.start_time)}</span>
+                              <span className="block text-xs opacity-75">
+                                {slot.duration_minutes} min
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
                       {!selectedDate && (
                         <p className="text-xs text-gray-400 mt-2 text-center">
                           Please select a date first to view available times
@@ -832,10 +904,13 @@ export default function BookAppointmentPage() {
                       )}
                     </div>
 
-                    {selectedDate && selectedTime && (
+                    {selectedDate && selectedSlot && (
                       <div className="mt-4 p-3 bg-tiffany/10 rounded-lg">
                         <p className="text-sm text-tiffany-dark">
-                          <strong>Selected:</strong> {formatDate(selectedDate)} at {selectedTime}
+                          <strong>Selected:</strong> {formatDate(selectedDate)} at {formatSlotTime(selectedSlot.start_time)}
+                          <span className="block text-xs mt-1 opacity-80">
+                            Duration: {selectedSlot.duration_minutes} minutes
+                          </span>
                         </p>
                       </div>
                     )}
@@ -1079,7 +1154,7 @@ export default function BookAppointmentPage() {
 
                     <button
                       onClick={handleProceedToPayment}
-                      disabled={!selectedDate || !selectedTime || !formData.name || !formData.email || !formData.phone}
+                      disabled={!selectedDate || !selectedSlot || !formData.name || !formData.email || !formData.phone}
                       className="w-full bg-tiffany text-white py-4 rounded-xl font-semibold hover:bg-tiffany-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-lg"
                     >
                       Confirm Booking & Pay ${calculateTotal().total.toFixed(2)}

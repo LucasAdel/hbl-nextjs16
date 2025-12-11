@@ -45,9 +45,12 @@ interface AvailabilitySlot {
   google_event_id: string | null;
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+type SupabaseClientAny = any;
+
 // Get stored tokens
 async function getStoredTokens(
-  supabase: ReturnType<typeof createClient>
+  supabase: SupabaseClientAny
 ): Promise<StoredTokens | null> {
   const { data, error } = await supabase
     .from("settings")
@@ -61,7 +64,7 @@ async function getStoredTokens(
 
 // Update stored tokens
 async function updateStoredTokens(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClientAny,
   tokens: Partial<StoredTokens>
 ): Promise<void> {
   const existingTokens = await getStoredTokens(supabase);
@@ -76,7 +79,7 @@ async function updateStoredTokens(
 
 // Get valid access token (refresh if needed)
 async function getValidAccessToken(
-  supabase: ReturnType<typeof createClient>
+  supabase: SupabaseClientAny
 ): Promise<string | null> {
   const tokens = await getStoredTokens(supabase);
   if (!tokens) return null;
@@ -191,7 +194,7 @@ function hasConflict(
 
 // Update sync state
 async function updateSyncState(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClientAny,
   success: boolean,
   eventsCount: number,
   blockedCount: number,
