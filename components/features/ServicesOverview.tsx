@@ -12,14 +12,14 @@ interface ServiceCardProps {
 const ServiceCard: React.FC<ServiceCardProps> = ({ title, description, icon, link }) => (
   <Link
     href={link}
-    className="group block h-full rounded-2xl border border-gray-200 bg-white/90 p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+    className="group block h-full rounded-2xl border border-gray-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
   >
-    <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-tiffany/10 text-tiffany">
+    <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-tiffany/10 dark:bg-tiffany/20 text-tiffany">
       {icon}
     </div>
-    <h3 className="text-xl font-semibold text-gray-900 mb-3">{title}</h3>
-    <p className="text-sm text-gray-600 leading-relaxed mb-4">{description}</p>
-    <span className="inline-flex items-center font-semibold text-tiffany transition-colors group-hover:text-tiffany-dark">
+    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">{title}</h3>
+    <p className="text-sm text-gray-600 dark:text-slate-400 leading-relaxed mb-4">{description}</p>
+    <span className="inline-flex items-center font-semibold text-tiffany transition-colors group-hover:text-tiffany-dark dark:group-hover:text-tiffany-light">
       Learn more
       <svg
         className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"
@@ -79,13 +79,13 @@ const services = [
 ];
 
 const ServicesOverview: React.FC = () => (
-  <section className="py-16 bg-white">
+  <section className="py-16 bg-white dark:bg-slate-900">
     <div className="container-custom">
       <div className="text-center mb-12 space-y-3">
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
           Comprehensive Medical Legal Services
         </h2>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        <p className="text-lg text-gray-600 dark:text-slate-300 max-w-2xl mx-auto">
           Everything your practice needs to thrive legally
         </p>
       </div>

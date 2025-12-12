@@ -373,64 +373,184 @@ export type Database = {
       }
       analytics_events: {
         Row: {
-          created_at: string | null
+          id: string
+          user_id: string | null
+          session_id: string
+          event_name: string | null
+          event_type: string | null // Legacy field, use event_name
+          event_category: string | null
+          properties: Json | null
+          page_url: string
+          page_title: string | null
+          referrer: string | null
+          user_agent: string | null
+          ip_hash: string | null
+          device_type: string | null
+          browser: string | null
+          os: string | null
+          screen_width: number | null
+          screen_height: number | null
+          viewport_width: number | null
+          viewport_height: number | null
+          // Legacy fields (kept for backwards compatibility)
+          screen_size: string | null
+          viewport_size: string | null
           document_name: string | null
           element_id: string | null
           element_text: string | null
           element_type: string | null
-          event_type: string
-          id: string
-          page_title: string | null
-          page_url: string
-          referrer: string | null
-          screen_size: string | null
           scroll_depth: number | null
           search_query: string | null
-          session_id: string
           time_spent: number | null
+          // Geo fields
+          country_code: string | null
+          region: string | null
+          city: string | null
+          // UTM tracking
+          utm_source: string | null
+          utm_medium: string | null
+          utm_campaign: string | null
+          utm_term: string | null
+          utm_content: string | null
+          // Session analytics
+          landing_page: string | null
+          exit_page: string | null
+          session_duration: number | null
+          page_view_count: number | null
+          is_bounce: boolean | null
+          is_returning: boolean | null
+          language: string | null
+          timezone_offset: number | null
+          connection_type: string | null
+          // Performance
+          page_load_time: number | null
+          dom_ready_time: number | null
+          // Conversion tracking
+          conversion_value: number | null
+          conversion_currency: string | null
+          // A/B testing
+          experiment_id: string | null
+          variant_id: string | null
+          // Gamification
+          xp_earned: number | null
+          streak_day: number | null
+          // Timestamps
           timestamp: string
-          user_agent: string | null
-          viewport_size: string | null
+          created_at: string | null
         }
         Insert: {
-          created_at?: string | null
+          id?: string
+          user_id?: string | null
+          session_id: string
+          event_name?: string | null
+          event_type?: string | null
+          event_category?: string | null
+          properties?: Json | null
+          page_url: string
+          page_title?: string | null
+          referrer?: string | null
+          user_agent?: string | null
+          ip_hash?: string | null
+          device_type?: string | null
+          browser?: string | null
+          os?: string | null
+          screen_width?: number | null
+          screen_height?: number | null
+          viewport_width?: number | null
+          viewport_height?: number | null
+          screen_size?: string | null
+          viewport_size?: string | null
           document_name?: string | null
           element_id?: string | null
           element_text?: string | null
           element_type?: string | null
-          event_type: string
-          id?: string
-          page_title?: string | null
-          page_url: string
-          referrer?: string | null
-          screen_size?: string | null
           scroll_depth?: number | null
           search_query?: string | null
-          session_id: string
           time_spent?: number | null
+          country_code?: string | null
+          region?: string | null
+          city?: string | null
+          utm_source?: string | null
+          utm_medium?: string | null
+          utm_campaign?: string | null
+          utm_term?: string | null
+          utm_content?: string | null
+          landing_page?: string | null
+          exit_page?: string | null
+          session_duration?: number | null
+          page_view_count?: number | null
+          is_bounce?: boolean | null
+          is_returning?: boolean | null
+          language?: string | null
+          timezone_offset?: number | null
+          connection_type?: string | null
+          page_load_time?: number | null
+          dom_ready_time?: number | null
+          conversion_value?: number | null
+          conversion_currency?: string | null
+          experiment_id?: string | null
+          variant_id?: string | null
+          xp_earned?: number | null
+          streak_day?: number | null
           timestamp: string
-          user_agent?: string | null
-          viewport_size?: string | null
+          created_at?: string | null
         }
         Update: {
-          created_at?: string | null
+          id?: string
+          user_id?: string | null
+          session_id?: string
+          event_name?: string | null
+          event_type?: string | null
+          event_category?: string | null
+          properties?: Json | null
+          page_url?: string
+          page_title?: string | null
+          referrer?: string | null
+          user_agent?: string | null
+          ip_hash?: string | null
+          device_type?: string | null
+          browser?: string | null
+          os?: string | null
+          screen_width?: number | null
+          screen_height?: number | null
+          viewport_width?: number | null
+          viewport_height?: number | null
+          screen_size?: string | null
+          viewport_size?: string | null
           document_name?: string | null
           element_id?: string | null
           element_text?: string | null
           element_type?: string | null
-          event_type?: string
-          id?: string
-          page_title?: string | null
-          page_url?: string
-          referrer?: string | null
-          screen_size?: string | null
           scroll_depth?: number | null
           search_query?: string | null
-          session_id?: string
           time_spent?: number | null
+          country_code?: string | null
+          region?: string | null
+          city?: string | null
+          utm_source?: string | null
+          utm_medium?: string | null
+          utm_campaign?: string | null
+          utm_term?: string | null
+          utm_content?: string | null
+          landing_page?: string | null
+          exit_page?: string | null
+          session_duration?: number | null
+          page_view_count?: number | null
+          is_bounce?: boolean | null
+          is_returning?: boolean | null
+          language?: string | null
+          timezone_offset?: number | null
+          connection_type?: string | null
+          page_load_time?: number | null
+          dom_ready_time?: number | null
+          conversion_value?: number | null
+          conversion_currency?: string | null
+          experiment_id?: string | null
+          variant_id?: string | null
+          xp_earned?: number | null
+          streak_day?: number | null
           timestamp?: string
-          user_agent?: string | null
-          viewport_size?: string | null
+          created_at?: string | null
         }
         Relationships: []
       }

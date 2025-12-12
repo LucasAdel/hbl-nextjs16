@@ -5,12 +5,7 @@ import Link from "next/link";
 
 const CallToAction: React.FC = () => {
   return (
-    <section
-      className="py-20"
-      style={{
-        background: "rgb(29, 138, 127)",
-      }}
-    >
+    <section className="py-20 bg-tiffany-dark dark:bg-slate-800">
       <div className="container-custom">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
           {/* Text Content */}

@@ -4,6 +4,12 @@ import { useState, useEffect } from "react";
 import { X, Download, Printer, Loader2, FileText } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
+import DOMPurify from "dompurify";
+
+// Escape HTML entities to prevent XSS in document.write
+function escapeHtml(str: string): string {
+  return DOMPurify.sanitize(str, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+}
 
 interface InvoiceItem {
   description: string;
@@ -91,7 +97,7 @@ export function InvoiceModal({ isOpen, onClose, sessionId, email }: InvoiceModal
         <!DOCTYPE html>
         <html>
         <head>
-          <title>Invoice ${invoice.invoiceNumber}</title>
+          <title>Invoice ${escapeHtml(invoice.invoiceNumber)}</title>
           <style>
             body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
             .header { display: flex; justify-content: space-between; margin-bottom: 40px; }
@@ -111,14 +117,14 @@ export function InvoiceModal({ isOpen, onClose, sessionId, email }: InvoiceModal
             <div class="logo">Hamilton Bailey Law</div>
             <div class="invoice-details">
               <h2>TAX INVOICE</h2>
-              <p><strong>Invoice #:</strong> ${invoice.invoiceNumber}</p>
+              <p><strong>Invoice #:</strong> ${escapeHtml(invoice.invoiceNumber)}</p>
               <p><strong>Date:</strong> ${format(new Date(invoice.date), "dd MMM yyyy")}</p>
             </div>
           </div>
           <div class="customer-info">
             <h3>Bill To:</h3>
-            <p>${invoice.customerName}</p>
-            <p>${invoice.customerEmail}</p>
+            <p>${escapeHtml(invoice.customerName)}</p>
+            <p>${escapeHtml(invoice.customerEmail)}</p>
           </div>
           <table>
             <thead>
@@ -132,7 +138,7 @@ export function InvoiceModal({ isOpen, onClose, sessionId, email }: InvoiceModal
             <tbody>
               ${invoice.items.map(item => `
                 <tr>
-                  <td>${item.description}</td>
+                  <td>${escapeHtml(item.description)}</td>
                   <td>${item.quantity}</td>
                   <td>${formatCurrency(item.unitPrice)}</td>
                   <td>${formatCurrency(item.total)}</td>

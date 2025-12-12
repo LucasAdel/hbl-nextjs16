@@ -4,6 +4,7 @@ import { CodexFooter } from "@/components/codex/CodexFooter";
 import { CodexThemeForcer } from "@/components/codex/CodexThemeForcer";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://codex.hamiltonbailey.com"),
   title: {
     default: "Hamilton Bailey Legal Codex | Healthcare Law Resources",
     template: "%s | Hamilton Bailey Legal Codex",

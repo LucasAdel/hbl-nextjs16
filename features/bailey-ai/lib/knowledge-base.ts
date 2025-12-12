@@ -2,15 +2,19 @@
  * Bailey AI Knowledge Base - Hamilton Bailey Law Firm
  *
  * Comprehensive knowledge base containing all Hamilton Bailey-specific information
- * (38 entries total)
+ * (76 entries total)
  *
  * Categories covered:
- * - Company information (overview, principal, contact)
+ * - Company information (overview, principal, contact, offices)
  * - Services (Tenant Doctor™, payroll tax, commercial law, audits, pathology)
- * - Compliance (AHPRA, Fair Work, risk indicators, regulatory)
- * - Expertise (case law: Thomas/Naaz, Optical Superstore, Hollis v Vabu)
+ * - Compliance (AHPRA, Fair Work, risk indicators, regulatory, Medicare)
+ * - Expertise (case law: Thomas/Naaz, Optical Superstore, Hollis v Vabu, etc.)
  * - Partnerships (Health and Life, David Dahm clarification)
  * - Resources (library, educational, technology)
+ * - Medical Practice Types (GP, specialist, allied health, dental, etc.)
+ * - State-specific (SA, NSW, VIC, QLD, TAS variations)
+ * - Common Scenarios (practice sale, new practice, restructuring)
+ * - FAQ (common questions, objections, concerns)
  */
 
 import { KnowledgeItem, CHAT_XP_REWARDS } from "../types";
@@ -828,6 +832,836 @@ export const KNOWLEDGE_BASE: KnowledgeItem[] = [
     xpReward: 15,
     metadata: { access: "registered clients", format: "digital" }
   },
+
+  // ============================================
+  // NEW KNOWLEDGE: MEDICAL PRACTICE TYPES
+  // ============================================
+
+  // 39. General Practice (GP) Legal Services
+  {
+    id: "gp-legal-services",
+    category: "practice-types",
+    subcategory: "general-practice",
+    topic: "gp legal services",
+    title: "Legal Services for General Practitioners",
+    content: "Hamilton Bailey provides specialised legal services for General Practitioners including Tenant Doctor™ arrangements, payroll tax compliance, Medicare billing compliance, practice sale and purchase, partnership agreements, and regulatory defence. GPs face unique compliance challenges given their high patient volume and contractor arrangements.",
+    summary: "Specialised legal services tailored for General Practice medical centres and GPs.",
+    keywords: ["gp", "general practitioner", "general practice", "family medicine", "bulk billing", "medicare"],
+    intentPatterns: ["general practice", "gp legal", "family doctor", "bulk billing practice", "gp compliance"],
+    responseTemplate: "Legal Services for General Practitioners:\n\n**Why GPs Need Specialised Legal Support:**\nGeneral Practices are the most common targets for payroll tax audits due to:\n• High volume of contractor arrangements\n• Complex billing structures (bulk billing, private, mixed)\n• Multiple practitioners sharing facilities\n• Varying engagement models\n\n**Our GP-Specific Services:**\n\n**Structure & Compliance:**\n• Tenant Doctor™ arrangements optimised for GP settings\n• Payroll tax risk assessment and mitigation\n• Medicare billing compliance review\n• Practice management agreements\n\n**Commercial Matters:**\n• Practice sale and purchase\n• Partnership and associate agreements\n• Lease negotiations (including pathology collection rooms)\n• Succession planning\n\n**Regulatory Support:**\n• AHPRA compliance\n• State Revenue Office audit defence\n• Fair Work contractor reviews\n\n**GP Challenges We Address:**\n• After-hours clinics and locum arrangements\n• Bulk billing practices and mixed billing structures\n• Practice nurse employment vs contractor status\n• Allied health co-location agreements\n\nWould you like to discuss your GP practice's specific legal needs?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Each GP practice has unique circumstances. Specific advice should be obtained.",
+    adviceLevel: "general",
+    confidenceLevel: 10,
+    relatedProducts: ["gp-compliance-package"],
+    xpReward: 25,
+    metadata: { practice_type: "General Practice", risk_level: "high" }
+  },
+
+  // 40. Specialist Practice Legal Services
+  {
+    id: "specialist-legal-services",
+    category: "practice-types",
+    subcategory: "specialist",
+    topic: "specialist practice legal",
+    title: "Legal Services for Medical Specialists",
+    content: "Hamilton Bailey provides legal services for medical specialists including surgeons, physicians, psychiatrists, and other specialty practitioners. Specialist practices have unique structuring requirements due to higher billing rates, hospital affiliations, procedural focus, and different patient relationship models.",
+    summary: "Legal services tailored for specialist medical practitioners and specialist clinics.",
+    keywords: ["specialist", "surgeon", "physician", "psychiatrist", "dermatologist", "cardiologist", "specialist practice"],
+    intentPatterns: ["specialist practice", "surgeon legal", "specialist clinic", "medical specialist", "consulting specialist"],
+    responseTemplate: "Legal Services for Medical Specialists:\n\n**Specialist Practice Considerations:**\nSpecialist practices have unique legal requirements due to:\n• Higher consultation and procedural fees\n• Hospital visiting rights and affiliations\n• Referral relationships with GPs\n• Complex billing (Medicare rebates, gap fees, no-gap arrangements)\n\n**Our Specialist Services:**\n\n**Practice Structuring:**\n• Service entity design for specialists\n• Hospital affiliation agreements\n• Rooms licence arrangements in specialist centres\n• Tenant Doctor™ structures for specialist settings\n\n**Commercial Agreements:**\n• Specialist rooms leases\n• Equipment sharing agreements\n• Group practice arrangements\n• Associate specialist agreements\n\n**Compliance:**\n• Specialist-specific payroll tax considerations\n• AHPRA specialist registration requirements\n• Medicare compliance for specialist billing\n• Private health fund agreements\n\n**Succession & Exit:**\n• Specialist practice valuations\n• Patient list transitions\n• Referrer relationship management\n• Post-sale consulting arrangements\n\nWhich specialty area is your practice focused on?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Specialist practices have unique requirements. Professional advice is recommended.",
+    adviceLevel: "general",
+    confidenceLevel: 10,
+    relatedProducts: ["specialist-compliance-review"],
+    xpReward: 25,
+    metadata: { practice_type: "Specialist", complexity: "high" }
+  },
+
+  // 41. Allied Health Legal Services
+  {
+    id: "allied-health-legal",
+    category: "practice-types",
+    subcategory: "allied-health",
+    topic: "allied health legal services",
+    title: "Legal Services for Allied Health Practices",
+    content: "Hamilton Bailey provides legal services for allied health practitioners including physiotherapists, occupational therapists, speech pathologists, dietitians, podiatrists, and psychologists. Allied health practices face unique regulatory and structuring challenges including NDIS compliance, Medicare CDM items, and multi-disciplinary practice models.",
+    summary: "Specialised legal services for allied health practices and practitioners.",
+    keywords: ["allied health", "physiotherapy", "psychology", "occupational therapy", "speech pathology", "dietitian", "podiatry", "ndis"],
+    intentPatterns: ["allied health", "physio practice", "psychology practice", "ndis provider", "cdm billing"],
+    responseTemplate: "Legal Services for Allied Health Practices:\n\n**Allied Health Legal Challenges:**\nAllied health practices face distinct compliance requirements:\n• NDIS provider registration and compliance\n• Medicare CDM (Chronic Disease Management) billing\n• Multi-disciplinary practice structuring\n• WorkCover and TAC provider agreements\n\n**Our Allied Health Services:**\n\n**Practice Structuring:**\n• Multi-disciplinary practice models\n• Contractor vs employee classification (critical for allied health)\n• Service entity structures\n• Partnership and association agreements\n\n**Regulatory Compliance:**\n• NDIS pricing and compliance requirements\n• Medicare CDM item claiming\n• WorkCover and TAC provider registration\n• AHPRA allied health registration\n\n**Commercial Agreements:**\n• Practitioner service agreements\n• Room rental arrangements\n• Equipment and resource sharing\n• Referral relationship documentation\n\n**NDIS-Specific:**\n• Provider agreement reviews\n• Service agreement templates\n• Plan management compliance\n• Quality and safeguarding requirements\n\nWhat type of allied health practice do you operate?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Allied health regulations vary by profession. Specific advice should be obtained.",
+    adviceLevel: "general",
+    confidenceLevel: 9,
+    relatedProducts: ["allied-health-package"],
+    xpReward: 25,
+    metadata: { practice_type: "Allied Health", ndis_relevant: true }
+  },
+
+  // 42. Dental Practice Legal Services
+  {
+    id: "dental-legal-services",
+    category: "practice-types",
+    subcategory: "dental",
+    topic: "dental practice legal",
+    title: "Legal Services for Dental Practices",
+    content: "Hamilton Bailey provides legal services for dental practices including dentists, dental specialists, and dental groups. Dental practices have unique considerations including equipment financing, practice ownership restrictions in some states, specialist referral relationships, and corporate dental group structures.",
+    summary: "Legal services tailored for dental practices, dentists, and dental groups.",
+    keywords: ["dental", "dentist", "dental practice", "orthodontist", "oral surgeon", "dental group", "dental corporate"],
+    intentPatterns: ["dental practice", "dentist legal", "dental group", "dental compliance", "dental sale"],
+    responseTemplate: "Legal Services for Dental Practices:\n\n**Dental Practice Legal Considerations:**\nDental practices have unique structuring requirements:\n• Significant equipment and fit-out investments\n• Practice ownership rules (vary by state)\n• Dental specialist referral networks\n• Corporate dental group arrangements\n\n**Our Dental Services:**\n\n**Practice Structuring:**\n• Dental practice entity structures\n• Associate dentist agreements\n• Specialist dental arrangements\n• Corporate dental group compliance\n\n**Commercial Matters:**\n• Practice purchase and sale\n• Equipment financing agreements\n• Lease negotiations (dental-specific fit-out considerations)\n• Partnership and shareholder agreements\n\n**Compliance:**\n• Dental Board registration requirements\n• Payroll tax for dental associates\n• Fair Work compliance for dental nurses/assistants\n• Health fund provider agreements\n\n**Special Considerations:**\n• Goodwill protection on sale\n• Restrictive covenant enforceability\n• Patient record transitions\n• Dental nurse/hygienist contractor status\n\nAre you looking at practice structuring, sale/purchase, or compliance matters?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Dental practice regulations vary by state. Professional advice is recommended.",
+    adviceLevel: "general",
+    confidenceLevel: 9,
+    relatedProducts: ["dental-practice-package"],
+    xpReward: 25,
+    metadata: { practice_type: "Dental", equipment_intensive: true }
+  },
+
+  // 43. Veterinary Practice Legal Services
+  {
+    id: "veterinary-legal-services",
+    category: "practice-types",
+    subcategory: "veterinary",
+    topic: "veterinary practice legal",
+    title: "Legal Services for Veterinary Practices",
+    content: "Hamilton Bailey provides legal services for veterinary practices including vet clinics, veterinary hospitals, and specialty veterinary services. Veterinary practices share many compliance challenges with medical practices but have unique considerations around animal welfare, emergency services, and corporate ownership.",
+    summary: "Legal services for veterinary clinics, hospitals, and veterinary professionals.",
+    keywords: ["veterinary", "vet", "animal hospital", "vet clinic", "veterinarian", "vet practice"],
+    intentPatterns: ["veterinary practice", "vet clinic", "vet legal", "veterinary compliance", "vet sale"],
+    responseTemplate: "Legal Services for Veterinary Practices:\n\n**Why Vet Practices Need Specialised Support:**\nVeterinary practices share many characteristics with medical practices:\n• Contractor vs employee classification issues\n• Equipment-intensive operations\n• Emergency and after-hours services\n• Corporate group structures\n\n**Our Veterinary Services:**\n\n**Practice Structuring:**\n• Veterinary practice entity structures\n• Associate vet agreements\n• Locum and emergency vet arrangements\n• Corporate veterinary group compliance\n\n**Commercial Matters:**\n• Practice purchase and sale\n• Lease negotiations\n• Partnership agreements\n• Equipment financing\n\n**Compliance:**\n• Veterinary Board registration\n• Payroll tax for associate vets\n• Fair Work compliance for vet nurses\n• WorkCover obligations\n\n**Unique Veterinary Considerations:**\n• 24/7 emergency service structures\n• Animal welfare compliance\n• Drug and medication handling\n• Client (pet owner) relationship management\n\nWhat aspect of your veterinary practice can we assist with?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Veterinary regulations vary by state. Professional advice is recommended.",
+    adviceLevel: "general",
+    confidenceLevel: 9,
+    relatedProducts: [],
+    xpReward: 20,
+    metadata: { practice_type: "Veterinary", emergency_services: true }
+  },
+
+  // ============================================
+  // NEW KNOWLEDGE: STATE-SPECIFIC INFORMATION
+  // ============================================
+
+  // 44. South Australia Payroll Tax
+  {
+    id: "sa-payroll-tax",
+    category: "state-specific",
+    subcategory: "south-australia",
+    topic: "sa payroll tax",
+    title: "South Australia Payroll Tax for Medical Practices",
+    content: "South Australia payroll tax is administered by RevenueSA. The current threshold is $1.5 million (as of 2024). SA has been active in auditing medical practices following national trends. Key considerations include grouping provisions and contractor deeming rules.",
+    summary: "South Australian payroll tax rules and compliance for medical practices.",
+    keywords: ["south australia", "sa", "revenuesa", "adelaide", "sa payroll tax", "south australian"],
+    intentPatterns: ["south australia payroll", "sa payroll tax", "revenuesa", "adelaide practice", "sa compliance"],
+    responseTemplate: "South Australia Payroll Tax Information:\n\n**RevenueSA Administration:**\nPayroll tax in SA is administered by RevenueSA, with medical practices being a key audit focus.\n\n**Current Thresholds (2024-25):**\n• Threshold: $1.5 million\n• Rate: 4.95% (general)\n• Higher rate applies above $1.7 million\n\n**SA-Specific Considerations:**\n• Active audit program targeting medical practices\n• Grouping provisions for related entities\n• Contractor deeming rules aligned with national approach\n• Focus on GP and specialist practices\n\n**Recent SA Activity:**\n• Increased audit activity post-Thomas and Naaz\n• Focus on contractor arrangements in medical centres\n• Retrospective assessments commonly 5+ years\n\n**Hamilton Bailey Advantage:**\n• Based in Adelaide with direct RevenueSA experience\n• Local knowledge of SA regulatory landscape\n• Established relationships with SA practitioners\n\n**Our Adelaide Office:**\nLevel 2/147 Pirie Street, Adelaide SA 5000\nPhone: (08) 8121 5167\n\nWould you like a SA-specific payroll tax risk assessment?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Tax thresholds and rates may change. Verify current figures with RevenueSA.",
+    adviceLevel: "specific",
+    confidenceLevel: 10,
+    relatedProducts: ["sa-payroll-review"],
+    xpReward: 25,
+    metadata: { state: "South Australia", threshold: "$1.5M", authority: "RevenueSA" }
+  },
+
+  // 45. New South Wales Payroll Tax
+  {
+    id: "nsw-payroll-tax",
+    category: "state-specific",
+    subcategory: "new-south-wales",
+    topic: "nsw payroll tax",
+    title: "New South Wales Payroll Tax for Medical Practices",
+    content: "NSW payroll tax is administered by Revenue NSW. The Thomas and Naaz [2022] case originated in NSW, making it particularly relevant for NSW medical practices. NSW has the highest concentration of medical practices and aggressive audit activity.",
+    summary: "New South Wales payroll tax rules and compliance for medical practices.",
+    keywords: ["new south wales", "nsw", "revenue nsw", "sydney", "nsw payroll tax", "thomas naaz nsw"],
+    intentPatterns: ["nsw payroll tax", "new south wales payroll", "sydney practice", "revenue nsw", "nsw compliance"],
+    responseTemplate: "New South Wales Payroll Tax Information:\n\n**Revenue NSW Administration:**\nNSW is the most active jurisdiction for medical practice payroll tax audits.\n\n**Current Thresholds (2024-25):**\n• Threshold: $1.2 million\n• Rate: 5.45%\n\n**NSW-Specific Significance:**\n• Thomas and Naaz [2022] case originated in NSW\n• Sets precedent applied nationally\n• Highest volume of medical practice audits\n• Largest concentration of medical practices\n\n**NSW Audit Focus:**\n• GP contractor arrangements\n• Specialist rooms licences\n• Corporate medical group structures\n• Allied health contractor status\n\n**NSW Case Law:**\n• Thomas and Naaz [2022] NSWCATAD 56 - Landmark medical practice decision\n• Establishes NSW-specific interpretation of contractor tests\n• Retrospective assessments common (5-7 years)\n\n**Our NSW Support:**\nWhile based in Adelaide, we assist NSW practices with:\n• Revenue NSW audit defence\n• Restructuring to achieve compliance\n• Risk assessment based on Thomas and Naaz principles\n\nDo you have an NSW practice requiring compliance review?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Tax thresholds and rates may change. Verify current figures with Revenue NSW.",
+    adviceLevel: "specific",
+    confidenceLevel: 10,
+    relatedProducts: ["nsw-compliance-review"],
+    xpReward: 25,
+    metadata: { state: "New South Wales", threshold: "$1.2M", authority: "Revenue NSW" }
+  },
+
+  // 46. Victoria Payroll Tax
+  {
+    id: "vic-payroll-tax",
+    category: "state-specific",
+    subcategory: "victoria",
+    topic: "vic payroll tax",
+    title: "Victoria Payroll Tax for Medical Practices",
+    content: "Victoria payroll tax is administered by the State Revenue Office Victoria. VIC has specific contractor provisions and has been applying Thomas and Naaz principles to Victorian medical practices. Mental health levy applies to larger employers.",
+    summary: "Victorian payroll tax rules and compliance for medical practices.",
+    keywords: ["victoria", "vic", "sro victoria", "melbourne", "vic payroll tax", "victorian"],
+    intentPatterns: ["victoria payroll", "vic payroll tax", "melbourne practice", "sro victoria", "vic compliance"],
+    responseTemplate: "Victoria Payroll Tax Information:\n\n**State Revenue Office Victoria:**\nVIC has been actively applying national precedents to medical practice audits.\n\n**Current Thresholds (2024-25):**\n• Threshold: $900,000\n• Rate: 4.85% (up to $100M)\n• Mental health levy: Additional 0.5% (wages > $10M)\n\n**VIC-Specific Considerations:**\n• Lower threshold than other states\n• Mental health levy for larger practices\n• Active audit program for medical practices\n• Applying Thomas and Naaz principles\n\n**Victorian Audit Focus:**\n• Large multi-site medical groups\n• Allied health practices (significant in VIC)\n• Dental corporate groups\n• Specialist consulting suites\n\n**Grouping Provisions:**\n• Strict grouping rules in Victoria\n• Related entities may be grouped\n• Affects threshold calculations\n\n**Our Victorian Support:**\n• SRO Victoria audit defence\n• Victorian-specific restructuring advice\n• Compliance with mental health levy requirements\n\nDo you operate a Victorian medical practice?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Tax thresholds and rates may change. Verify current figures with SRO Victoria.",
+    adviceLevel: "specific",
+    confidenceLevel: 10,
+    relatedProducts: ["vic-compliance-review"],
+    xpReward: 25,
+    metadata: { state: "Victoria", threshold: "$900K", authority: "SRO Victoria" }
+  },
+
+  // 47. Queensland Payroll Tax
+  {
+    id: "qld-payroll-tax",
+    category: "state-specific",
+    subcategory: "queensland",
+    topic: "qld payroll tax",
+    title: "Queensland Payroll Tax for Medical Practices",
+    content: "Queensland payroll tax is administered by the Queensland Revenue Office. QLD has the highest threshold nationally at $1.3 million but has been increasing audit activity for medical practices. Regional and rural practices have specific considerations.",
+    summary: "Queensland payroll tax rules and compliance for medical practices.",
+    keywords: ["queensland", "qld", "queensland revenue", "brisbane", "qld payroll tax", "queensland"],
+    intentPatterns: ["queensland payroll", "qld payroll tax", "brisbane practice", "qld compliance", "queensland revenue"],
+    responseTemplate: "Queensland Payroll Tax Information:\n\n**Queensland Revenue Office:**\nQLD has been increasing audit focus on medical practices following national trends.\n\n**Current Thresholds (2024-25):**\n• Threshold: $1.3 million\n• Rate: 4.75%\n• Regional discount: 1% for regional employers\n\n**QLD-Specific Considerations:**\n• Highest threshold nationally\n• Regional employer discount available\n• Growing audit activity\n• Large regional medical practice sector\n\n**Queensland Focus Areas:**\n• Regional and rural medical practices\n• Flying doctor and outreach services\n• Queensland Health contractor arrangements\n• Mining industry medical services\n\n**Regional Considerations:**\n• Many QLD practices operate across multiple regional locations\n• Locum arrangements common in regional areas\n• Telehealth services growing\n\n**Our Queensland Support:**\n• QRO audit defence\n• Regional practice structuring\n• Multi-site compliance strategies\n\nIs your practice based in Queensland?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Tax thresholds and rates may change. Verify current figures with Queensland Revenue Office.",
+    adviceLevel: "specific",
+    confidenceLevel: 10,
+    relatedProducts: ["qld-compliance-review"],
+    xpReward: 25,
+    metadata: { state: "Queensland", threshold: "$1.3M", authority: "QRO" }
+  },
+
+  // 48. Tasmania Payroll Tax
+  {
+    id: "tas-payroll-tax",
+    category: "state-specific",
+    subcategory: "tasmania",
+    topic: "tas payroll tax",
+    title: "Tasmania Payroll Tax for Medical Practices",
+    content: "Tasmania payroll tax is administered by the State Revenue Office Tasmania. TAS has unique considerations for its smaller, more dispersed medical practice sector, with many rural and regional practices. The threshold and rates differ from mainland states.",
+    summary: "Tasmanian payroll tax rules and compliance for medical practices.",
+    keywords: ["tasmania", "tas", "hobart", "launceston", "tas payroll tax", "tasmanian", "state revenue tasmania"],
+    intentPatterns: ["tasmania payroll", "tas payroll tax", "hobart practice", "launceston practice", "tas compliance", "tasmanian"],
+    responseTemplate: "Tasmania Payroll Tax Information:\n\n**State Revenue Office Tasmania:**\nTasmania has a smaller but growing medical practice sector with unique compliance considerations.\n\n**Current Thresholds (2024-25):**\n• Threshold: $1.25 million\n• Rate: 4% (up to $2M)\n• Higher rate: 6.1% (above $2M)\n\n**TAS-Specific Considerations:**\n• Smaller market with fewer large practices\n• Significant rural and regional presence\n• Growing telehealth sector\n• Locum arrangements common due to practitioner shortages\n\n**Tasmanian Focus Areas:**\n• Rural medical practices (widespread across TAS)\n• Hospital-affiliated specialist practices\n• Allied health practices in regional areas\n• Locum and visiting practitioner arrangements\n\n**Unique Tasmanian Factors:**\n• Practitioner shortages drive contractor use\n• Many practices serve large geographic areas\n• Ferry and flight access considerations for specialists\n• Strong public health system interaction\n\n**Regional Considerations:**\n• Hobart practices (largest concentration)\n• Launceston and North-West practices\n• Rural and remote area services\n• Visiting specialist arrangements\n\n**Our Tasmanian Support:**\n• State Revenue Office Tasmania audit defence\n• Rural practice structuring\n• Locum and visiting practitioner arrangements\n• Multi-site compliance across TAS regions\n\nIs your practice based in Tasmania?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Tax thresholds and rates may change. Verify current figures with State Revenue Office Tasmania.",
+    adviceLevel: "specific",
+    confidenceLevel: 10,
+    relatedProducts: ["tas-compliance-review"],
+    xpReward: 25,
+    metadata: { state: "Tasmania", threshold: "$1.25M", authority: "State Revenue Office Tasmania" }
+  },
+
+  // ============================================
+  // NEW KNOWLEDGE: COMMON SCENARIOS
+  // ============================================
+
+  // 49. Practice Sale
+  {
+    id: "practice-sale",
+    category: "scenarios",
+    subcategory: "transactions",
+    topic: "selling a medical practice",
+    title: "Selling Your Medical Practice",
+    content: "Selling a medical practice involves unique considerations including patient list valuation, practitioner transitions, restrictive covenants, and regulatory compliance during handover. Hamilton Bailey provides end-to-end support for practice sales.",
+    summary: "Comprehensive legal support for selling your medical practice.",
+    keywords: ["sell practice", "practice sale", "selling", "exit", "retirement", "goodwill", "sale agreement"],
+    intentPatterns: ["sell my practice", "selling practice", "practice sale", "exit planning", "retire from practice"],
+    responseTemplate: "Selling Your Medical Practice:\n\n**Planning Your Exit:**\nA successful practice sale requires careful planning, typically 2-3 years in advance for optimal outcomes.\n\n**Key Considerations:**\n\n**Valuation:**\n• Goodwill assessment (patient list value)\n• Equipment and fit-out valuation\n• Lease value and assignability\n• Revenue multiples in your specialty\n\n**Legal Documentation:**\n• Sale of business agreement\n• Asset vs share sale structure\n• Restraint of trade clauses\n• Transition arrangements\n\n**Regulatory Compliance:**\n• Patient record transitions\n• Medicare provider number changes\n• AHPRA notification requirements\n• Staff and contractor transitions\n\n**Tax Optimisation:**\n• CGT planning (small business concessions)\n• Rollover relief options\n• Structure for after-tax proceeds\n• Timing considerations\n\n**Practitioner Transitions:**\n• Introducing purchaser to patients\n• Referrer relationship handover\n• Post-sale consulting arrangements\n• Restrictive covenant compliance\n\n**Our Process:**\n1. Initial valuation assessment\n2. Preparation for sale\n3. Buyer due diligence management\n4. Contract negotiation\n5. Settlement and transition\n\nAre you considering selling your practice?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Practice sale outcomes depend on individual circumstances. Professional advice is essential.",
+    adviceLevel: "specific",
+    confidenceLevel: 10,
+    relatedProducts: ["practice-sale-package"],
+    xpReward: 35,
+    metadata: { transaction_type: "sale", planning_horizon: "2-3 years" }
+  },
+
+  // 49. Practice Purchase
+  {
+    id: "practice-purchase",
+    category: "scenarios",
+    subcategory: "transactions",
+    topic: "buying a medical practice",
+    title: "Buying a Medical Practice",
+    content: "Purchasing a medical practice requires thorough due diligence, proper structuring, and understanding of what you're actually buying. Hamilton Bailey provides comprehensive support for practice acquisitions.",
+    summary: "Legal support for purchasing or acquiring a medical practice.",
+    keywords: ["buy practice", "purchase practice", "acquisition", "buying", "acquire", "due diligence"],
+    intentPatterns: ["buy a practice", "purchase practice", "acquire practice", "buying practice", "practice acquisition"],
+    responseTemplate: "Buying a Medical Practice:\n\n**Why Due Diligence Matters:**\nMedical practice purchases involve unique risks that general commercial lawyers often miss.\n\n**What You're Actually Buying:**\n\n**Tangible Assets:**\n• Equipment and fit-out\n• Consumables and stock\n• Lease rights\n\n**Intangible Assets:**\n• Patient list (goodwill)\n• Referrer relationships\n• Practice reputation\n• Systems and processes\n\n**Due Diligence Checklist:**\n✓ Payroll tax compliance history\n✓ Contractor arrangement review\n✓ Lease terms and assignability\n✓ Equipment condition and warranties\n✓ Staff entitlements and contracts\n✓ Medicare compliance history\n✓ Patient retention analysis\n✓ Financial performance verification\n\n**Structure Options:**\n• Asset purchase (most common)\n• Share purchase (existing company)\n• Hybrid arrangements\n\n**Risk Areas We Investigate:**\n• Hidden payroll tax liabilities\n• Practitioner departure risk\n• Lease issues\n• Equipment obsolescence\n• Compliance gaps\n\n**Our Process:**\n1. Preliminary assessment\n2. Due diligence investigation\n3. Negotiation and structuring\n4. Contract documentation\n5. Settlement support\n\nAre you looking at a specific practice to purchase?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Practice purchase decisions require thorough professional due diligence.",
+    adviceLevel: "specific",
+    confidenceLevel: 10,
+    relatedProducts: ["due-diligence-package"],
+    xpReward: 35,
+    metadata: { transaction_type: "purchase", due_diligence: "essential" }
+  },
+
+  // 50. New Practice Setup
+  {
+    id: "new-practice-setup",
+    category: "scenarios",
+    subcategory: "establishment",
+    topic: "starting a new practice",
+    title: "Starting a New Medical Practice",
+    content: "Starting a new medical practice requires careful planning around entity structure, premises, compliance, and operational setup. Getting the structure right from day one prevents costly restructuring later.",
+    summary: "Complete legal support for establishing a new medical practice.",
+    keywords: ["new practice", "start practice", "establish", "setup", "opening", "new clinic"],
+    intentPatterns: ["start a practice", "new practice", "establish practice", "opening a practice", "setup practice"],
+    responseTemplate: "Starting a New Medical Practice:\n\n**Getting Structure Right from Day One:**\nProper setup prevents costly restructuring and compliance issues later.\n\n**Key Setup Decisions:**\n\n**Entity Structure:**\n• Service entity vs operating entity\n• Trust vs company vs hybrid\n• Ownership and profit sharing\n• Tenant Doctor™ compliant structure\n\n**Premises:**\n• Lease negotiation\n• Fit-out requirements\n• Council and planning approvals\n• Medical centre vs standalone\n\n**Compliance Framework:**\n• AHPRA registration\n• Medicare provider registration\n• ABN and business registration\n• Insurance requirements\n\n**Practitioner Arrangements:**\n• Contractor vs employee decision\n• Service agreement templates\n• Payroll tax compliant from start\n• Fair Work compliance\n\n**Operational Setup:**\n• Practice management software\n• Billing and accounting systems\n• Clinical governance frameworks\n• Staff policies and procedures\n\n**Common Mistakes We Prevent:**\n• Wrong entity structure (expensive to fix)\n• Lease terms that restrict growth\n• Non-compliant contractor arrangements\n• Missing insurance coverage\n• Inadequate service agreements\n\n**Our New Practice Package:**\n• Entity establishment\n• Lease review and negotiation\n• Template agreements\n• Compliance framework setup\n• Fixed-fee pricing\n\nAre you planning to start a new practice?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "New practice setup requires professional advice tailored to your circumstances.",
+    adviceLevel: "specific",
+    confidenceLevel: 10,
+    relatedProducts: ["new-practice-package"],
+    xpReward: 30,
+    metadata: { scenario: "establishment", importance: "critical" }
+  },
+
+  // 51. Practice Restructure
+  {
+    id: "practice-restructure",
+    category: "scenarios",
+    subcategory: "restructuring",
+    topic: "restructuring practice",
+    title: "Restructuring Your Medical Practice",
+    content: "Practice restructuring may be necessary for payroll tax compliance, growth, partnership changes, or exit planning. Hamilton Bailey specialises in transitioning existing practices to compliant structures while minimising disruption.",
+    summary: "Expert guidance on restructuring your medical practice for compliance and growth.",
+    keywords: ["restructure", "restructuring", "change structure", "reorganise", "compliance restructure"],
+    intentPatterns: ["restructure practice", "change structure", "reorganise practice", "restructuring for compliance"],
+    responseTemplate: "Restructuring Your Medical Practice:\n\n**Why Restructure?**\nCommon triggers for practice restructuring:\n• Payroll tax audit or risk identified\n• Partnership changes or disputes\n• Growth requiring new structure\n• Exit or succession planning\n• Regulatory changes\n\n**Restructuring Options:**\n\n**Tenant Doctor™ Transition:**\n• Convert employee arrangements to compliant contractor model\n• Establish service entity structure\n• Implement compliant documentation\n• Manage practitioner transitions\n\n**Partnership to Corporate:**\n• Convert partnership to company structure\n• Address tax implications\n• Protect personal assets\n• Facilitate future sale or investment\n\n**Growth Restructuring:**\n• Multi-site practice structures\n• Franchise-style arrangements\n• Joint venture models\n• Associate pathways\n\n**Our Restructuring Process:**\n1. Current structure assessment\n2. Risk and compliance review\n3. Target structure design\n4. Transition planning\n5. Documentation and implementation\n6. Ongoing compliance support\n\n**Key Considerations:**\n• Tax implications of restructure\n• Existing contract terminations\n• Practitioner communication\n• Patient continuity\n• Timing for regulatory changes\n\nWhat's prompting your interest in restructuring?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Restructuring has significant legal and tax implications. Professional advice is essential.",
+    adviceLevel: "specific",
+    confidenceLevel: 10,
+    relatedProducts: ["restructure-package"],
+    xpReward: 35,
+    metadata: { scenario: "restructuring", complexity: "high" }
+  },
+
+  // 52. Partnership Disputes
+  {
+    id: "partnership-disputes",
+    category: "scenarios",
+    subcategory: "disputes",
+    topic: "partnership disputes",
+    title: "Medical Practice Partnership Disputes",
+    content: "Partnership disputes in medical practices can be complex due to intertwined patient relationships, ongoing business operations, and professional obligations. Hamilton Bailey provides dispute resolution and exit strategies for medical partnerships.",
+    summary: "Resolving partnership disputes in medical practices.",
+    keywords: ["partnership dispute", "partner disagreement", "buyout", "partner exit", "dispute resolution"],
+    intentPatterns: ["partnership dispute", "partner disagreement", "partner leaving", "buyout partner", "practice dispute"],
+    responseTemplate: "Medical Practice Partnership Disputes:\n\n**Common Dispute Triggers:**\n• Profit sharing disagreements\n• Work contribution imbalances\n• Strategic direction differences\n• New partner integration issues\n• Exit timing and valuation disputes\n\n**Our Dispute Resolution Approach:**\n\n**Assessment:**\n• Review partnership agreement\n• Identify dispute issues\n• Assess legal positions\n• Evaluate options\n\n**Resolution Options:**\n• Negotiated settlement\n• Mediation (confidential, cost-effective)\n• Arbitration (binding decision)\n• Litigation (last resort)\n\n**Exit Strategies:**\n• Buyout arrangements\n• Practice division\n• Gradual transition\n• Forced sale provisions\n\n**Key Considerations:**\n• Patient continuity and care\n• Staff and practitioner impacts\n• Referrer relationship management\n• Confidentiality during dispute\n• Regulatory notification requirements\n\n**Protecting Your Interests:**\n• Document all communications\n• Maintain professional conduct\n• Protect patient relationships\n• Preserve financial records\n• Seek early legal advice\n\n**Our Approach:**\nWe prioritise commercial resolution while protecting your interests and professional reputation.\n\nAre you experiencing a partnership dispute?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Dispute resolution requires specific legal advice based on your circumstances.",
+    adviceLevel: "specific",
+    confidenceLevel: 10,
+    relatedProducts: ["dispute-resolution"],
+    xpReward: 30,
+    metadata: { scenario: "dispute", priority: "urgent" }
+  },
+
+  // ============================================
+  // NEW KNOWLEDGE: COMPLIANCE TOPICS
+  // ============================================
+
+  // 53. Medicare Compliance
+  {
+    id: "medicare-compliance",
+    category: "compliance",
+    subcategory: "medicare",
+    topic: "medicare compliance",
+    title: "Medicare Billing Compliance",
+    content: "Medicare compliance is critical for medical practices. Incorrect billing can result in recovery actions, penalties, and professional sanctions. Hamilton Bailey assists with Medicare compliance reviews and audit defence.",
+    summary: "Medicare billing compliance and audit defence for medical practices.",
+    keywords: ["medicare", "billing", "pbs", "mbs", "medicare audit", "bulk billing", "medicare compliance"],
+    intentPatterns: ["medicare compliance", "medicare audit", "billing compliance", "mbs items", "pbs compliance"],
+    responseTemplate: "Medicare Billing Compliance:\n\n**Why Medicare Compliance Matters:**\nMedicare non-compliance can result in:\n• Recovery of overpaid benefits\n• Administrative penalties\n• Professional sanctions\n• Criminal prosecution (fraud cases)\n\n**Common Compliance Issues:**\n\n**MBS Billing:**\n• Incorrect item number usage\n• Time-based item requirements\n• Bulk billing vs private billing errors\n• Referred vs non-referred services\n• Chronic disease management items\n\n**PBS Compliance:**\n• Authority prescription requirements\n• Brand substitution rules\n• Quantity and repeat limits\n\n**Our Medicare Services:**\n\n**Compliance Reviews:**\n• MBS billing pattern analysis\n• Item number usage review\n• Documentation adequacy\n• Process improvement recommendations\n\n**Audit Defence:**\n• Response to Medicare audits\n• Negotiation with Department of Health\n• PSR (Professional Services Review) representation\n• Appeal processes\n\n**Prevention:**\n• Staff training on billing compliance\n• Documentation templates\n• Audit-ready processes\n• Ongoing monitoring\n\nAre you facing a Medicare compliance issue or want a preventive review?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Medicare rules are complex. Professional advice should be obtained.",
+    adviceLevel: "specific",
+    confidenceLevel: 9,
+    relatedProducts: ["medicare-compliance-review"],
+    xpReward: 30,
+    metadata: { regulatory_body: "Services Australia", risk_level: "high" }
+  },
+
+  // 54. WorkCover Compliance
+  {
+    id: "workcover-compliance",
+    category: "compliance",
+    subcategory: "workcover",
+    topic: "workcover obligations",
+    title: "WorkCover and Workers Compensation",
+    content: "Medical practices have WorkCover obligations for employees and may have additional obligations as medical service providers for injured workers. Understanding the distinction between employee and contractor status is critical for WorkCover compliance.",
+    summary: "WorkCover compliance for medical practices as employers and service providers.",
+    keywords: ["workcover", "workers compensation", "work injury", "workcover audit", "employer obligations"],
+    intentPatterns: ["workcover", "workers comp", "work injury", "workcover compliance", "workcover audit"],
+    responseTemplate: "WorkCover Compliance for Medical Practices:\n\n**Dual Obligations:**\nMedical practices have WorkCover obligations in two capacities:\n\n**1. As Employers:**\n• Workers compensation insurance\n• Return to work obligations\n• Workplace safety requirements\n• Claims management\n\n**2. As Service Providers:**\n• WorkCover approved provider registration\n• Fee schedules and billing\n• Treatment and reporting requirements\n• Independence and objectivity\n\n**Contractor Classification Impact:**\n• Employees: Full WorkCover coverage required\n• Contractors: Should have own insurance\n• Misclassification: Potential liability exposure\n\n**Common Issues:**\n• Premium classification disputes\n• Contractor vs employee audit\n• Claims for 'contractors' (misclassification)\n• Return to work management\n\n**Our WorkCover Services:**\n• Premium classification review\n• Contractor arrangement assessment\n• Claims management support\n• WorkCover audit defence\n\n**State Variations:**\nWorkCover systems vary by state:\n• SA: ReturnToWorkSA\n• NSW: iCare\n• VIC: WorkSafe Victoria\n• QLD: WorkCover Queensland\n\nDo you have a WorkCover compliance question?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "WorkCover requirements vary by state. Professional advice should be obtained.",
+    adviceLevel: "specific",
+    confidenceLevel: 9,
+    relatedProducts: ["workcover-review"],
+    xpReward: 25,
+    metadata: { regulation_type: "state-based", employer_obligation: true }
+  },
+
+  // 55. Privacy Compliance
+  {
+    id: "privacy-compliance",
+    category: "compliance",
+    subcategory: "privacy",
+    topic: "privacy compliance",
+    title: "Privacy and Health Records Compliance",
+    content: "Medical practices handle sensitive health information and must comply with Privacy Act requirements, Australian Privacy Principles, and state health records legislation. Breaches can result in significant penalties and reputational damage.",
+    summary: "Privacy and health records compliance for medical practices.",
+    keywords: ["privacy", "health records", "data protection", "privacy breach", "patient records", "confidentiality"],
+    intentPatterns: ["privacy compliance", "health records", "data breach", "patient privacy", "privacy policy"],
+    responseTemplate: "Privacy and Health Records Compliance:\n\n**Legal Framework:**\n• Privacy Act 1988 (Cth)\n• Australian Privacy Principles (APPs)\n• State Health Records Acts\n• My Health Records Act\n\n**Medical Practice Obligations:**\n\n**Collection:**\n• Collect only necessary information\n• Inform patients about collection\n• Obtain consent where required\n\n**Storage & Security:**\n• Secure physical and electronic records\n• Access controls and audit trails\n• Encryption and backup\n• Retention and destruction policies\n\n**Use & Disclosure:**\n• Primary purpose use only (unless consent)\n• Third party disclosure rules\n• Legal and court requirements\n• Marketing restrictions\n\n**Patient Rights:**\n• Access to records\n• Correction of errors\n• Complaint mechanisms\n\n**Data Breach Requirements:**\n• Notifiable Data Breaches scheme\n• Assessment and notification obligations\n• Penalty framework (up to $50M for serious breaches)\n\n**Our Privacy Services:**\n• Privacy policy development\n• Compliance assessments\n• Breach response support\n• Staff training\n\nDo you need a privacy compliance review?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Privacy requirements are complex. Professional advice should be obtained.",
+    adviceLevel: "specific",
+    confidenceLevel: 9,
+    relatedProducts: ["privacy-compliance-review"],
+    xpReward: 25,
+    metadata: { legislation: "Privacy Act 1988", max_penalty: "$50M" }
+  },
+
+  // ============================================
+  // NEW KNOWLEDGE: FAQ RESPONSES
+  // ============================================
+
+  // 56. Consultation Booking FAQ
+  {
+    id: "faq-booking",
+    category: "faq",
+    subcategory: "consultation",
+    topic: "booking consultation",
+    title: "How to Book a Consultation",
+    content: "Hamilton Bailey offers easy online booking for consultations. Choose from initial consultations, urgent advice, follow-up sessions, document reviews, or strategy planning sessions. Book online, by phone, or through Bailey AI.",
+    summary: "How to book a consultation with Hamilton Bailey.",
+    keywords: ["book", "appointment", "consultation", "schedule", "meeting", "booking"],
+    intentPatterns: ["how to book", "book appointment", "schedule consultation", "make booking", "available times"],
+    responseTemplate: "How to Book a Consultation:\n\n**Booking Options:**\n\n**1. Online Booking (Recommended)**\nVisit hamiltonbailey.com.au/book-appointment\n• Select consultation type\n• Choose date and time\n• Complete payment\n• Instant confirmation\n\n**2. Phone Booking**\nCall (08) 8121 5167\nMonday-Friday 9AM-5PM ACST\n\n**3. Email Request**\nEmail admin@hamiltonbailey.com.au\n\n**Consultation Types:**\n\n• **Initial Consultation** ($350 + GST, 30 min)\n  Full legal needs assessment\n\n• **Urgent Legal Advice** ($550 + GST, 30 min)\n  Same-day/next-day for urgent matters\n\n• **Follow-up Consultation** ($150 + GST, 15 min)\n  Existing clients only\n\n• **Document Review** ($550 + GST, 60 min)\n  Detailed contract/agreement review\n\n• **Strategy Planning** ($750 + GST, 90 min)\n  Complex matter deep-dive\n\n**Preparation:**\n• Have relevant documents ready\n• Prepare brief summary of your situation\n• List questions you want answered\n\nWould you like me to help you choose the right consultation type?",
+    requiresDisclaimer: false,
+    legalDisclaimer: "",
+    adviceLevel: "general",
+    confidenceLevel: 10,
+    relatedProducts: [],
+    xpReward: 10,
+    metadata: { action: "booking", phone: "(08) 8121 5167" }
+  },
+
+  // 57. What to Expect FAQ
+  {
+    id: "faq-what-to-expect",
+    category: "faq",
+    subcategory: "consultation",
+    topic: "what to expect in consultation",
+    title: "What to Expect in Your Consultation",
+    content: "Your consultation with Hamilton Bailey will be focused and productive. We prepare by reviewing any documents you provide, ask targeted questions to understand your situation, and provide clear advice and next steps.",
+    summary: "What to expect during your Hamilton Bailey consultation.",
+    keywords: ["expect", "consultation process", "what happens", "meeting process", "first meeting"],
+    intentPatterns: ["what to expect", "consultation process", "what happens", "how does it work", "first consultation"],
+    responseTemplate: "What to Expect in Your Consultation:\n\n**Before Your Consultation:**\n• Complete booking and payment\n• Receive confirmation email\n• Upload relevant documents (if applicable)\n• We review materials in advance\n\n**During Your Consultation:**\n\n**Opening (5 min)**\n• Introductions\n• Confirm your situation and goals\n• Set agenda for discussion\n\n**Assessment (15-20 min)**\n• Targeted questions about your matter\n• Review of key documents\n• Identification of issues and risks\n\n**Advice (10-15 min)**\n• Clear explanation of legal position\n• Options and recommendations\n• Risk assessment\n• Cost estimates for further work\n\n**Closing (5 min)**\n• Summary of key points\n• Agreed next steps\n• Follow-up arrangements\n\n**After Your Consultation:**\n• Written summary email within 24 hours\n• Quote for any further work required\n• Access to client portal (if ongoing)\n\n**Tips for Best Outcomes:**\n• Be honest and complete in information sharing\n• Ask questions if anything is unclear\n• Take notes during the meeting\n• Follow up promptly on action items\n\nReady to book your consultation?",
+    requiresDisclaimer: false,
+    legalDisclaimer: "",
+    adviceLevel: "general",
+    confidenceLevel: 10,
+    relatedProducts: [],
+    xpReward: 10,
+    metadata: { stage: "pre-consultation", preparation: "recommended" }
+  },
+
+  // 58. Why Specialised Lawyer FAQ
+  {
+    id: "faq-why-specialised",
+    category: "faq",
+    subcategory: "expertise",
+    topic: "why specialised lawyer",
+    title: "Why Use a Specialised Medical Practice Lawyer",
+    content: "Medical practice law is highly specialised. General commercial lawyers often miss healthcare-specific issues, leading to incomplete advice or compliance gaps. Hamilton Bailey focuses exclusively on medical practice legal matters.",
+    summary: "Why you need a specialised medical practice lawyer.",
+    keywords: ["why specialised", "specialist lawyer", "general lawyer", "expertise", "difference"],
+    intentPatterns: ["why specialised", "why not general lawyer", "what's different", "why specialist", "generalist vs specialist"],
+    responseTemplate: "Why Use a Specialised Medical Practice Lawyer:\n\n**The Difference Expertise Makes:**\n\n**General Commercial Lawyer:**\n• May miss healthcare-specific regulations\n• Unfamiliar with medical practice structures\n• Generic templates not fit for purpose\n• No relationship with healthcare regulators\n• May underestimate compliance risks\n\n**Hamilton Bailey (Specialised):**\n• Deep healthcare regulatory knowledge\n• Tenant Doctor™ trademark expertise\n• Medical practice-specific templates\n• Understanding of AHPRA, Medicare, State Revenue\n• Track record with medical clients\n\n**What We Know That Generalists Don't:**\n\n1. **Payroll Tax:** How Thomas and Naaz [2022] specifically affects medical practices\n\n2. **Contractor Tests:** Healthcare-specific application of multi-factor tests\n\n3. **AHPRA Requirements:** Annual declaration and compliance requirements\n\n4. **Medicare Compliance:** MBS billing and PBS requirements\n\n5. **Practice Structures:** What works and what doesn't in medical settings\n\n**Client Experiences:**\n\"Our previous lawyer didn't understand the contractor issues in medical practices. Hamilton Bailey immediately identified the payroll tax risk.\" - GP Practice Owner\n\n**Partnership Advantage:**\nOur Health and Life partnership (1,200+ medical clients) provides integrated legal-accounting expertise.\n\nWould you like to discuss your specific situation?",
+    requiresDisclaimer: false,
+    legalDisclaimer: "",
+    adviceLevel: "general",
+    confidenceLevel: 10,
+    relatedProducts: [],
+    xpReward: 15,
+    metadata: { differentiator: "specialisation", client_count: "500+" }
+  },
+
+  // 59. Confidentiality FAQ
+  {
+    id: "faq-confidentiality",
+    category: "faq",
+    subcategory: "process",
+    topic: "confidentiality",
+    title: "Confidentiality and Legal Privilege",
+    content: "All communications with Hamilton Bailey are protected by legal professional privilege. Your information remains confidential and cannot be disclosed without your consent. This protection applies from your first contact.",
+    summary: "Understanding confidentiality and legal privilege with Hamilton Bailey.",
+    keywords: ["confidentiality", "privilege", "private", "secret", "disclosure", "legal privilege"],
+    intentPatterns: ["confidentiality", "is it private", "legal privilege", "who will know", "keep secret"],
+    responseTemplate: "Confidentiality and Legal Privilege:\n\n**Your Information Is Protected:**\n\n**Legal Professional Privilege:**\nAll communications with Hamilton Bailey are protected by legal professional privilege. This means:\n• Your information cannot be compelled by courts\n• Regulators cannot access privileged advice\n• Protection applies from first contact\n• Privilege belongs to you (the client)\n\n**What's Protected:**\n✓ All verbal and written communications\n✓ Documents prepared for legal advice\n✓ Your instructions to us\n✓ Our advice to you\n✓ Strategy discussions\n\n**Confidentiality Commitment:**\n• Information shared only with your consent\n• Secure document storage and transmission\n• Staff bound by confidentiality obligations\n• Conflict of interest protocols\n\n**Exceptions (We Must Inform You):**\n• Court orders (we'll fight inappropriate orders)\n• Prevention of imminent harm\n• Money laundering reporting obligations\n• Child protection requirements\n\n**Data Security:**\n• Encrypted communications\n• Secure client portal\n• Australian-based data storage\n• Regular security audits\n\n**Our Promise:**\nYour sensitive business information is safe with us. We understand the importance of confidentiality for medical practice matters.\n\nDo you have specific confidentiality concerns we can address?",
+    requiresDisclaimer: false,
+    legalDisclaimer: "",
+    adviceLevel: "general",
+    confidenceLevel: 10,
+    relatedProducts: [],
+    xpReward: 10,
+    metadata: { protection: "legal privilege", data_location: "Australia" }
+  },
+
+  // 60. Timeline FAQ
+  {
+    id: "faq-timeline",
+    category: "faq",
+    subcategory: "process",
+    topic: "how long does it take",
+    title: "Typical Timelines for Legal Matters",
+    content: "Legal matter timelines vary significantly based on complexity, other parties involved, and regulatory processes. Hamilton Bailey provides realistic timeframes and keeps you informed throughout.",
+    summary: "Understanding typical timelines for medical practice legal matters.",
+    keywords: ["timeline", "how long", "duration", "timeframe", "when", "turnaround"],
+    intentPatterns: ["how long", "timeline", "when complete", "how fast", "turnaround time"],
+    responseTemplate: "Typical Timelines for Legal Matters:\n\n**Understanding Timeframes:**\nTimelines vary based on matter complexity, other parties, and regulatory processes.\n\n**Typical Timeframes:**\n\n**Document Review:**\n• Simple review: 3-5 business days\n• Complex review: 1-2 weeks\n• Urgent: Same day (with notice)\n\n**New Agreements:**\n• Standard contracts: 1-2 weeks\n• Complex structures: 2-4 weeks\n• Multi-party negotiations: 4-8 weeks\n\n**Practice Transactions:**\n• Sale/purchase: 2-4 months\n• Due diligence: 2-4 weeks\n• Settlement: 30-60 days after contracts\n\n**Compliance Reviews:**\n• Risk assessment: 1-2 weeks\n• Full compliance audit: 2-4 weeks\n• Restructuring implementation: 2-3 months\n\n**Regulatory Matters:**\n• Audit responses: Varies by regulator deadline\n• Appeal processes: 3-12 months\n• Negotiations: Varies significantly\n\n**Factors Affecting Timeline:**\n• Other party responsiveness\n• Document availability\n• Regulatory processing times\n• Complexity of issues\n• Court/tribunal schedules\n\n**Our Commitment:**\n• Realistic timeframes from outset\n• Regular progress updates\n• Proactive communication on delays\n• Urgent matter prioritisation\n\nWhat type of matter are you considering?",
+    requiresDisclaimer: false,
+    legalDisclaimer: "",
+    adviceLevel: "general",
+    confidenceLevel: 9,
+    relatedProducts: [],
+    xpReward: 10,
+    metadata: { response_type: "timeframes", flexibility: "varies" }
+  },
+
+  // ============================================
+  // NEW KNOWLEDGE: ADDITIONAL OBJECTION HANDLING
+  // ============================================
+
+  // 61. Objection: Location
+  {
+    id: "objection-location",
+    category: "objections",
+    subcategory: "location",
+    topic: "location concern",
+    title: "But You're in Adelaide - I'm in Another State",
+    content: "Hamilton Bailey provides services nationally despite being based in Adelaide. Modern legal practice allows effective service delivery through video consultations, secure document sharing, and phone conferences. Medical practice law is consistent nationally.",
+    summary: "Addressing concerns about Hamilton Bailey's Adelaide location for interstate clients.",
+    keywords: ["location", "interstate", "remote", "not local", "distance", "adelaide only"],
+    intentPatterns: ["but you're in adelaide", "not local", "interstate", "can you help remotely", "too far"],
+    responseTemplate: "**Addressing Location Concerns:**\n\nWhile Hamilton Bailey is based in Adelaide, we effectively serve clients across Australia:\n\n**How We Work Nationally:**\n\n**Technology:**\n• Secure video consultations\n• Encrypted document sharing\n• Electronic signing\n• Phone conferences\n\n**Why Location Matters Less:**\n• Medical practice law is nationally consistent\n• State payroll tax variations handled through expertise\n• Case law precedents apply nationally\n• Regulators operate similarly across states\n\n**Benefits of Our Approach:**\n• Specialised expertise outweighs local presence\n• No need for travel or parking\n• Convenient scheduling across time zones\n• Same quality advice regardless of location\n\n**State-Specific Knowledge:**\nWe maintain expertise across all states:\n• SA: RevenueSA (our home base)\n• NSW: Revenue NSW (Thomas and Naaz expertise)\n• VIC: SRO Victoria\n• QLD: Queensland Revenue Office\n• WA: Revenue WA\n\n**Our Dubai Office:**\nFor international matters, we also have presence in Dubai for extended hours and cross-border expertise.\n\n**Client Testimonial:**\n\"Despite being in Sydney, working with Hamilton Bailey remotely was seamless. Their specialist expertise was more valuable than having a generalist down the road.\" - NSW GP Practice\n\nWhere is your practice located?",
+    requiresDisclaimer: false,
+    legalDisclaimer: "",
+    adviceLevel: "general",
+    confidenceLevel: 10,
+    relatedProducts: [],
+    xpReward: 15,
+    metadata: { objection_type: "location", service_area: "national" }
+  },
+
+  // 62. Objection: Timing
+  {
+    id: "objection-timing",
+    category: "objections",
+    subcategory: "timing",
+    topic: "timing concern",
+    title: "I'll Deal With It Later / Not Urgent",
+    content: "Delaying compliance review increases risk exposure. Payroll tax audits can be retrospective for 5+ years, meaning today's non-compliance creates growing liability. Early action is always more cost-effective.",
+    summary: "Addressing timing objections and importance of early action.",
+    keywords: ["later", "not urgent", "wait", "next year", "not now", "delay"],
+    intentPatterns: ["deal with it later", "not urgent", "maybe next year", "when I have time", "not a priority"],
+    responseTemplate: "**Why Waiting Can Be Costly:**\n\nDelaying compliance review seems low-risk, but consider:\n\n**Growing Liability:**\n• Payroll tax audits are retrospective (5+ years)\n• Each month adds to potential liability\n• Interest and penalties compound\n• $250,000+ assessments can become $400,000+\n\n**Recent Audit Activity:**\n• State Revenue Offices actively targeting medical practices\n• Post-Thomas and Naaz [2022] increased scrutiny\n• Audit selection is unpredictable\n• Once selected, options are limited\n\n**Cost of Delay vs Action:**\n\n**Proactive Review:** $X (investment in compliance)\n**Reactive Audit Defence:** 3-5X (fighting assessments)\n**Retrospective Assessment:** 10X+ (paying back-tax + penalties)\n\n**What Early Action Provides:**\n✓ Identify issues before regulators do\n✓ Time to restructure properly\n✓ Documentation trail showing good faith\n✓ Potential for voluntary disclosure (reduced penalties)\n✓ Peace of mind\n\n**Limited Window:**\nRegulatory enforcement is increasing. The window for proactive compliance is narrowing.\n\n**Low-Commitment Start:**\nA quick risk assessment can identify if you have urgent issues requiring attention, without committing to full restructuring.\n\nWould a brief risk assessment be helpful?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Risk exposure depends on individual circumstances.",
+    adviceLevel: "general",
+    confidenceLevel: 10,
+    relatedProducts: ["risk-assessment"],
+    xpReward: 20,
+    metadata: { objection_type: "timing", urgency: "increasing" }
+  },
+
+  // 63. Objection: Accountant Handles This
+  {
+    id: "objection-accountant",
+    category: "objections",
+    subcategory: "existing-advisor",
+    topic: "accountant handles this",
+    title: "My Accountant Already Handles This",
+    content: "Accountants provide essential services but legal compliance requires legal expertise. Contractor classification, agreement drafting, and regulatory defence are legal matters. The best outcomes come from integrated legal-accounting collaboration.",
+    summary: "Distinguishing legal and accounting roles in medical practice compliance.",
+    keywords: ["accountant", "accountant handles", "already have accountant", "bookkeeper", "tax agent"],
+    intentPatterns: ["accountant handles", "my accountant", "already have accountant", "accountant said"],
+    responseTemplate: "**Accountants and Lawyers: Different Expertise:**\n\nAccountants provide essential services, but legal compliance requires legal expertise.\n\n**What Accountants Do Well:**\n✓ Tax return preparation\n✓ Financial statements\n✓ BAS and GST compliance\n✓ Payroll processing\n✓ Business advice\n\n**What Requires Legal Expertise:**\n✓ Contractor vs employee classification (legal test)\n✓ Agreement drafting and review\n✓ Regulatory audit defence\n✓ Court and tribunal representation\n✓ Legal privilege protection\n\n**The Classification Test:**\nDetermining if someone is a contractor or employee is a **legal** test based on case law (Hollis v Vabu, Thomas and Naaz). Accountants can process either arrangement - but the legal classification decision requires legal expertise.\n\n**Our Health and Life Partnership:**\nWe work collaboratively with accountants. Our partnership with Health and Life (Australia's leading healthcare accountant) shows how legal and accounting expertise complement each other.\n\n**Ask Your Accountant:**\n• \"Have you reviewed our contractor arrangements against Thomas and Naaz?\"\n• \"Can you provide legal advice on our payroll tax position?\"\n• \"Will you represent us in a State Revenue audit?\"\n\nIf they can't, that's where we come in.\n\n**Best Practice:**\nInformed accountants appreciate legal input on compliance matters. We're happy to collaborate with your existing accountant.\n\nWould you like us to work alongside your accountant?",
+    requiresDisclaimer: false,
+    legalDisclaimer: "",
+    adviceLevel: "general",
+    confidenceLevel: 10,
+    relatedProducts: [],
+    xpReward: 20,
+    metadata: { objection_type: "existing-advisor", collaboration: "recommended" }
+  },
+
+  // ============================================
+  // NEW KNOWLEDGE: SPECIFIC SERVICES
+  // ============================================
+
+  // 64. Employment Contracts
+  {
+    id: "employment-contracts",
+    category: "services",
+    subcategory: "employment",
+    topic: "employment contracts",
+    title: "Employment Contracts for Medical Practices",
+    content: "Medical practice employment contracts must comply with Fair Work Act, relevant awards, and industry-specific requirements. Hamilton Bailey drafts and reviews employment contracts for practice managers, nurses, reception staff, and other employees.",
+    summary: "Employment contract services for medical practice staff.",
+    keywords: ["employment contract", "staff contract", "employee agreement", "award", "fair work"],
+    intentPatterns: ["employment contract", "staff contract", "employee agreement", "hiring staff", "award compliance"],
+    responseTemplate: "Employment Contracts for Medical Practices:\n\n**Why Proper Contracts Matter:**\n• Fair Work Act compliance\n• Award coverage requirements\n• Clarity on roles and expectations\n• Protection for both parties\n• Dispute prevention\n\n**Staff Types We Cover:**\n\n**Clinical Staff:**\n• Practice nurses\n• Allied health employees\n• Medical assistants\n• Dental nurses/assistants\n\n**Administrative Staff:**\n• Practice managers\n• Reception staff\n• Billing officers\n• Medical secretaries\n\n**Contract Inclusions:**\n✓ Position description and duties\n✓ Remuneration and benefits\n✓ Hours and flexibility arrangements\n✓ Leave entitlements\n✓ Confidentiality obligations\n✓ Termination provisions\n✓ Award compliance where applicable\n\n**Award Coverage:**\n• Health Professionals and Support Services Award\n• Medical Practitioners Award (where applicable)\n• General Retail Industry Award (some roles)\n\n**Common Issues We Address:**\n• Underpayment risk (award compliance)\n• Flexible working arrangements\n• Restraint of trade clauses\n• Professional development obligations\n\nDo you need employment contracts drafted or reviewed?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Employment law is complex. Professional advice should be obtained.",
+    adviceLevel: "specific",
+    confidenceLevel: 10,
+    relatedProducts: ["employment-contract-package"],
+    xpReward: 25,
+    metadata: { service_type: "employment", fair_work_relevant: true }
+  },
+
+  // 65. Practice Policies
+  {
+    id: "practice-policies",
+    category: "services",
+    subcategory: "governance",
+    topic: "practice policies",
+    title: "Practice Policies and Procedures",
+    content: "Comprehensive practice policies protect both the practice and patients. Hamilton Bailey develops policy frameworks covering clinical governance, privacy, complaints handling, workplace health and safety, and operational procedures.",
+    summary: "Policy and procedure development for medical practices.",
+    keywords: ["policies", "procedures", "governance", "clinical governance", "workplace policy"],
+    intentPatterns: ["practice policies", "need policies", "policy review", "procedures", "governance framework"],
+    responseTemplate: "Practice Policies and Procedures:\n\n**Why Policies Matter:**\n• Regulatory compliance evidence\n• Staff clarity and consistency\n• Risk management\n• Quality improvement\n• Accreditation requirements\n\n**Core Policy Areas:**\n\n**Clinical Governance:**\n• Clinical incident management\n• Medication management\n• Infection control\n• Medical records management\n• Quality improvement\n\n**Privacy & Confidentiality:**\n• Privacy policy (APP compliant)\n• Health records handling\n• Data breach response\n• Third party disclosure\n\n**Workplace:**\n• Work health and safety\n• Anti-discrimination and harassment\n• Grievance procedures\n• Return to work\n\n**Operational:**\n• Appointment booking\n• Fee collection\n• After-hours arrangements\n• Emergency procedures\n\n**Compliance & Legal:**\n• Complaints handling\n• Consent processes\n• Contractor engagement\n• Conflict of interest\n\n**Our Policy Services:**\n• Template policy library\n• Customised policy development\n• Policy review and update\n• Implementation support\n• Staff training\n\nWould you like to discuss your policy needs?",
+    requiresDisclaimer: false,
+    legalDisclaimer: "",
+    adviceLevel: "general",
+    confidenceLevel: 9,
+    relatedProducts: ["policy-package"],
+    xpReward: 20,
+    metadata: { service_type: "governance", accreditation_relevant: true }
+  },
+
+  // 66. Restraint of Trade
+  {
+    id: "restraint-of-trade",
+    category: "services",
+    subcategory: "commercial",
+    topic: "restraint of trade",
+    title: "Restraint of Trade Clauses",
+    content: "Restraint of trade clauses protect practices from departing practitioners taking patients or setting up nearby. However, restraints must be reasonable to be enforceable. Hamilton Bailey drafts enforceable restraints and advises on existing restraint obligations.",
+    summary: "Restraint of trade advice for medical practices and practitioners.",
+    keywords: ["restraint", "non-compete", "restrictive covenant", "competition", "leaving practice"],
+    intentPatterns: ["restraint of trade", "non-compete", "restrictive covenant", "leaving practice", "competition clause"],
+    responseTemplate: "Restraint of Trade in Medical Practice:\n\n**What is Restraint of Trade?**\nClauses restricting practitioners from:\n• Setting up competing practice nearby\n• Taking patients when leaving\n• Soliciting staff\n• Working for competitors\n\n**Enforceability Requirements:**\nRestraints must be \"reasonable\" to be enforceable:\n\n**Factors Courts Consider:**\n• Geographic scope (area)\n• Duration (time period)\n• Activity restricted\n• Legitimate interest protected\n• Impact on practitioner's livelihood\n\n**Medical Practice Considerations:**\n• Patient relationships are personal\n• Geographical limits must reflect actual catchment\n• Time limits typically 1-2 years maximum\n• Must protect legitimate business interest\n\n**Our Restraint Services:**\n\n**For Practices:**\n• Draft enforceable restraint clauses\n• Review existing agreements\n• Advise on breach situations\n• Enforcement actions\n\n**For Practitioners:**\n• Review restraint obligations before signing\n• Advise on restraint implications\n• Challenge unreasonable restraints\n• Exit planning within restraints\n\n**Common Issues:**\n• Restraints that are too broad (unenforceable)\n• Restraints that are too narrow (ineffective)\n• Unclear definitions of restricted area\n• No consideration (restraint added later)\n\nDo you need restraint advice for your situation?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Restraint enforceability depends on specific circumstances.",
+    adviceLevel: "specific",
+    confidenceLevel: 10,
+    relatedProducts: ["restraint-review"],
+    xpReward: 25,
+    metadata: { service_type: "commercial", enforcement: "case-by-case" }
+  },
+
+  // 67. Locum Arrangements
+  {
+    id: "locum-arrangements",
+    category: "services",
+    subcategory: "practitioner",
+    topic: "locum arrangements",
+    title: "Locum Doctor Arrangements",
+    content: "Locum arrangements enable practices to cover leave, peak periods, and vacancies. Proper locum agreements ensure compliance with contractor requirements while protecting both practice and locum. Hamilton Bailey provides locum agreement templates and advice.",
+    summary: "Legal arrangements for locum doctors in medical practices.",
+    keywords: ["locum", "relief doctor", "temporary doctor", "cover", "leave cover", "locum agreement"],
+    intentPatterns: ["locum", "locum arrangement", "relief doctor", "covering leave", "temporary practitioner"],
+    responseTemplate: "Locum Doctor Arrangements:\n\n**What Locums Cover:**\n• Annual leave coverage\n• Sick leave and emergencies\n• Peak period demand\n• Vacancy periods\n• Maternity/paternity leave\n\n**Locum Classification:**\nLocums are typically contractors, but proper documentation is essential to support this classification.\n\n**Key Agreement Elements:**\n\n**Engagement Terms:**\n• Duration and hours\n• Facilities provided\n• Billing arrangements\n• Patient allocation vs own patients\n\n**Financial:**\n• Payment basis (percentage, sessional, daily)\n• Who bills patients\n• Medicare provider number usage\n• Expenses and travel\n\n**Compliance:**\n• Insurance requirements\n• AHPRA registration verification\n• Credentialing where required\n• Medical indemnity confirmation\n\n**Independence Indicators:**\n• Own ABN\n• Own insurance\n• Work at multiple practices\n• Control over clinical decisions\n• Can decline shifts\n\n**Common Mistakes:**\n• Using employment-style arrangements\n• Rostering like employees\n• Practice billing under own provider number\n• Treating locums like staff\n\n**Our Locum Services:**\n• Locum agreement templates\n• Existing agreement review\n• Locum policy development\n• Classification advice\n\nDo you need locum arrangement documentation?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "Locum classification depends on specific circumstances.",
+    adviceLevel: "specific",
+    confidenceLevel: 10,
+    relatedProducts: ["locum-agreement-template"],
+    xpReward: 20,
+    metadata: { arrangement_type: "contractor", compliance_risk: "moderate" }
+  },
+
+  // ============================================
+  // NEW KNOWLEDGE: GREETINGS AND GENERAL
+  // ============================================
+
+  // 68. Greeting Response
+  {
+    id: "greeting-response",
+    category: "general",
+    subcategory: "greeting",
+    topic: "hello greeting",
+    title: "Bailey AI Greeting",
+    content: "Bailey AI welcomes users and offers to help with medical practice legal questions. The greeting establishes the AI's purpose and capabilities.",
+    summary: "Bailey AI greeting and introduction.",
+    keywords: ["hello", "hi", "hey", "good morning", "good afternoon", "good evening", "greetings"],
+    intentPatterns: ["hello", "hi", "hey", "good morning", "good afternoon", "good evening"],
+    responseTemplate: "Hello! I'm Bailey, the AI assistant for Hamilton Bailey Law Firm.\n\nI'm here to help with medical practice legal questions including:\n\n• **Tenant Doctor™ arrangements** - compliant contractor structures\n• **Payroll tax compliance** - risk assessment and audit defence\n• **Practice transactions** - buying, selling, or restructuring\n• **Regulatory compliance** - AHPRA, Fair Work, Medicare\n• **Commercial agreements** - leases, partnerships, employment\n\n**How can I help you today?**\n\nYou can ask me questions about your legal situation, or I can help you book a consultation with our team.\n\n💡 *Tip: The more detail you provide, the more helpful I can be!*",
+    requiresDisclaimer: false,
+    legalDisclaimer: "",
+    adviceLevel: "general",
+    confidenceLevel: 10,
+    relatedProducts: [],
+    xpReward: 5,
+    metadata: { message_type: "greeting", engagement: "opening" }
+  },
+
+  // 69. Thank You Response
+  {
+    id: "thank-you-response",
+    category: "general",
+    subcategory: "courtesy",
+    topic: "thank you response",
+    title: "Response to Thanks",
+    content: "Bailey AI responds graciously to thanks and offers continued assistance.",
+    summary: "Responding to user thanks.",
+    keywords: ["thank you", "thanks", "cheers", "appreciate", "helpful"],
+    intentPatterns: ["thank you", "thanks", "cheers", "appreciate it", "that was helpful"],
+    responseTemplate: "You're welcome! I'm glad I could help.\n\n**What else can I assist with?**\n\nFeel free to ask more questions, or if you're ready to take the next step:\n\n• **Book a consultation** - discuss your specific situation with our team\n• **Request a callback** - we'll contact you at a convenient time\n• **Get more information** - I can explain any topic in more detail\n\nIs there anything else you'd like to know about medical practice legal matters?",
+    requiresDisclaimer: false,
+    legalDisclaimer: "",
+    adviceLevel: "general",
+    confidenceLevel: 10,
+    relatedProducts: [],
+    xpReward: 5,
+    metadata: { message_type: "courtesy", engagement: "closing" }
+  },
+
+  // 70. Unclear Request
+  {
+    id: "unclear-request",
+    category: "general",
+    subcategory: "clarification",
+    topic: "unclear request",
+    title: "Request for Clarification",
+    content: "When Bailey AI doesn't understand a request, it asks for clarification while offering common topics the user might be interested in.",
+    summary: "Handling unclear user requests.",
+    keywords: ["unclear", "don't understand", "what do you mean", "confused"],
+    intentPatterns: [],
+    responseTemplate: "I want to make sure I give you the most helpful response. Could you tell me a bit more about what you're looking for?\n\n**Common topics I can help with:**\n\n📋 **Compliance**\n• Payroll tax risks and compliance\n• AHPRA annual declarations\n• Fair Work contractor classification\n\n📄 **Agreements**\n• Tenant Doctor™ arrangements\n• Practice agreements\n• Employment contracts\n\n💼 **Transactions**\n• Buying or selling a practice\n• Practice restructuring\n• Partnership matters\n\n⚖️ **Disputes & Audits**\n• State Revenue audits\n• Partnership disputes\n• Regulatory investigations\n\n**Or simply describe your situation** and I'll point you in the right direction.\n\nWhat aspect of medical practice law can I help you with?",
+    requiresDisclaimer: false,
+    legalDisclaimer: "",
+    adviceLevel: "general",
+    confidenceLevel: 10,
+    relatedProducts: [],
+    xpReward: 5,
+    metadata: { message_type: "clarification", engagement: "redirect" }
+  },
+
+  // 71. Out of Scope
+  {
+    id: "out-of-scope",
+    category: "general",
+    subcategory: "limitations",
+    topic: "out of scope",
+    title: "Out of Scope Request",
+    content: "Bailey AI clarifies its scope when asked about topics outside medical practice law, and redirects to relevant Hamilton Bailey services.",
+    summary: "Handling requests outside Bailey AI's scope.",
+    keywords: ["criminal", "family law", "immigration", "conveyancing", "personal injury"],
+    intentPatterns: ["criminal law", "family law", "divorce", "immigration", "visa", "personal injury", "car accident"],
+    responseTemplate: "I specialise in **medical practice law** and may not be the best resource for that topic.\n\n**Hamilton Bailey focuses on:**\n• Medical practice compliance and structuring\n• Payroll tax for healthcare businesses\n• Practice sales, purchases, and partnerships\n• Healthcare regulatory matters\n• Commercial agreements for medical practices\n\n**We don't practice in:**\n• Criminal law\n• Family law\n• Immigration\n• Personal injury\n• General conveyancing\n\n**However**, if your question relates to a medical practice (even tangentially), I'm happy to help!\n\n**Need a referral?**\nIf you need a lawyer in another area, we can recommend trusted colleagues. Just let us know.\n\nIs there a medical practice legal matter I can assist with instead?",
+    requiresDisclaimer: false,
+    legalDisclaimer: "",
+    adviceLevel: "general",
+    confidenceLevel: 10,
+    relatedProducts: [],
+    xpReward: 5,
+    metadata: { message_type: "scope", engagement: "redirect" }
+  },
+
+  // 72. Specific Legal Advice Warning
+  {
+    id: "specific-advice-warning",
+    category: "general",
+    subcategory: "limitations",
+    topic: "cannot provide specific advice",
+    title: "Cannot Provide Specific Legal Advice",
+    content: "Bailey AI cannot provide specific legal advice tailored to individual circumstances. It provides general information and encourages consultation for specific matters.",
+    summary: "Explaining limitations on specific legal advice.",
+    keywords: ["specific advice", "my situation", "what should I do", "legal advice"],
+    intentPatterns: ["what should I do", "give me advice", "tell me what to do", "advise me"],
+    responseTemplate: "I can provide **general information** about medical practice law, but I cannot give **specific legal advice** tailored to your unique situation.\n\n**Why This Matters:**\n• Legal advice must consider all your circumstances\n• Your documents, history, and goals affect the advice\n• Incorrect advice could have serious consequences\n• Only qualified lawyers should provide specific advice\n\n**What I CAN Do:**\n✓ Explain legal concepts and processes\n✓ Describe typical approaches to common issues\n✓ Outline relevant considerations\n✓ Help you prepare questions for a consultation\n✓ Point you to relevant resources\n\n**What I CANNOT Do:**\n✗ Tell you exactly what to do\n✗ Review your specific documents\n✗ Provide advice you should rely on\n✗ Replace a lawyer consultation\n\n**Next Step:**\nFor advice specific to your situation, I recommend booking a consultation with our team. We can then provide tailored advice after understanding your full circumstances.\n\n**Book Now:** hamiltonbailey.com.au/book-appointment\n**Call:** (08) 8121 5167\n\nShall I help you prepare for a consultation?",
+    requiresDisclaimer: true,
+    legalDisclaimer: "This is general information only and should not be relied upon as legal advice.",
+    adviceLevel: "general",
+    confidenceLevel: 10,
+    relatedProducts: [],
+    xpReward: 10,
+    metadata: { message_type: "limitation", engagement: "booking" }
+  },
+
+  // 73. Crisis/Emergency Detection
+  {
+    id: "crisis-detection",
+    category: "safety",
+    subcategory: "crisis",
+    topic: "crisis response",
+    title: "Crisis and Emergency Response",
+    content: "Bailey AI detects crisis language and provides appropriate resources. For legal emergencies, it directs to urgent consultation. For personal crises, it provides mental health resources.",
+    summary: "Detecting and responding to crisis situations.",
+    keywords: ["crisis", "emergency", "help", "desperate", "urgent help", "suicide", "harm"],
+    intentPatterns: ["need help now", "emergency", "desperate", "can't cope", "crisis"],
+    responseTemplate: "I understand you may be facing a difficult situation. Let me help direct you to the right support.\n\n**If this is a medical emergency:** Call 000\n\n**If you're experiencing a mental health crisis:**\n• Lifeline: 13 11 14 (24/7)\n• Beyond Blue: 1300 22 4636\n• Suicide Call Back Service: 1300 659 467\n\n**If this is an urgent legal matter:**\nHamilton Bailey provides urgent legal response for:\n• Regulatory investigation notices\n• Audit deadline responses\n• Employment crises\n• Compliance emergencies\n\n**Contact for Urgent Legal Matters:**\n📞 Phone: (08) 8121 5167\n📧 Email: admin@hamiltonbailey.com.au\n\nMention \"urgent\" and we'll prioritise your matter.\n\n**Are you facing:**\n• A regulatory deadline?\n• An urgent business situation?\n• Something else I can help with?\n\nPlease let me know how I can best assist you.",
+    requiresDisclaimer: false,
+    legalDisclaimer: "",
+    adviceLevel: "general",
+    confidenceLevel: 10,
+    relatedProducts: [],
+    xpReward: 0,
+    metadata: { message_type: "crisis", priority: "urgent" }
+  },
+
+  // 74. Lead Capture - Name Request
+  {
+    id: "lead-capture-name",
+    category: "lead-capture",
+    subcategory: "contact",
+    topic: "get contact details",
+    title: "Contact Information Request",
+    content: "Bailey AI requests contact details to enable follow-up and personalised assistance.",
+    summary: "Requesting user contact information.",
+    keywords: ["contact", "callback", "follow up", "get in touch", "reach me"],
+    intentPatterns: ["contact me", "call me", "get in touch", "reach me", "follow up with me"],
+    responseTemplate: "I'd be happy to arrange for our team to follow up with you!\n\n**To connect you with the right person, please share:**\n\n📧 **Email address**\n📱 **Phone number** (optional)\n🏥 **Practice type** (e.g., GP, Specialist, Allied Health)\n💬 **Brief description** of what you're looking for help with\n\nOnce I have your details, I can:\n• Have a team member call you back\n• Send you relevant information\n• Set up a consultation\n\n**Your information is protected** by legal professional privilege from first contact.\n\nWhat's the best way to reach you?",
+    requiresDisclaimer: false,
+    legalDisclaimer: "",
+    adviceLevel: "general",
+    confidenceLevel: 10,
+    relatedProducts: [],
+    xpReward: 10,
+    metadata: { message_type: "lead-capture", action: "contact-request" }
+  },
+
+  // 75. Competitor Comparison
+  {
+    id: "competitor-comparison",
+    category: "faq",
+    subcategory: "comparison",
+    topic: "why hamilton bailey",
+    title: "Why Choose Hamilton Bailey Over Competitors",
+    content: "Hamilton Bailey differentiates through healthcare specialisation, Tenant Doctor™ exclusivity, Health and Life partnership, and proven track record with medical practices.",
+    summary: "Hamilton Bailey's competitive advantages.",
+    keywords: ["compare", "competitor", "other lawyers", "why you", "difference", "better"],
+    intentPatterns: ["why hamilton bailey", "compare to other", "what makes you different", "why should I choose"],
+    responseTemplate: "Why Choose Hamilton Bailey:\n\n**Our Unique Advantages:**\n\n**1. Healthcare Specialisation**\n• 100% focus on medical practice law\n• Not a general commercial firm doing \"some\" healthcare\n• Deep understanding of your industry\n\n**2. Tenant Doctor™ Exclusivity**\n• We are exclusively licensed to use this trademark in legal documents\n• Proven compliant structure framework\n• Based on latest case law\n\n**3. Health and Life Partnership**\n• Integrated legal-accounting solutions\n• Access to 1,200+ medical practice insights\n• Doctors Pay Calculator™ integration\n\n**4. Proven Track Record**\n• 500+ medical practice clients\n• Up to 75% reduction in proposed assessments\n• Successful audit defence outcomes\n\n**5. Fixed-Fee Transparency**\n• No surprise bills\n• Clear quotes upfront\n• Value-based pricing\n\n**6. International Presence**\n• Adelaide headquarters\n• Dubai office for extended hours\n• National service capability\n\n**What Clients Say:**\n\"Unlike generalist lawyers, Hamilton Bailey understood our medical practice immediately. No time wasted explaining basics.\"\n\n**Comparison with Generalist Firms:**\n| | Hamilton Bailey | Generalist |\n|---|---|---|\n| Healthcare focus | 100% | Often <5% |\n| Tenant Doctor™ | Licensed | No |\n| Medical practice templates | Yes | Generic |\n| Regulatory relationships | Established | Limited |\n\nWant to experience the difference?",
+    requiresDisclaimer: false,
+    legalDisclaimer: "",
+    adviceLevel: "general",
+    confidenceLevel: 10,
+    relatedProducts: [],
+    xpReward: 15,
+    metadata: { message_type: "comparison", competitive: true }
+  },
 ];
 
 // Re-export XP rewards from types
@@ -883,93 +1717,234 @@ export function findRelevantKnowledge(message: string): KnowledgeItem[] {
 export function detectIntent(message: string): string {
   const lowerMessage = message.toLowerCase();
 
+  // Greeting intent (check early)
+  if (/^(hello|hi|hey|good morning|good afternoon|good evening|g'day|howdy)\b/i.test(lowerMessage.trim())) {
+    return "greeting";
+  }
+
+  // Thank you intent
+  if (lowerMessage.includes("thank") || lowerMessage.includes("thanks") || lowerMessage.includes("cheers") || lowerMessage.includes("appreciate")) {
+    return "thank_you";
+  }
+
+  // Crisis/Emergency detection (check early for safety)
+  if (lowerMessage.includes("suicide") || lowerMessage.includes("harm myself") || lowerMessage.includes("can't cope") ||
+      lowerMessage.includes("desperate") || lowerMessage.includes("crisis") || lowerMessage.includes("emergency help")) {
+    return "crisis";
+  }
+
   // Booking intent
-  if (lowerMessage.includes("book") || lowerMessage.includes("appointment") || lowerMessage.includes("consultation")) {
+  if (lowerMessage.includes("book") || lowerMessage.includes("appointment") || lowerMessage.includes("consultation") || lowerMessage.includes("schedule")) {
     return "booking";
   }
+
+  // Practice Type intents
+  if (lowerMessage.includes("gp") || lowerMessage.includes("general practice") || lowerMessage.includes("general practitioner") || lowerMessage.includes("family doctor")) {
+    return "gp_practice";
+  }
+  if (lowerMessage.includes("specialist") || lowerMessage.includes("surgeon") || lowerMessage.includes("physician") || lowerMessage.includes("psychiatrist")) {
+    return "specialist_practice";
+  }
+  if (lowerMessage.includes("allied health") || lowerMessage.includes("physio") || lowerMessage.includes("psychology") || lowerMessage.includes("ndis")) {
+    return "allied_health";
+  }
+  if (lowerMessage.includes("dental") || lowerMessage.includes("dentist") || lowerMessage.includes("orthodontist")) {
+    return "dental_practice";
+  }
+  if (lowerMessage.includes("vet") || lowerMessage.includes("veterinary") || lowerMessage.includes("animal")) {
+    return "veterinary_practice";
+  }
+
+  // State-specific intents
+  if (lowerMessage.includes("south australia") || lowerMessage.includes(" sa ") || lowerMessage.includes("adelaide") || lowerMessage.includes("revenuesa")) {
+    return "sa_specific";
+  }
+  if (lowerMessage.includes("new south wales") || lowerMessage.includes(" nsw ") || lowerMessage.includes("sydney") || lowerMessage.includes("revenue nsw")) {
+    return "nsw_specific";
+  }
+  if (lowerMessage.includes("victoria") || lowerMessage.includes(" vic ") || lowerMessage.includes("melbourne") || lowerMessage.includes("sro victoria")) {
+    return "vic_specific";
+  }
+  if (lowerMessage.includes("queensland") || lowerMessage.includes(" qld ") || lowerMessage.includes("brisbane")) {
+    return "qld_specific";
+  }
+  if (lowerMessage.includes("tasmania") || lowerMessage.includes(" tas ") || lowerMessage.includes("hobart") || lowerMessage.includes("launceston")) {
+    return "tas_specific";
+  }
+
+  // Transaction intents
+  if (lowerMessage.includes("sell") || lowerMessage.includes("selling") || lowerMessage.includes("exit") || lowerMessage.includes("retire")) {
+    return "practice_sale";
+  }
+  if (lowerMessage.includes("buy") || lowerMessage.includes("purchase") || lowerMessage.includes("acquire") || lowerMessage.includes("acquisition")) {
+    return "practice_purchase";
+  }
+  if (lowerMessage.includes("start") || lowerMessage.includes("new practice") || lowerMessage.includes("establish") || lowerMessage.includes("opening")) {
+    return "new_practice";
+  }
+  if (lowerMessage.includes("restructure") || lowerMessage.includes("reorganise") || lowerMessage.includes("change structure")) {
+    return "restructure";
+  }
+  if (lowerMessage.includes("partnership dispute") || lowerMessage.includes("partner disagreement") || lowerMessage.includes("buyout partner")) {
+    return "partnership_dispute";
+  }
+
+  // Compliance intents
+  if (lowerMessage.includes("medicare") || lowerMessage.includes("mbs") || lowerMessage.includes("pbs") || lowerMessage.includes("bulk billing")) {
+    return "medicare";
+  }
+  if (lowerMessage.includes("workcover") || lowerMessage.includes("workers comp") || lowerMessage.includes("work injury")) {
+    return "workcover";
+  }
+  if (lowerMessage.includes("privacy") || lowerMessage.includes("health records") || lowerMessage.includes("data breach") || lowerMessage.includes("patient records")) {
+    return "privacy";
+  }
+
+  // Service-specific intents
+  if (lowerMessage.includes("employment contract") || lowerMessage.includes("staff contract") || lowerMessage.includes("hiring staff")) {
+    return "employment_contract";
+  }
+  if (lowerMessage.includes("polic") || lowerMessage.includes("procedure") || lowerMessage.includes("governance")) {
+    return "policies";
+  }
+  if (lowerMessage.includes("restraint") || lowerMessage.includes("non-compete") || lowerMessage.includes("restrictive covenant")) {
+    return "restraint";
+  }
+  if (lowerMessage.includes("locum") || lowerMessage.includes("relief doctor") || lowerMessage.includes("covering leave")) {
+    return "locum";
+  }
+
+  // FAQ intents
+  if (lowerMessage.includes("what to expect") || lowerMessage.includes("how does it work") || lowerMessage.includes("consultation process")) {
+    return "what_to_expect";
+  }
+  if (lowerMessage.includes("why speciali") || lowerMessage.includes("why not general lawyer") || lowerMessage.includes("what's different")) {
+    return "why_specialised";
+  }
+  if (lowerMessage.includes("confidential") || lowerMessage.includes("privilege") || lowerMessage.includes("private") || lowerMessage.includes("who will know")) {
+    return "confidentiality";
+  }
+  if (lowerMessage.includes("how long") || lowerMessage.includes("timeline") || lowerMessage.includes("when complete") || lowerMessage.includes("turnaround")) {
+    return "timeline";
+  }
+  if (lowerMessage.includes("why hamilton") || lowerMessage.includes("compare") || lowerMessage.includes("what makes you different")) {
+    return "comparison";
+  }
+
+  // Lead capture intents
+  if (lowerMessage.includes("contact me") || lowerMessage.includes("call me") || lowerMessage.includes("reach me") || lowerMessage.includes("follow up")) {
+    return "lead_capture";
+  }
+
   // Pricing intent
   if (lowerMessage.includes("price") || lowerMessage.includes("cost") || lowerMessage.includes("fee") || lowerMessage.includes("how much")) {
     return "pricing";
   }
+
   // Tenant Doctor
   if (lowerMessage.includes("tenant doctor") || lowerMessage.includes("independent contractor")) {
     return "tenant_doctor";
   }
+
   // Payroll Tax
   if (lowerMessage.includes("payroll tax") || lowerMessage.includes("state revenue") || lowerMessage.includes("pt21") || lowerMessage.includes("21 requirements")) {
     return "payroll_tax";
   }
+
   // Fair Work
-  if (lowerMessage.includes("fair work") || lowerMessage.includes("employment")) {
+  if (lowerMessage.includes("fair work") || lowerMessage.includes("employment law")) {
     return "fair_work";
   }
+
   // AHPRA
   if (lowerMessage.includes("ahpra") || lowerMessage.includes("annual declaration") || lowerMessage.includes("practitioner registration")) {
     return "ahpra";
   }
+
   // Pathology
   if (lowerMessage.includes("pathology") || lowerMessage.includes("collection room")) {
     return "pathology";
   }
+
   // Legal Audit
   if (lowerMessage.includes("legal audit") || lowerMessage.includes("document review") || lowerMessage.includes("agreement review")) {
     return "legal_audit";
   }
+
   // Audit/Investigation (State Revenue)
   if (lowerMessage.includes("audit") || lowerMessage.includes("investigation") || lowerMessage.includes("sro")) {
     return "audit";
   }
+
   // Case Law
   if (lowerMessage.includes("thomas and naaz") || lowerMessage.includes("optical superstore") || lowerMessage.includes("hollis v vabu") || lowerMessage.includes("case law")) {
     return "case_law";
   }
+
   // Risk Language
   if (lowerMessage.includes("risk language") || lowerMessage.includes("risky language") || lowerMessage.includes("what to avoid") || lowerMessage.includes("compliance language")) {
     return "risk_language";
   }
+
   // Compliance
   if (lowerMessage.includes("compliance") || lowerMessage.includes("regulatory") || lowerMessage.includes("triple threat")) {
     return "compliance";
   }
+
   // Structure
   if (lowerMessage.includes("structure") || lowerMessage.includes("service entity")) {
     return "structure";
   }
+
   // Property/Lease
   if (lowerMessage.includes("property") || lowerMessage.includes("lease") || lowerMessage.includes("rent")) {
     return "property";
   }
+
   // Health and Life / Accounting / David Dahm
   if (lowerMessage.includes("health and life") || lowerMessage.includes("accounting") || lowerMessage.includes("accountant") || lowerMessage.includes("david dahm")) {
     return "partnership";
   }
+
   // Technology
   if (lowerMessage.includes("technology") || lowerMessage.includes("calculator") || lowerMessage.includes("xero") || lowerMessage.includes("doctors pay")) {
     return "technology";
   }
+
   // Contact
   if (lowerMessage.includes("contact") || lowerMessage.includes("phone") || lowerMessage.includes("email") || lowerMessage.includes("call")) {
     return "contact";
   }
+
   // Urgent
   if (lowerMessage.includes("urgent") || lowerMessage.includes("emergency") || lowerMessage.includes("immediate")) {
     return "urgent";
   }
+
   // Copyright/Licensing
   if (lowerMessage.includes("copyright") || lowerMessage.includes("licensing") || lowerMessage.includes("trademark") || lowerMessage.includes("permitted use")) {
     return "copyright";
   }
+
   // Library/Resources
   if (lowerMessage.includes("library") || lowerMessage.includes("resources") || lowerMessage.includes("templates") || lowerMessage.includes("guides")) {
     return "resources";
   }
+
   // About/Company
   if (lowerMessage.includes("about") || lowerMessage.includes("who are") || lowerMessage.includes("tell me about")) {
     return "about";
   }
+
   // Team
   if (lowerMessage.includes("lukasz") || lowerMessage.includes("wyszynski") || lowerMessage.includes("lawyer") || lowerMessage.includes("team")) {
     return "team";
+  }
+
+  // Out of scope detection
+  if (lowerMessage.includes("criminal") || lowerMessage.includes("family law") || lowerMessage.includes("divorce") ||
+      lowerMessage.includes("immigration") || lowerMessage.includes("visa") || lowerMessage.includes("personal injury")) {
+    return "out_of_scope";
   }
 
   return "general_inquiry";

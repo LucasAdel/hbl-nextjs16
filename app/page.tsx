@@ -14,19 +14,19 @@ export default function Home() {
       <Hero />
 
       {/* Secondary hero block */}
-      <section className="py-8 bg-gradient-to-br from-tiffany/5 to-white">
+      <section className="py-8 bg-gradient-to-br from-tiffany/5 to-white dark:from-tiffany/10 dark:to-slate-900">
         <div className="container-custom">
-          <div className="relative rounded-2xl bg-gradient-to-br from-tiffany/10 to-white p-8 md:p-12">
-            <div className="inline-flex items-center rounded-full border border-transparent bg-tiffany/20 px-3 py-1 text-xs font-semibold text-tiffany-dark mb-4">
+          <div className="relative rounded-2xl bg-gradient-to-br from-tiffany/10 to-white dark:from-tiffany/20 dark:to-slate-800 p-8 md:p-12">
+            <div className="inline-flex items-center rounded-full border border-transparent bg-tiffany/20 dark:bg-tiffany/30 px-3 py-1 text-xs font-semibold text-tiffany-dark dark:text-tiffany-light mb-4">
               Trusted by 1000+ Healthcare Professionals
             </div>
 
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div>
-                <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
+                <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900 dark:text-white">
                   Legal Excellence for Healthcare Practitioners
                 </h2>
-                <p className="text-lg text-gray-600 mb-8">
+                <p className="text-lg text-gray-600 dark:text-slate-300 mb-8">
                   From practice setup to AHPRA compliance, payroll tax to acquisitions -
                   comprehensive legal support tailored for Australian GPs and healthcare
                   professionals.
@@ -70,16 +70,16 @@ export default function Home() {
       <ServicesOverview />
 
       {/* Legal Documents Section */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-gray-50 dark:bg-slate-900">
         <div className="container-custom">
           <div className="text-center mb-12">
             <span className="font-montserrat text-sm font-semibold text-tiffany uppercase tracking-wider block mb-3">
               Legal Documents
             </span>
-            <h2 className="font-blair text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="font-blair text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
               Tailored For Healthcare Professionals
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 dark:text-slate-300 max-w-2xl mx-auto">
               Access our comprehensive library of legal documents specifically designed for
               Australian medical practitioners and healthcare organisations.
             </p>
@@ -115,20 +115,20 @@ export default function Home() {
               <Link
                 key={category.title}
                 href={category.href}
-                className="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+                className="group bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
               >
-                <div className="w-12 h-12 bg-tiffany/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-tiffany/20 transition-colors">
+                <div className="w-12 h-12 bg-tiffany/10 dark:bg-tiffany/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-tiffany/20 dark:group-hover:bg-tiffany/30 transition-colors">
                   <category.icon className="h-6 w-6 text-tiffany" />
                 </div>
-                <h3 className="font-blair text-lg text-gray-900 mb-1">{category.title}</h3>
-                <p className="text-sm text-gray-500">{category.count} documents</p>
+                <h3 className="font-blair text-lg text-gray-900 dark:text-white mb-1">{category.title}</h3>
+                <p className="text-sm text-gray-500 dark:text-slate-400">{category.count} documents</p>
               </Link>
             ))}
           </div>
 
-          <div className="text-center bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-            <h3 className="font-blair text-xl text-gray-900 mb-2">Need a Specific Document?</h3>
-            <p className="text-gray-600 mb-6">
+          <div className="text-center bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-sm border border-gray-100 dark:border-slate-700">
+            <h3 className="font-blair text-xl text-gray-900 dark:text-white mb-2">Need a Specific Document?</h3>
+            <p className="text-gray-600 dark:text-slate-300 mb-6">
               Browse our complete collection of legal documents designed for medical practitioners.
             </p>
             <Link
@@ -158,18 +158,18 @@ export default function Home() {
       <Testimonials />
 
       {/* Get In Touch Section with Map */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-white dark:bg-slate-800">
         <div className="container-custom">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center px-4 py-2 rounded-full mb-6 bg-tiffany/10">
+            <div className="inline-flex items-center px-4 py-2 rounded-full mb-6 bg-tiffany/10 dark:bg-tiffany/20">
               <span className="font-montserrat text-sm font-semibold text-tiffany uppercase tracking-wider">
                 Get In Touch
               </span>
             </div>
-            <h2 className="font-blair text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="font-blair text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
               Contact Our Team
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 dark:text-slate-300 max-w-2xl mx-auto">
               We&apos;re here to assist Australian medical practitioners with their legal needs.
               Reach out to discuss how we can support your practice.
             </p>
@@ -178,17 +178,17 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Contact Information */}
             <div className="space-y-8">
-              <div className="bg-gradient-to-br from-tiffany/5 to-white rounded-2xl p-8 border border-gray-100">
-                <h3 className="font-blair text-2xl text-gray-900 mb-6">Our Practice</h3>
+              <div className="bg-gradient-to-br from-tiffany/5 to-white dark:from-tiffany/10 dark:to-slate-800 rounded-2xl p-8 border border-gray-100 dark:border-slate-700">
+                <h3 className="font-blair text-2xl text-gray-900 dark:text-white mb-6">Our Practice</h3>
 
                 <div className="space-y-6">
                   <div className="flex items-start">
-                    <div className="w-12 h-12 bg-tiffany/10 rounded-xl flex items-center justify-center flex-shrink-0 mr-4">
+                    <div className="w-12 h-12 bg-tiffany/10 dark:bg-tiffany/20 rounded-xl flex items-center justify-center flex-shrink-0 mr-4">
                       <MapPin className="h-6 w-6 text-tiffany" />
                     </div>
                     <div>
-                      <h4 className="font-blair text-lg text-gray-900 mb-1">Address</h4>
-                      <p className="text-gray-600">
+                      <h4 className="font-blair text-lg text-gray-900 dark:text-white mb-1">Address</h4>
+                      <p className="text-gray-600 dark:text-slate-300">
                         147 Pirie Street<br />
                         Adelaide, South Australia 5000
                       </p>
@@ -196,32 +196,32 @@ export default function Home() {
                   </div>
 
                   <div className="flex items-start">
-                    <div className="w-12 h-12 bg-tiffany/10 rounded-xl flex items-center justify-center flex-shrink-0 mr-4">
+                    <div className="w-12 h-12 bg-tiffany/10 dark:bg-tiffany/20 rounded-xl flex items-center justify-center flex-shrink-0 mr-4">
                       <Phone className="h-6 w-6 text-tiffany" />
                     </div>
                     <div>
-                      <h4 className="font-blair text-lg text-gray-900 mb-1">Phone</h4>
-                      <p className="text-gray-600">+61 8 5122 0056</p>
+                      <h4 className="font-blair text-lg text-gray-900 dark:text-white mb-1">Phone</h4>
+                      <p className="text-gray-600 dark:text-slate-300">+61 8 5122 0056</p>
                     </div>
                   </div>
 
                   <div className="flex items-start">
-                    <div className="w-12 h-12 bg-tiffany/10 rounded-xl flex items-center justify-center flex-shrink-0 mr-4">
+                    <div className="w-12 h-12 bg-tiffany/10 dark:bg-tiffany/20 rounded-xl flex items-center justify-center flex-shrink-0 mr-4">
                       <Mail className="h-6 w-6 text-tiffany" />
                     </div>
                     <div>
-                      <h4 className="font-blair text-lg text-gray-900 mb-1">Contact</h4>
-                      <p className="text-gray-600">Use our contact form for enquiries</p>
+                      <h4 className="font-blair text-lg text-gray-900 dark:text-white mb-1">Contact</h4>
+                      <p className="text-gray-600 dark:text-slate-300">Use our contact form for enquiries</p>
                     </div>
                   </div>
 
                   <div className="flex items-start">
-                    <div className="w-12 h-12 bg-tiffany/10 rounded-xl flex items-center justify-center flex-shrink-0 mr-4">
+                    <div className="w-12 h-12 bg-tiffany/10 dark:bg-tiffany/20 rounded-xl flex items-center justify-center flex-shrink-0 mr-4">
                       <Clock className="h-6 w-6 text-tiffany" />
                     </div>
                     <div>
-                      <h4 className="font-blair text-lg text-gray-900 mb-1">Business Hours</h4>
-                      <p className="text-gray-600">
+                      <h4 className="font-blair text-lg text-gray-900 dark:text-white mb-1">Business Hours</h4>
+                      <p className="text-gray-600 dark:text-slate-300">
                         Monday - Friday: 9:00 AM - 5:00 PM<br />
                         Saturday & Sunday: Closed
                       </p>
@@ -230,8 +230,8 @@ export default function Home() {
                 </div>
 
                 {/* Security Notice */}
-                <div className="mt-8 pt-6 border-t border-gray-200">
-                  <div className="flex items-center text-sm text-gray-500">
+                <div className="mt-8 pt-6 border-t border-gray-200 dark:border-slate-700">
+                  <div className="flex items-center text-sm text-gray-500 dark:text-slate-400">
                     <Shield className="h-4 w-4 mr-2 text-tiffany" />
                     <span>CSRF Protected</span>
                     <span className="mx-2">•</span>

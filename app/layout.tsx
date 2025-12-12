@@ -29,6 +29,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://hamiltonbailey.com"),
   title: {
     default: "Hamilton Bailey Law Firm | Legal Services for Medical Practitioners",
     template: "%s | Hamilton Bailey Law Firm",

@@ -6,7 +6,7 @@ import Link from "next/link";
 
 const Hero: React.FC = () => {
   return (
-    <section className="relative bg-gradient-to-br from-gray-50 via-white to-tiffany-lighter/10 hero-spacing overflow-hidden">
+    <section className="relative bg-gradient-to-br from-gray-50 via-white to-tiffany-lighter/10 dark:from-slate-900 dark:via-slate-800 dark:to-tiffany/10 hero-spacing overflow-hidden">
       {/* Force tiffany text color for secondary button */}
       <style jsx>{`
         .force-tiffany-text {
@@ -24,8 +24,8 @@ const Hero: React.FC = () => {
       <div className="container-custom relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
           <div className="order-2 lg:order-1 animate-fade-up">
-            <div className="inline-flex items-center px-4 py-2 bg-tiffany-lighter/30 rounded-full mb-8">
-              <span className="text-tiffany-dark font-semibold text-sm tracking-wide">
+            <div className="inline-flex items-center px-4 py-2 bg-tiffany-lighter/30 dark:bg-tiffany/20 rounded-full mb-8">
+              <span className="text-tiffany-dark dark:text-tiffany-light font-semibold text-sm tracking-wide">
                 Hamilton Bailey Law Firm
               </span>
             </div>
@@ -34,7 +34,7 @@ const Hero: React.FC = () => {
               Specialised Legal Services for Medical Practitioners
             </h1>
 
-            <p className="text-xl text-gray-700 mb-12 max-w-xl leading-relaxed">
+            <p className="text-xl text-gray-700 dark:text-slate-300 mb-12 max-w-xl leading-relaxed">
               Providing expert legal advice and documentation tailored to Australian medical
               practitioners, helping you organise practice management, compliance, and risk
               mitigation.
@@ -60,10 +60,10 @@ const Hero: React.FC = () => {
 
               <Link
                 href="/book-appointment?type=initial-consultation"
-                className="bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-tiffany-lighter
+                className="bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 border-2 border-gray-200 dark:border-slate-600 hover:border-tiffany-lighter dark:hover:border-tiffany
                    font-semibold py-4 px-8 rounded-xl transition-all duration-300
                    inline-flex items-center justify-center shadow-md hover:shadow-lg transform hover:-translate-y-0.5
-                   focus:outline-none focus:ring-4 focus:ring-gray-200 group force-tiffany-text"
+                   focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-slate-600 group force-tiffany-text"
               >
                 <span className="font-semibold">Book a Consultation</span>
                 <svg
@@ -119,8 +119,8 @@ const Hero: React.FC = () => {
                     </svg>
                   </div>
                   <div>
-                    <p className="font-semibold text-sm text-gray-900">Trusted Legal Partner</p>
-                    <p className="text-gray-600 text-xs">1000+ Healthcare Clients</p>
+                    <p className="font-semibold text-sm text-gray-900 dark:text-white">Trusted Legal Partner</p>
+                    <p className="text-gray-600 dark:text-slate-400 text-xs">1000+ Healthcare Clients</p>
                   </div>
                 </div>
               </div>
@@ -130,8 +130,8 @@ const Hero: React.FC = () => {
                 style={{ animationDelay: "0.7s" }}
               >
                 <div className="text-center">
-                  <p className="text-xl sm:text-2xl font-bold text-tiffany-dark">14+</p>
-                  <p className="text-gray-600 text-xs">Years Experience</p>
+                  <p className="text-xl sm:text-2xl font-bold text-tiffany-dark dark:text-tiffany-light">14+</p>
+                  <p className="text-gray-600 dark:text-slate-400 text-xs">Years Experience</p>
                 </div>
               </div>
             </div>

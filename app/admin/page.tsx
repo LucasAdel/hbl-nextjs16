@@ -199,6 +199,29 @@ export default function AdminDashboard() {
         </button>
       </div>
 
+      {/* Urgent Tasks Banner */}
+      <div className="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <h3 className="font-semibold text-amber-800 dark:text-amber-200">
+              Urgent: Configure Production Domain
+            </h3>
+            <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+              Add hamiltonbailey.com to Netlify to enable Stripe payments on production.
+            </p>
+            <div className="mt-3 text-sm text-amber-600 dark:text-amber-400 space-y-1">
+              <p>1. Go to <a href="https://app.netlify.com/projects/hbl-law-staging/domain-management" target="_blank" rel="noopener noreferrer" className="underline hover:text-amber-800">Netlify Domain Settings</a></p>
+              <p>2. Add custom domain: <code className="bg-amber-100 dark:bg-amber-800 px-1 rounded">hamiltonbailey.com</code></p>
+              <p>3. Update env vars: <code className="bg-amber-100 dark:bg-amber-800 px-1 rounded">NEXT_PUBLIC_SITE_URL=https://hamiltonbailey.com</code></p>
+            </div>
+            <p className="text-xs text-amber-500 dark:text-amber-500 mt-2">
+              Due: Within 48 hours (by {new Date(Date.now() + 48 * 60 * 60 * 1000).toLocaleDateString()})
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard

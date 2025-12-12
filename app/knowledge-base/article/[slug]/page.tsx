@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
+import DOMPurify from "isomorphic-dompurify";
 import {
   KNOWLEDGE_BASE_ARTICLES,
   KNOWLEDGE_BASE_CATEGORIES,
@@ -133,9 +134,9 @@ export default async function ArticlePage({ params }: Props) {
   );
 }
 
-// Simple markdown to HTML formatter
+// Simple markdown to HTML formatter with XSS protection
 function formatMarkdown(content: string): string {
-  return content
+  const html = content
     .replace(/^### (.*$)/gim, "<h3>$1</h3>")
     .replace(/^## (.*$)/gim, "<h2>$1</h2>")
     .replace(/^# (.*$)/gim, "<h1>$1</h1>")
@@ -146,4 +147,10 @@ function formatMarkdown(content: string): string {
     .replace(/\n\n/g, "</p><p>")
     .replace(/^/g, "<p>")
     .replace(/$/g, "</p>");
+
+  // Sanitise HTML to prevent XSS attacks
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ["h1", "h2", "h3", "h4", "h5", "h6", "p", "strong", "em", "li", "ul", "ol", "a", "br"],
+    ALLOWED_ATTR: ["href", "target", "rel"],
+  });
 }

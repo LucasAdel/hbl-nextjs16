@@ -9,15 +9,11 @@ interface TestimonialProps {
 const TestimonialCard: React.FC<TestimonialProps> = ({ quote, name, location }) => {
   return (
     <div
-      className="h-full flex flex-col bg-white/80 rounded-2xl p-8 border border-gray-200/50"
-      style={{
-        boxShadow: "0 8px 32px rgba(31, 38, 135, 0.1)",
-      }}
+      className="h-full flex flex-col bg-white/80 dark:bg-slate-800/80 rounded-2xl p-8 border border-gray-200/50 dark:border-slate-700/50 shadow-lg"
     >
       {/* Quote Icon */}
       <svg
-        className="mb-6 text-tiffany-light"
-        style={{ width: "40px", height: "40px" }}
+        className="mb-6 text-tiffany-light w-10 h-10"
         fill="currentColor"
         viewBox="0 0 32 32"
         xmlns="http://www.w3.org/2000/svg"
@@ -26,13 +22,13 @@ const TestimonialCard: React.FC<TestimonialProps> = ({ quote, name, location }) 
       </svg>
 
       {/* Quote Text */}
-      <p className="flex-grow font-montserrat text-base leading-relaxed text-text-secondary mb-6">
+      <p className="flex-grow font-montserrat text-base leading-relaxed text-text-secondary dark:text-slate-300 mb-6">
         {quote}
       </p>
 
       {/* Attribution */}
       <div>
-        <p className="font-montserrat text-base font-semibold text-text-primary mb-1">{name}</p>
+        <p className="font-montserrat text-base font-semibold text-text-primary dark:text-white mb-1">{name}</p>
         <p className="font-montserrat text-sm font-medium text-tiffany">{location}</p>
       </div>
     </div>
@@ -62,17 +58,17 @@ const Testimonials: React.FC = () => {
   ];
 
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-white dark:bg-slate-900">
       <div className="container-custom">
         {/* Section Header */}
         <div className="text-center mb-12">
           <span className="font-montserrat text-sm font-semibold text-tiffany uppercase tracking-wider block mb-3">
             Client Experiences
           </span>
-          <h2 className="font-blair text-3xl md:text-4xl font-bold text-text-primary mb-4">
+          <h2 className="font-blair text-3xl md:text-4xl font-bold text-text-primary dark:text-white mb-4">
             Trusted by Medical Professionals
           </h2>
-          <p className="font-montserrat text-lg text-text-secondary max-w-2xl mx-auto">
+          <p className="font-montserrat text-lg text-text-secondary dark:text-slate-300 max-w-2xl mx-auto">
             Hear from Australian medical practitioners who have benefited from our specialised
             legal services.
           </p>

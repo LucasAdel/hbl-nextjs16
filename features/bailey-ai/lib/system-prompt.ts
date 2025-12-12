@@ -25,7 +25,7 @@ export const PRACTICE_AREAS = [
 ] as const;
 
 // Booking link for consultations
-export const BOOKING_LINK = "https://hamiltonbailey.com/book";
+export const BOOKING_LINK = "https://hamiltonbailey.com/book-appointment";
 
 // Office contact details
 export const CONTACT_DETAILS = {

@@ -75,7 +75,7 @@ function getUpstashLimiter(config: RateLimitConfig): Ratelimit {
       new Ratelimit({
         redis,
         limiter: Ratelimit.slidingWindow(config.maxRequests, `${windowSec} s`),
-        analytics: true,
+        analytics: false, // IMPORTANT: true doubles Redis commands, hits free tier limit
         prefix: "hbl-ratelimit",
       })
     );
