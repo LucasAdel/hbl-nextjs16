@@ -1,4 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
+import path from 'path';
+
+const authFile = path.join(__dirname, '.playwright/.auth/admin.json');
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -14,9 +17,28 @@ export default defineConfig({
   },
 
   projects: [
+    // Setup project for authentication
+    {
+      name: 'setup',
+      testMatch: /auth\.setup\.ts/,
+    },
+
+    // Public tests - no authentication required
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      testIgnore: /admin\.spec\.ts/,
+    },
+
+    // Admin tests - requires authentication
+    {
+      name: 'admin',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: authFile,
+      },
+      testMatch: /admin\.spec\.ts/,
+      dependencies: ['setup'],
     },
   ],
 
