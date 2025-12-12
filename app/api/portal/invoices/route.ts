@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { requirePortalOrAdminAuth } from "@/lib/auth/portal-auth";
+import { requireAdminAuth } from "@/lib/auth/admin-auth";
 
 // Helper to get untyped access for new tables not yet in types
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -14,6 +16,12 @@ interface Invoice {
   due_date: string;
 }
 
+/**
+ * GET /api/portal/invoices
+ * Get invoices for a client
+ * SECURITY: Requires authentication. Users can only view their own invoices.
+ * Admins can view any user's invoices.
+ */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -26,6 +34,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // SECURITY: Verify user is authenticated and authorized
+    const authResult = await requirePortalOrAdminAuth(email);
+    if (!authResult.authorized) {
+      return authResult.response;
+    }
+
+    // Use verified email for query (admin can query any email, users only their own)
+    const queryEmail = authResult.user.isAdmin ? email : authResult.user.email;
+
     const supabase = await createClient();
     const db = getUntypedClient(supabase);
 
@@ -33,7 +50,7 @@ export async function GET(request: NextRequest) {
     const { data: invoices, error } = await db
       .from("client_invoices")
       .select("*")
-      .eq("client_email", email.toLowerCase())
+      .eq("client_email", queryEmail.toLowerCase())
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -81,10 +98,16 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * PATCH /api/portal/invoices
+ * Update invoice status (mark as paid, viewed)
+ * SECURITY: Requires authentication. Users can only update their own invoices.
+ * Admins can update any invoice.
+ */
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
-    const { invoiceId, action, paymentMethod } = body;
+    const { invoiceId, action, paymentMethod, clientEmail } = body;
 
     if (!invoiceId || !action) {
       return NextResponse.json(
@@ -93,8 +116,31 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    // SECURITY: Verify user is authenticated
+    const authResult = await requirePortalOrAdminAuth(clientEmail);
+    if (!authResult.authorized) {
+      return authResult.response;
+    }
+
     const supabase = await createClient();
     const db = getUntypedClient(supabase);
+
+    // SECURITY: For non-admins, verify the invoice belongs to them
+    if (!authResult.user.isAdmin) {
+      const { data: invoice } = await db
+        .from("client_invoices")
+        .select("client_email")
+        .eq("id", invoiceId)
+        .single();
+
+      if (!invoice || invoice.client_email.toLowerCase() !== authResult.user.email.toLowerCase()) {
+        console.warn(`SECURITY: User ${authResult.user.email} attempted to modify invoice ${invoiceId} belonging to another user`);
+        return NextResponse.json(
+          { error: "Forbidden - You can only update your own invoices" },
+          { status: 403 }
+        );
+      }
+    }
 
     if (action === "mark_paid") {
       const { error } = await db
@@ -148,7 +194,18 @@ export async function PATCH(request: NextRequest) {
   }
 }
 
+/**
+ * POST /api/portal/invoices
+ * Create a new invoice
+ * SECURITY: Admin only - only staff/admins can create invoices
+ */
 export async function POST(request: NextRequest) {
+  // SECURITY: Only admins can create invoices
+  const authResult = await requireAdminAuth();
+  if (!authResult.authorized) {
+    return authResult.response;
+  }
+
   try {
     const body = await request.json();
     const {

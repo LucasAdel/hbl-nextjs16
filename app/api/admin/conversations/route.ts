@@ -5,12 +5,20 @@ import {
   exportConversations,
   type ConversationFilters,
 } from "@/lib/supabase/conversations";
+import { requireAdminAuth } from "@/lib/auth/admin-auth";
 
 /**
  * GET /api/admin/conversations
  * List conversations with filters, pagination, and analytics
+ * SECURITY: Requires admin authentication
  */
 export async function GET(request: NextRequest) {
+  // SECURITY: Verify admin authentication
+  const authResult = await requireAdminAuth();
+  if (!authResult.authorized) {
+    return authResult.response;
+  }
+
   try {
     const { searchParams } = new URL(request.url);
 
@@ -103,8 +111,15 @@ export async function GET(request: NextRequest) {
 /**
  * POST /api/admin/conversations
  * Export conversations in various formats
+ * SECURITY: Requires admin authentication
  */
 export async function POST(request: NextRequest) {
+  // SECURITY: Verify admin authentication
+  const authResult = await requireAdminAuth();
+  if (!authResult.authorized) {
+    return authResult.response;
+  }
+
   try {
     const body = await request.json();
     const { action, filters, format = "json" } = body;

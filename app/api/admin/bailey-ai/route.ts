@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
+import { requireAdminAuth } from "@/lib/auth/admin-auth";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -10,8 +11,15 @@ function getDb(supabase: SupabaseClient): any {
 /**
  * GET /api/admin/bailey-ai
  * Get Bailey AI analytics and stats
+ * SECURITY: Requires admin authentication
  */
 export async function GET(request: NextRequest) {
+  // SECURITY: Verify admin authentication
+  const authResult = await requireAdminAuth();
+  if (!authResult.authorized) {
+    return authResult.response;
+  }
+
   const { searchParams } = new URL(request.url);
   const type = searchParams.get("type") || "overview";
 
@@ -342,8 +350,15 @@ export async function GET(request: NextRequest) {
 /**
  * POST /api/admin/bailey-ai
  * Create or update knowledge base items
+ * SECURITY: Requires admin authentication
  */
 export async function POST(request: NextRequest) {
+  // SECURITY: Verify admin authentication
+  const authResult = await requireAdminAuth();
+  if (!authResult.authorized) {
+    return authResult.response;
+  }
+
   try {
     const body = await request.json();
     const { action, data } = body;

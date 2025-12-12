@@ -4,6 +4,7 @@ import {
   updateConversation,
   deleteConversation,
 } from "@/lib/supabase/conversations";
+import { requireAdminAuth } from "@/lib/auth/admin-auth";
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -12,11 +13,18 @@ interface RouteContext {
 /**
  * GET /api/admin/conversations/[id]
  * Get conversation details with all messages
+ * SECURITY: Requires admin authentication
  */
 export async function GET(
   request: NextRequest,
   context: RouteContext
 ) {
+  // SECURITY: Verify admin authentication
+  const authResult = await requireAdminAuth();
+  if (!authResult.authorized) {
+    return authResult.response;
+  }
+
   try {
     const { id } = await context.params;
 
@@ -52,11 +60,18 @@ export async function GET(
 /**
  * PATCH /api/admin/conversations/[id]
  * Update conversation metadata (lead score, status, satisfaction)
+ * SECURITY: Requires admin authentication
  */
 export async function PATCH(
   request: NextRequest,
   context: RouteContext
 ) {
+  // SECURITY: Verify admin authentication
+  const authResult = await requireAdminAuth();
+  if (!authResult.authorized) {
+    return authResult.response;
+  }
+
   try {
     const { id } = await context.params;
 
@@ -161,11 +176,18 @@ export async function PATCH(
 /**
  * DELETE /api/admin/conversations/[id]
  * Delete a conversation and all its messages
+ * SECURITY: Requires admin authentication
  */
 export async function DELETE(
   request: NextRequest,
   context: RouteContext
 ) {
+  // SECURITY: Verify admin authentication
+  const authResult = await requireAdminAuth();
+  if (!authResult.authorized) {
+    return authResult.response;
+  }
+
   try {
     const { id } = await context.params;
 

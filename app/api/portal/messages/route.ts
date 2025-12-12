@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { checkRateLimit, getClientIdentifier } from "@/lib/rate-limiter";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { requirePortalOrAdminAuth } from "@/lib/auth/portal-auth";
+import { requireAdminAuth } from "@/lib/auth/admin-auth";
 
 // Helper to get untyped access for new tables not yet in types
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -15,6 +17,12 @@ const MESSAGES_RATE_LIMIT = {
   windowMs: 60000,
 };
 
+/**
+ * GET /api/portal/messages
+ * Get messages for a client
+ * SECURITY: Requires authentication. Users can only view their own messages.
+ * Admins can view any user's messages.
+ */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -28,13 +36,22 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // SECURITY: Verify user is authenticated and authorized
+    const authResult = await requirePortalOrAdminAuth(email);
+    if (!authResult.authorized) {
+      return authResult.response;
+    }
+
+    // Use verified email for query (admin can query any email, users only their own)
+    const queryEmail = authResult.user.isAdmin ? email : authResult.user.email;
+
     const supabase = await createClient();
     const db = getUntypedClient(supabase);
 
     let query = db
       .from("client_messages")
       .select("*")
-      .eq("client_email", email.toLowerCase())
+      .eq("client_email", queryEmail.toLowerCase())
       .order("created_at", { ascending: true });
 
     if (matterId) {
@@ -61,6 +78,12 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * POST /api/portal/messages
+ * Send a new message
+ * SECURITY: Requires authentication. Users can only send messages as themselves.
+ * Admins can send messages on behalf of any user.
+ */
 export async function POST(request: NextRequest) {
   const clientId = getClientIdentifier(request);
   const rateLimit = checkRateLimit(`portal-messages-${clientId}`, MESSAGES_RATE_LIMIT);
@@ -86,6 +109,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // SECURITY: Verify user is authenticated and authorized
+    const authResult = await requirePortalOrAdminAuth(email);
+    if (!authResult.authorized) {
+      return authResult.response;
+    }
+
+    // Use verified email (admin can send as any user, users only as themselves)
+    const senderEmail = authResult.user.isAdmin ? email : authResult.user.email;
+
     const supabase = await createClient();
     const db = getUntypedClient(supabase);
 
@@ -97,7 +129,7 @@ export async function POST(request: NextRequest) {
       const fileName = `${Date.now()}-${attachment.name}`;
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("client-attachments")
-        .upload(`messages/${email}/${fileName}`, attachment);
+        .upload(`messages/${senderEmail}/${fileName}`, attachment);
 
       if (uploadError) {
         console.error("Upload error:", uploadError);
@@ -110,14 +142,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Insert message
+    // Insert message using verified email
     const { data: newMessage, error } = await db
       .from("client_messages")
       .insert({
-        client_email: email.toLowerCase(),
+        client_email: senderEmail.toLowerCase(),
         matter_id: matterId || null,
-        sender_type: "client",
-        sender_name: email.split("@")[0],
+        sender_type: authResult.user.isAdmin ? "admin" : "client",
+        sender_name: authResult.user.isAdmin ? "Hamilton Bailey Legal" : senderEmail.split("@")[0],
         message,
         attachment_url: attachmentUrl,
         attachment_name: attachmentName,
@@ -144,8 +176,19 @@ export async function POST(request: NextRequest) {
   }
 }
 
+/**
+ * PATCH /api/portal/messages
+ * Update message status (mark as read)
+ * SECURITY: Admin only - only admins can mark messages as read (for their view)
+ */
 export async function PATCH(request: NextRequest) {
   try {
+    // SECURITY: Only admins can mark messages as read (admin viewing client messages)
+    const authResult = await requireAdminAuth();
+    if (!authResult.authorized) {
+      return authResult.response;
+    }
+
     const body = await request.json();
     const { action, messageIds } = body;
 
