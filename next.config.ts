@@ -2,13 +2,52 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
-  // Enable hostname detection for subdomain routing
-  async headers() {
+  // Redirects for old/short URLs
+  async redirects() {
     return [
+      {
+        source: "/book",
+        destination: "/book-appointment",
+        permanent: true,
+      },
+    ];
+  },
+
+  // Security headers and subdomain routing
+  async headers() {
+    // Security headers to apply to all routes
+    const securityHeaders = [
+      // Prevent clickjacking attacks
+      { key: "X-Frame-Options", value: "DENY" },
+      // Prevent MIME type sniffing
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      // Enable XSS filter (legacy browsers)
+      { key: "X-XSS-Protection", value: "1; mode=block" },
+      // Control referrer information
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      // Permissions policy - disable dangerous features
+      {
+        key: "Permissions-Policy",
+        value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+      },
+      // Strict Transport Security (HSTS) - enforce HTTPS
+      {
+        key: "Strict-Transport-Security",
+        value: "max-age=31536000; includeSubDomains; preload",
+      },
+    ];
+
+    return [
+      // Apply security headers to all routes
+      {
+        source: "/:path*",
+        headers: securityHeaders,
+      },
       {
         // Apply CORS headers for library subdomain
         source: "/api/:path*",
         headers: [
+          ...securityHeaders,
           { key: "Access-Control-Allow-Credentials", value: "true" },
           {
             key: "Access-Control-Allow-Origin",

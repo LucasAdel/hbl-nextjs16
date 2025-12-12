@@ -3,6 +3,8 @@
  *
  * Provides admin-focused endpoints for managing knowledge base items
  * with test-match capabilities and AI draft generation.
+ *
+ * SECURITY: All endpoints require admin authentication.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -13,13 +15,21 @@ import {
 } from "@/features/bailey-ai/lib/knowledge-base";
 import { knowledgeManager, getAllKnowledgeItems } from "@/lib/chat/knowledge-manager";
 import * as supabaseKnowledge from "@/lib/supabase/knowledge";
+import { requireAdminAuth } from "@/lib/auth/admin-auth";
 
 /**
  * GET /api/admin/knowledge-base
  * List all knowledge items (combined static + database)
+ * SECURITY: Requires admin authentication.
  */
 export async function GET(request: NextRequest) {
   try {
+    // SECURITY: Verify admin authentication
+    const authResult = await requireAdminAuth();
+    if (!authResult.authorized) {
+      return authResult.response;
+    }
+
     const { searchParams } = new URL(request.url);
     const action = searchParams.get("action");
 
@@ -174,9 +184,16 @@ export async function GET(request: NextRequest) {
 /**
  * POST /api/admin/knowledge-base
  * Create or update knowledge items, generate drafts
+ * SECURITY: Requires admin authentication.
  */
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Verify admin authentication
+    const authResult = await requireAdminAuth();
+    if (!authResult.authorized) {
+      return authResult.response;
+    }
+
     const body = await request.json();
     const { action } = body;
 

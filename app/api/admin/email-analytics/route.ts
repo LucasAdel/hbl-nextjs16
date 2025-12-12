@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { requireAdminAuth } from "@/lib/auth/admin-auth";
 
 interface SequenceStats {
   sequenceType: string;
@@ -31,15 +32,10 @@ interface DailyStats {
 
 export async function GET(request: NextRequest) {
   try {
-    // Simple auth check - in production, use proper admin auth
-    const authHeader = request.headers.get("authorization");
-    const adminSecret = process.env.ADMIN_SECRET;
-
-    if (adminSecret && authHeader !== `Bearer ${adminSecret}`) {
-      // Allow in development
-      if (process.env.NODE_ENV === "production") {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
+    // SECURITY: Verify admin authentication
+    const authResult = await requireAdminAuth();
+    if (!authResult.authorized) {
+      return authResult.response;
     }
 
     const supabase = await createClient();
@@ -225,6 +221,12 @@ export async function GET(request: NextRequest) {
 // Pause/Resume enrollment
 export async function PATCH(request: NextRequest) {
   try {
+    // SECURITY: Verify admin authentication
+    const authResult = await requireAdminAuth();
+    if (!authResult.authorized) {
+      return authResult.response;
+    }
+
     const supabase = await createClient();
     const body = await request.json();
     const { enrollmentId, action } = body;

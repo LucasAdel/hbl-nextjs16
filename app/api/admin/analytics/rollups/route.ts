@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { requireAdminAuth } from "@/lib/auth/admin-auth";
 import {
   getDashboardMetrics,
   getEventsByDateRange,
@@ -17,24 +18,10 @@ import {
 // GET /api/admin/analytics/rollups - Get pre-aggregated analytics data
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-
-    // Verify user is authenticated and is admin
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Check if user is admin (has admin email or role)
-    const adminEmails = ["admin@hbl.law", "henry@wyszynski.com.au"];
-    const isAdmin = adminEmails.includes(user.email || "");
-
-    if (!isAdmin) {
-      return NextResponse.json({ error: "Forbidden - Admin access required" }, { status: 403 });
+    // SECURITY: Verify admin authentication using role-based check
+    const authResult = await requireAdminAuth();
+    if (!authResult.authorized) {
+      return authResult.response;
     }
 
     const searchParams = request.nextUrl.searchParams;
@@ -131,24 +118,10 @@ export async function GET(request: NextRequest) {
 // POST /api/admin/analytics/rollups - Trigger aggregation job
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
-
-    // Verify user is authenticated and is admin
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Check if user is admin
-    const adminEmails = ["admin@hbl.law", "henry@wyszynski.com.au"];
-    const isAdmin = adminEmails.includes(user.email || "");
-
-    if (!isAdmin) {
-      return NextResponse.json({ error: "Forbidden - Admin access required" }, { status: 403 });
+    // SECURITY: Verify admin authentication using role-based check
+    const authResult = await requireAdminAuth();
+    if (!authResult.authorized) {
+      return authResult.response;
     }
 
     const body = await request.json().catch(() => ({}));
