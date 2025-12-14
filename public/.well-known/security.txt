@@ -1,0 +1,5 @@
+Contact: mailto:admin@hamiltonbailey.com.au
+Expires: 2026-12-31T23:59:00.000Z
+Preferred-Languages: en
+Canonical: https://hamiltonbailey.com.au/.well-known/security.txt
+Policy: https://hamiltonbailey.com.au/privacy-policy
