@@ -161,28 +161,32 @@ const Navigation: React.FC = () => {
 
         <div
           ref={menuRef}
-          className="hidden md:flex items-center space-x-3 md:space-x-4 lg:space-x-8 flex-1 justify-end"
+          className="hidden md:flex items-center space-x-2 lg:space-x-4 xl:space-x-6 flex-1 justify-end overflow-hidden"
           aria-label="Navigation menu"
         >
-          {navItems.map((item, index) => (
-            <Link
-              ref={(el) => { navItemRefs.current[index] = el; }}
-              key={item.name}
-              href={item.path}
-              className={`font-medium transition-all duration-300 hover:text-tiffany hover:transform hover:scale-105 flex items-center ${
-                item.name === "Client Intake" ? "text-sm" : ""
-              } ${
-                pathname === item.path
-                  ? "text-tiffany-dark border-b-2 border-tiffany-dark pb-1"
-                  : "text-foreground"
-              }`}
-              tabIndex={0}
-              aria-current={pathname === item.path ? "page" : undefined}
-              onKeyDown={(e) => handleKeyDown(e, index)}
-            >
-              <span className="whitespace-nowrap">{item.name}</span>
-            </Link>
-          ))}
+          {navItems.map((item, index) => {
+            // Hide some items on medium screens to prevent overflow
+            const hiddenOnMd = ["Client Intake", "Immigration"].includes(item.name);
+            return (
+              <Link
+                ref={(el) => { navItemRefs.current[index] = el; }}
+                key={item.name}
+                href={item.path}
+                className={`font-medium transition-all duration-300 hover:text-tiffany hover:transform hover:scale-105 flex items-center text-sm ${
+                  hiddenOnMd ? "hidden lg:flex" : ""
+                } ${
+                  pathname === item.path
+                    ? "text-tiffany-dark border-b-2 border-tiffany-dark pb-1"
+                    : "text-foreground"
+                }`}
+                tabIndex={0}
+                aria-current={pathname === item.path ? "page" : undefined}
+                onKeyDown={(e) => handleKeyDown(e, index)}
+              >
+                <span className="whitespace-nowrap">{item.name}</span>
+              </Link>
+            );
+          })}
 
           {/* Search Button */}
           <button
@@ -224,11 +228,12 @@ const Navigation: React.FC = () => {
 
           <Link
             href="/book-appointment"
-            className="bg-gradient-to-r from-tiffany to-tiffany-dark hover:from-tiffany-dark hover:to-tiffany
-                     text-white font-semibold px-3 md:px-4 lg:px-6 py-2 md:py-2.5 lg:py-3 rounded-xl text-xs md:text-sm transition-all duration-300
+            className="flex-shrink-0 bg-gradient-to-r from-tiffany to-tiffany-dark hover:from-tiffany-dark hover:to-tiffany
+                     text-white font-semibold px-3 lg:px-5 py-2 lg:py-2.5 rounded-xl text-xs lg:text-sm transition-all duration-300
                      transform hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-tiffany-lighter whitespace-nowrap"
           >
-            Book Appointment
+            <span className="hidden lg:inline">Book Appointment</span>
+            <span className="lg:hidden">Book</span>
           </Link>
         </div>
 

@@ -139,6 +139,11 @@ export async function requireCSRF(
  *
  * Webhooks and public APIs that don't use cookies for auth
  * should be exempt from CSRF protection.
+ *
+ * Public forms (newsletter, legal resources) are exempt because:
+ * - They are heavily rate-limited
+ * - They don't modify sensitive data
+ * - Anonymous users don't have CSRF cookies
  */
 export const CSRF_EXEMPT_PATHS = [
   "/api/webhooks/", // All webhook endpoints
@@ -146,6 +151,10 @@ export const CSRF_EXEMPT_PATHS = [
   "/api/chat/stream", // Chat streaming
   "/api/cron/", // Cron jobs (authenticated differently)
   "/api/health", // Health check
+  "/api/newsletter", // Public signup (rate limited)
+  "/api/legal-resources", // Public signup (rate limited)
+  "/api/auth/", // Auth endpoints (magic link, password reset)
+  "/api/google/", // OAuth callbacks
 ];
 
 /**
