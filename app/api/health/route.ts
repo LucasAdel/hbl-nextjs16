@@ -42,10 +42,11 @@ async function checkDatabase(): Promise<CheckResult> {
       .limit(1);
 
     if (error) {
+      console.error("Health check DB error:", error.message, error.code);
       return {
         status: "fail",
         latencyMs: Date.now() - start,
-        message: "Database query failed",
+        message: `Database query failed: ${error.code}`,
       };
     }
 
