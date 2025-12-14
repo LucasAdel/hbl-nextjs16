@@ -10,7 +10,7 @@
  */
 
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -34,8 +34,8 @@ interface CheckResult {
 async function checkDatabase(): Promise<CheckResult> {
   const start = Date.now();
   try {
-    const supabase = await createClient();
-    // Simple query to verify database connectivity (using contacts table that exists in types)
+    const supabase = createServiceRoleClient();
+    // Simple query to verify database connectivity
     const { error } = await supabase
       .from("contacts")
       .select("id")

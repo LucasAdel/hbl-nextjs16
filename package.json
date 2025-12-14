@@ -89,6 +89,7 @@
     "eslint": "^9",
     "eslint-config-next": "^16.0.10",
     "jsdom": "^27.2.0",
+    "netlify-cli": "^23.12.3",
     "puppeteer": "^24.32.1",
     "tailwindcss": "^4",
     "typescript": "^5",
