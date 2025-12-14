@@ -15,8 +15,39 @@ const nextConfig: NextConfig = {
 
   // Security headers and subdomain routing
   async headers() {
+    // Content Security Policy - prevents XSS and data injection attacks
+    const cspDirectives = [
+      "default-src 'self'",
+      // Scripts: self, inline for Next.js, and trusted CDNs
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.googletagmanager.com https://www.google-analytics.com https://api.mapbox.com",
+      // Styles: self, inline for dynamic styles, Google Fonts
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.mapbox.com",
+      // Images: self, data URIs, and trusted sources
+      "img-src 'self' data: blob: https: http:",
+      // Fonts: self and Google Fonts
+      "font-src 'self' https://fonts.gstatic.com data:",
+      // Connect: API endpoints and services
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://api.mapbox.com https://events.mapbox.com https://*.posthog.com https://*.sentry.io https://www.google-analytics.com https://api.resend.com",
+      // Frames: Stripe for payment forms
+      "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
+      // Workers: self for service workers
+      "worker-src 'self' blob:",
+      // Objects: none (no plugins)
+      "object-src 'none'",
+      // Base URI: self only
+      "base-uri 'self'",
+      // Form actions: self only
+      "form-action 'self'",
+      // Frame ancestors: none (prevents clickjacking)
+      "frame-ancestors 'none'",
+      // Upgrade insecure requests in production
+      ...(process.env.NODE_ENV === "production" ? ["upgrade-insecure-requests"] : []),
+    ].join("; ");
+
     // Security headers to apply to all routes
     const securityHeaders = [
+      // Content Security Policy
+      { key: "Content-Security-Policy", value: cspDirectives },
       // Prevent clickjacking attacks
       { key: "X-Frame-Options", value: "DENY" },
       // Prevent MIME type sniffing

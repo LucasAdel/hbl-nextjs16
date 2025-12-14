@@ -8,13 +8,6 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
-import { SupabaseClient } from "@supabase/supabase-js";
-
-// Helper to get untyped access for new tables not yet in types
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getUntypedClient(supabase: SupabaseClient): any {
-  return supabase;
-}
 
 interface Document {
   id: string;
@@ -124,9 +117,8 @@ export async function getRecommendations(
  */
 async function getCoPurchaseRecommendations(documentId: string): Promise<Recommendation[]> {
   const supabase = await createClient();
-  const db = getUntypedClient(supabase);
 
-  const { data: correlations } = await db
+  const { data: correlations } = await supabase
     .from("document_correlations")
     .select("document_id_2, correlation_score, co_purchase_count")
     .eq("document_id_1", documentId)
@@ -137,19 +129,21 @@ async function getCoPurchaseRecommendations(documentId: string): Promise<Recomme
     return [];
   }
 
-  return correlations
-    .map((corr: { document_id_2: string; correlation_score: number; co_purchase_count: number }) => {
-      const doc = DOCUMENTS.find((d) => d.id === corr.document_id_2);
-      if (!doc) return null;
+  const recommendations: Recommendation[] = [];
 
-      return {
+  for (const corr of correlations) {
+    const doc = DOCUMENTS.find((d) => d.id === corr.document_id_2);
+    if (doc) {
+      recommendations.push({
         document: doc,
         score: corr.correlation_score * 100,
         reason: `${corr.co_purchase_count} people also bought this`,
         reasonType: "co_purchase" as const,
-      };
-    })
-    .filter((r: Recommendation | null): r is Recommendation => r !== null);
+      });
+    }
+  }
+
+  return recommendations;
 }
 
 /**
@@ -160,10 +154,9 @@ async function getBrowsingHistoryRecommendations(
   sessionId: string
 ): Promise<Recommendation[]> {
   const supabase = await createClient();
-  const db = getUntypedClient(supabase);
 
   // Get recently viewed documents
-  let query = db
+  let query = supabase
     .from("document_views")
     .select("document_id")
     .order("created_at", { ascending: false })
@@ -228,13 +221,12 @@ function getCategoryRecommendations(category: string): Recommendation[] {
  */
 async function getPopularRecommendations(): Promise<Recommendation[]> {
   const supabase = await createClient();
-  const db = getUntypedClient(supabase);
 
   // Get most viewed documents in last 30 days
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-  const { data: viewCounts } = await db
+  const { data: viewCounts } = await supabase
     .from("document_views")
     .select("document_id")
     .gte("created_at", thirtyDaysAgo.toISOString());
@@ -271,10 +263,9 @@ export async function updateDocumentCorrelations(
   purchasedDocumentId: string
 ): Promise<void> {
   const supabase = await createClient();
-  const db = getUntypedClient(supabase);
 
   // Get user's previous purchases
-  const { data: previousPurchases } = await db
+  const { data: previousPurchases } = await supabase
     .from("user_activity_log")
     .select("document_id")
     .eq("user_email", email.toLowerCase())
@@ -287,10 +278,10 @@ export async function updateDocumentCorrelations(
 
   // Update correlations for each previous purchase
   for (const prev of previousPurchases) {
-    if (prev.document_id === purchasedDocumentId) continue;
+    if (!prev.document_id || prev.document_id === purchasedDocumentId) continue;
 
     // Check if correlation exists
-    const { data: existing } = await db
+    const { data: existing } = await supabase
       .from("document_correlations")
       .select("*")
       .eq("document_id_1", prev.document_id)
@@ -302,7 +293,7 @@ export async function updateDocumentCorrelations(
       const newCount = existing.co_purchase_count + 1;
       const newScore = Math.min(1.0, newCount * 0.1); // Increase score with each co-purchase
 
-      await db
+      await supabase
         .from("document_correlations")
         .update({
           co_purchase_count: newCount,
@@ -312,7 +303,7 @@ export async function updateDocumentCorrelations(
         .eq("id", existing.id);
     } else {
       // Create new correlation (both directions)
-      await db.from("document_correlations").insert([
+      await supabase.from("document_correlations").insert([
         {
           document_id_1: prev.document_id,
           document_id_2: purchasedDocumentId,
@@ -338,9 +329,8 @@ export async function getFrequentlyBoughtTogether(
   limit: number = 3
 ): Promise<Document[]> {
   const supabase = await createClient();
-  const db = getUntypedClient(supabase);
 
-  const { data: correlations } = await db
+  const { data: correlations } = await supabase
     .from("document_correlations")
     .select("document_id_2, correlation_score")
     .eq("document_id_1", documentId)

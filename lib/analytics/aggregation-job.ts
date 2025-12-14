@@ -13,12 +13,6 @@ import {
   recordCohortRetention,
 } from "@/lib/db/analytics-rollups";
 
-// Helper to get untyped Supabase client for tables not in generated types
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getUntypedClient(): any {
-  return createServiceRoleClient();
-}
-
 // ============================================
 // MAIN AGGREGATION FUNCTIONS
 // ============================================
@@ -113,12 +107,12 @@ export async function backfillAggregations(
  * Aggregate events from tracking data
  */
 async function aggregateEvents(date: string): Promise<boolean> {
-  const supabase = getUntypedClient();
+  const supabase = createServiceRoleClient();
 
   // Get event counts from user_activity_log (if it exists)
   const { data: activityData, error: activityError } = await supabase
     .from("user_activity_log")
-    .select("event_type, user_email")
+    .select("activity_type, user_email")
     .gte("created_at", `${date}T00:00:00`)
     .lt("created_at", `${date}T23:59:59.999`);
 
@@ -132,7 +126,7 @@ async function aggregateEvents(date: string): Promise<boolean> {
 
   if (activityData) {
     for (const row of activityData) {
-      const eventType = row.event_type || "unknown";
+      const eventType = row.activity_type || "unknown";
       if (!eventCounts.has(eventType)) {
         eventCounts.set(eventType, { count: 0, users: new Set() });
       }
@@ -205,12 +199,12 @@ async function aggregateEvents(date: string): Promise<boolean> {
  * Aggregate XP economy metrics
  */
 async function aggregateXPEconomy(date: string): Promise<boolean> {
-  const supabase = getUntypedClient();
+  const supabase = createServiceRoleClient();
 
   // Get XP transactions for the day
   const { data: xpData, error: xpError } = await supabase
     .from("xp_transactions")
-    .select("user_email, amount, transaction_type")
+    .select("user_email, amount, source")
     .gte("created_at", `${date}T00:00:00`)
     .lt("created_at", `${date}T23:59:59.999`);
 
@@ -266,13 +260,13 @@ async function aggregateXPEconomy(date: string): Promise<boolean> {
  * Aggregate conversion funnel stages
  */
 async function aggregateConversionFunnel(date: string): Promise<boolean> {
-  const supabase = getUntypedClient();
+  const supabase = createServiceRoleClient();
 
   // Define funnel stages based on available data
   const funnelStages = [
-    { name: "page_view", table: "user_activity_log", filter: { event_type: "page_view" } },
-    { name: "product_view", table: "user_activity_log", filter: { event_type: "product_view" } },
-    { name: "add_to_cart", table: "user_activity_log", filter: { event_type: "add_to_cart" } },
+    { name: "page_view", table: "user_activity_log", filter: { activity_type: "page_view" } },
+    { name: "product_view", table: "user_activity_log", filter: { activity_type: "product_view" } },
+    { name: "add_to_cart", table: "user_activity_log", filter: { activity_type: "add_to_cart" } },
     { name: "checkout_start", table: "document_purchases", filter: { status: "pending" } },
     { name: "checkout_complete", table: "document_purchases", filter: { status: "completed" } },
   ];
@@ -289,11 +283,11 @@ async function aggregateConversionFunnel(date: string): Promise<boolean> {
       const { data } = await supabase
         .from(stage.table)
         .select("user_email")
-        .eq("event_type", stage.filter.event_type)
+        .eq("activity_type", stage.filter.activity_type as string)
         .gte("created_at", `${date}T00:00:00`)
         .lt("created_at", `${date}T23:59:59.999`);
 
-      const uniqueUsers = new Set(data?.map((r: { user_email: string }) => r.user_email) || []);
+      const uniqueUsers = new Set(data?.map((r: { user_email: string | null }) => r.user_email).filter(Boolean) || []);
       userCount = uniqueUsers.size;
     } else if (stage.table === "document_purchases") {
       const { data } = await supabase
@@ -333,7 +327,7 @@ async function aggregateConversionFunnel(date: string): Promise<boolean> {
  * Aggregate feature engagement metrics
  */
 async function aggregateFeatureEngagement(date: string): Promise<boolean> {
-  const supabase = getUntypedClient();
+  const supabase = createServiceRoleClient();
 
   // Define features to track
   const features = [
@@ -353,12 +347,12 @@ async function aggregateFeatureEngagement(date: string): Promise<boolean> {
     const { data } = await supabase
       .from("user_activity_log")
       .select("user_email, session_id")
-      .eq("event_type", feature.event)
+      .eq("activity_type", feature.event)
       .gte("created_at", `${date}T00:00:00`)
       .lt("created_at", `${date}T23:59:59.999`);
 
-    const uniqueUsers = new Set(data?.map((r: { user_email: string }) => r.user_email) || []);
-    const uniqueSessions = new Set(data?.map((r: { session_id?: string }) => r.session_id).filter(Boolean) || []);
+    const uniqueUsers = new Set(data?.map((r) => r.user_email).filter(Boolean) || []);
+    const uniqueSessions = new Set(data?.map((r) => r.session_id).filter(Boolean) || []);
 
     const result = await recordFeatureEngagement(
       date,
@@ -380,7 +374,7 @@ async function aggregateFeatureEngagement(date: string): Promise<boolean> {
  * Aggregate weekly cohort retention
  */
 async function aggregateCohortRetention(date: string): Promise<boolean> {
-  const supabase = getUntypedClient();
+  const supabase = createServiceRoleClient();
 
   // Get the Monday of the week containing this date
   const dateObj = new Date(date);

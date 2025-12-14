@@ -510,7 +510,7 @@ class ChatPersistenceService {
           user_id: conversation.userId,
           session_id: conversation.sessionId,
           started_at: conversation.startedAt.toISOString(),
-          last_message_at: conversation.lastMessageAt.toISOString(),
+          updated_at: conversation.lastMessageAt.toISOString(),
           status: conversation.status,
           lead_score: conversation.leadScore,
           lead_category: conversation.leadCategory,
@@ -589,10 +589,10 @@ class ChatPersistenceService {
           conversation_id: msg.conversationId,
           role: msg.role,
           content: msg.content,
-          timestamp: msg.timestamp.toISOString(),
+          created_at: msg.timestamp.toISOString(),
           confidence_score: msg.confidenceScore,
           knowledge_items_used: msg.knowledgeItemsUsed,
-          intent_detected: msg.intentDetected,
+          intent: msg.intentDetected,
           metadata: msg.metadata,
         }))
       );
@@ -608,7 +608,7 @@ class ChatPersistenceService {
         await getDb(this.supabase)
           .from("chat_conversations")
           .update({
-            last_message_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
             lead_score: this.currentConversation.leadScore,
             lead_category: this.currentConversation.leadCategory,
           })
@@ -663,7 +663,7 @@ class ChatPersistenceService {
         .from("chat_conversations")
         .select("*")
         .eq("user_id", userId)
-        .order("last_message_at", { ascending: false })
+        .order("updated_at", { ascending: false })
         .limit(limit);
 
       if (error) throw error;
@@ -674,7 +674,7 @@ class ChatPersistenceService {
         userId: conv.user_id,
         sessionId: conv.session_id,
         startedAt: new Date(conv.started_at),
-        lastMessageAt: new Date(conv.last_message_at),
+        lastMessageAt: new Date(conv.updated_at),
         status: conv.status,
         summary: conv.summary,
         leadScore: conv.lead_score,
@@ -702,7 +702,7 @@ class ChatPersistenceService {
         userId: data.user_id,
         sessionId: data.session_id,
         startedAt: new Date(data.started_at),
-        lastMessageAt: new Date(data.last_message_at),
+        lastMessageAt: new Date(data.updated_at),
         status: data.status,
         summary: data.summary,
         leadScore: data.lead_score,
@@ -731,7 +731,7 @@ class ChatPersistenceService {
         .update({
           status: "completed",
           summary,
-          last_message_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         })
         .eq("id", this.currentConversation.id);
 
@@ -1389,7 +1389,7 @@ class ChatPersistenceService {
         userId: data.user_id,
         sessionId: data.session_id,
         startedAt: new Date(data.started_at),
-        lastMessageAt: new Date(data.last_message_at),
+        lastMessageAt: new Date(data.updated_at),
         status: data.status,
         summary: data.summary,
         leadScore: data.lead_score || 0,

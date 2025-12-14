@@ -122,7 +122,6 @@ async function sendReminderEmail(
   cartId: string
 ): Promise<boolean> {
   if (!process.env.RESEND_API_KEY) {
-    console.log("RESEND_API_KEY not configured, skipping email");
     return false;
   }
 

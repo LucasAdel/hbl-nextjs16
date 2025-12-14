@@ -63,16 +63,12 @@ export async function POST(request: NextRequest) {
       .select("*")
       .limit(1);
 
-    console.log("Contacts table check:", { tableCheck, tableError });
-
     if (tableError) {
       // Try contact_submissions table instead
       const { data: altData, error: altError } = await supabase
         .from("contact_submissions")
         .select("*")
         .limit(1);
-
-      console.log("Alt table (contact_submissions) check:", { altData, altError });
 
       if (!altError) {
         // Use contact_submissions table

@@ -80,13 +80,9 @@ export async function POST(request: NextRequest) {
           message: "Google Calendar connected successfully",
         });
       } catch (error) {
+        console.error("Google Calendar connect error:", error instanceof Error ? error.message : error);
         return NextResponse.json(
-          {
-            error:
-              error instanceof Error
-                ? error.message
-                : "Failed to connect Google Calendar",
-          },
+          { error: "Failed to connect Google Calendar" },
           { status: 400 }
         );
       }

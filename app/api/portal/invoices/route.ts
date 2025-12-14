@@ -1,19 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { SupabaseClient } from "@supabase/supabase-js";
 import { requirePortalOrAdminAuth } from "@/lib/auth/portal-auth";
 import { requireAdminAuth } from "@/lib/auth/admin-auth";
 
-// Helper to get untyped access for new tables not yet in types
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getUntypedClient(supabase: SupabaseClient): any {
-  return supabase;
-}
-
 interface Invoice {
-  total_amount: number;
+  amount: number;
   status: string;
-  due_date: string;
+  due_date: string | null;
 }
 
 /**
@@ -44,13 +37,12 @@ export async function GET(request: NextRequest) {
     const queryEmail = authResult.user.isAdmin ? email : authResult.user.email;
 
     const supabase = await createClient();
-    const db = getUntypedClient(supabase);
 
     // Get all invoices for this client
-    const { data: invoices, error } = await db
+    const { data: invoices, error } = await supabase
       .from("client_invoices")
       .select("*")
-      .eq("client_email", queryEmail.toLowerCase())
+      .eq("email", queryEmail.toLowerCase())
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -72,15 +64,15 @@ export async function GET(request: NextRequest) {
     const now = new Date();
 
     for (const invoice of (invoices as Invoice[]) || []) {
-      stats.total += invoice.total_amount;
+      stats.total += invoice.amount;
 
       if (invoice.status === "paid") {
-        stats.paid += invoice.total_amount;
-      } else if (["sent", "viewed", "overdue"].includes(invoice.status)) {
-        stats.outstanding += invoice.total_amount;
+        stats.paid += invoice.amount;
+      } else if (["sent", "overdue"].includes(invoice.status)) {
+        stats.outstanding += invoice.amount;
 
-        if (new Date(invoice.due_date) < now) {
-          stats.overdue += invoice.total_amount;
+        if (invoice.due_date && new Date(invoice.due_date) < now) {
+          stats.overdue += invoice.amount;
         }
       }
     }
@@ -123,17 +115,16 @@ export async function PATCH(request: NextRequest) {
     }
 
     const supabase = await createClient();
-    const db = getUntypedClient(supabase);
 
     // SECURITY: For non-admins, verify the invoice belongs to them
     if (!authResult.user.isAdmin) {
-      const { data: invoice } = await db
+      const { data: invoice } = await supabase
         .from("client_invoices")
-        .select("client_email")
+        .select("email")
         .eq("id", invoiceId)
         .single();
 
-      if (!invoice || invoice.client_email.toLowerCase() !== authResult.user.email.toLowerCase()) {
+      if (!invoice || invoice.email.toLowerCase() !== authResult.user.email.toLowerCase()) {
         console.warn(`SECURITY: User ${authResult.user.email} attempted to modify invoice ${invoiceId} belonging to another user`);
         return NextResponse.json(
           { error: "Forbidden - You can only update your own invoices" },
@@ -143,7 +134,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     if (action === "mark_paid") {
-      const { error } = await db
+      const { error } = await supabase
         .from("client_invoices")
         .update({
           status: "paid",
@@ -165,10 +156,11 @@ export async function PATCH(request: NextRequest) {
     }
 
     if (action === "mark_viewed") {
-      const { error } = await db
+      // Just update the timestamp to track when invoice was viewed
+      // Status remains the same since "viewed" is not a valid status
+      const { error } = await supabase
         .from("client_invoices")
         .update({
-          status: "viewed",
           updated_at: new Date().toISOString(),
         })
         .eq("id", invoiceId)
@@ -227,20 +219,16 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient();
-    const db = getUntypedClient(supabase);
 
     const totalAmount = amount + (taxAmount || amount * 0.1);
 
-    const { data: invoice, error } = await db
+    const { data: invoice, error } = await supabase
       .from("client_invoices")
       .insert({
-        client_email: clientEmail.toLowerCase(),
+        email: clientEmail.toLowerCase(),
         matter_id: matterId || null,
-        matter_name: matterName || null,
         invoice_number: invoiceNumber,
         amount,
-        tax_amount: taxAmount || amount * 0.1,
-        total_amount: totalAmount,
         status: "sent",
         due_date: dueDate || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
         description: description || null,

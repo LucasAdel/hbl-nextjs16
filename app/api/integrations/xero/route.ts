@@ -110,13 +110,9 @@ export async function POST(request: NextRequest) {
           organisation: org.success ? org.data : null,
         });
       } catch (error) {
+        console.error("Xero connect error:", error instanceof Error ? error.message : error);
         return NextResponse.json(
-          {
-            error:
-              error instanceof Error
-                ? error.message
-                : "Failed to connect Xero",
-          },
+          { error: "Failed to connect Xero" },
           { status: 400 }
         );
       }

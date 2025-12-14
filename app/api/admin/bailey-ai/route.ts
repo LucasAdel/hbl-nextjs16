@@ -193,7 +193,8 @@ export async function GET(request: NextRequest) {
         const { data, count, error } = await query;
 
         if (error) {
-          return NextResponse.json({ error: error.message }, { status: 500 });
+          console.error("Bailey AI conversations fetch error:", error.message);
+          return NextResponse.json({ error: "Failed to fetch conversations" }, { status: 500 });
         }
 
         const conversations = (data || []).map((c: {
@@ -243,7 +244,8 @@ export async function GET(request: NextRequest) {
           .order("usage_count", { ascending: false });
 
         if (error) {
-          return NextResponse.json({ error: error.message }, { status: 500 });
+          console.error("Bailey AI knowledge fetch error:", error.message);
+          return NextResponse.json({ error: "Failed to fetch knowledge base" }, { status: 500 });
         }
 
         const knowledge = (data || []).map((k: {
@@ -288,7 +290,8 @@ export async function GET(request: NextRequest) {
           .order("created_at", { ascending: false });
 
         if (error) {
-          return NextResponse.json({ error: error.message }, { status: 500 });
+          console.error("Bailey AI analytics fetch error:", error.message);
+          return NextResponse.json({ error: "Failed to fetch analytics" }, { status: 500 });
         }
 
         // Aggregate analytics
@@ -385,7 +388,8 @@ export async function POST(request: NextRequest) {
         });
 
         if (error) {
-          return NextResponse.json({ error: error.message }, { status: 500 });
+          console.error("Bailey AI knowledge create error:", error.message);
+          return NextResponse.json({ error: "Failed to create knowledge item" }, { status: 500 });
         }
 
         return NextResponse.json({ success: true, message: "Knowledge item created" });
@@ -413,7 +417,8 @@ export async function POST(request: NextRequest) {
           .eq("id", id);
 
         if (error) {
-          return NextResponse.json({ error: error.message }, { status: 500 });
+          console.error("Bailey AI knowledge update error:", error.message);
+          return NextResponse.json({ error: "Failed to update knowledge item" }, { status: 500 });
         }
 
         return NextResponse.json({ success: true, message: "Knowledge item updated" });
@@ -427,7 +432,8 @@ export async function POST(request: NextRequest) {
           .eq("id", id);
 
         if (error) {
-          return NextResponse.json({ error: error.message }, { status: 500 });
+          console.error("Bailey AI knowledge delete error:", error.message);
+          return NextResponse.json({ error: "Failed to archive knowledge item" }, { status: 500 });
         }
 
         return NextResponse.json({ success: true, message: "Knowledge item archived" });
@@ -441,7 +447,8 @@ export async function POST(request: NextRequest) {
           .eq("id", id);
 
         if (error) {
-          return NextResponse.json({ error: error.message }, { status: 500 });
+          console.error("Bailey AI conversation status update error:", error.message);
+          return NextResponse.json({ error: "Failed to update conversation status" }, { status: 500 });
         }
 
         return NextResponse.json({ success: true, message: "Conversation status updated" });

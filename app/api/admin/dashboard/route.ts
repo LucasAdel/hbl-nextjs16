@@ -4,28 +4,14 @@ import {
   getRecentActivity,
   getUpcomingBookings,
 } from "@/lib/db/admin-queries";
-import { createClient } from "@/lib/supabase/server";
+import { requirePermission, PERMISSIONS } from "@/lib/auth/admin-auth";
 
 export async function GET() {
   try {
-    // Verify admin authentication
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    // Check if user has admin role
-    const userRole = user.user_metadata?.role || "client";
-    if (userRole !== "admin" && userRole !== "staff") {
-      return NextResponse.json(
-        { error: "Forbidden - Admin access required" },
-        { status: 403 }
-      );
+    // SECURITY: Verify user has VIEW_DASHBOARD permission
+    const auth = await requirePermission(PERMISSIONS.VIEW_DASHBOARD);
+    if (!auth.authorized) {
+      return auth.response;
     }
 
     // Fetch all dashboard data in parallel
@@ -35,7 +21,7 @@ export async function GET() {
       getUpcomingBookings(5),
     ]);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       data: {
         stats,
@@ -43,6 +29,14 @@ export async function GET() {
         upcomingBookings,
       },
     });
+
+    // Add caching headers (30s cache, 60s stale-while-revalidate)
+    response.headers.set(
+      "Cache-Control",
+      "private, s-maxage=30, stale-while-revalidate=60"
+    );
+
+    return response;
   } catch (error) {
     console.error("Dashboard API error:", error);
     return NextResponse.json(

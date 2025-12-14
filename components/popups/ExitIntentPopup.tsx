@@ -9,11 +9,7 @@ import {
   Loader2,
   CheckCircle2,
   Sparkles,
-  Users,
   FileText,
-  ShoppingCart,
-  Gift,
-  Star,
 } from "lucide-react";
 import { useExitIntent } from "@/hooks/useExitIntent";
 import { usePathname } from "next/navigation";
@@ -22,15 +18,12 @@ import { usePathname } from "next/navigation";
 // Types
 // ============================================================================
 
-type PopupVariant = "newsletter" | "cart" | "document" | "discount";
+// Note: "cart" and "discount" variants removed per business policy - no discounts allowed
+type PopupVariant = "newsletter" | "document";
 
 interface ExitIntentPopupProps {
   /** Force a specific variant (auto-detected if not provided) */
   variant?: PopupVariant;
-  /** Custom discount code */
-  discountCode?: string;
-  /** Custom discount percentage */
-  discountPercent?: number;
   /** Enable gamification XP reward display */
   showXPReward?: boolean;
   /** XP amount to display */
@@ -51,9 +44,7 @@ const SOCIAL_PROOF_STATS = [
 
 const XP_REWARDS = {
   newsletter: 100,
-  cart: 50,
   document: 75,
-  discount: 100,
 };
 
 // ============================================================================
@@ -62,8 +53,6 @@ const XP_REWARDS = {
 
 export function ExitIntentPopup({
   variant: forcedVariant,
-  discountCode = "STAYWITHUS",
-  discountPercent = 10,
   showXPReward = true,
   xpReward,
   disabled = false,
@@ -73,18 +62,16 @@ export function ExitIntentPopup({
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
 
-  // Determine variant based on current page
-  const isCartPage = pathname?.includes("/cart") || forcedVariant === "cart";
+  // Determine variant based on current page (cart pages excluded - no discount popups)
   const isDocumentPage = pathname?.includes("/documents") || pathname?.includes("/codex") || forcedVariant === "document";
 
-  const variant: PopupVariant = forcedVariant || (isCartPage ? "cart" : isDocumentPage ? "document" : "newsletter");
+  const variant: PopupVariant = forcedVariant || (isDocumentPage ? "document" : "newsletter");
 
   // Use single hook with configuration based on page type
-  // Cart pages get shorter delay, other pages get longer delay
   const exitIntent = useExitIntent({
-    delay: isCartPage ? 15000 : 45000, // 15s for cart, 45s for others
+    delay: 45000, // 45 seconds before showing popup
     offerType: variant,
-    excludePaths: ["/admin", "/checkout", "/thank-you", "/success", "/login", "/register"],
+    excludePaths: ["/admin", "/checkout", "/thank-you", "/success", "/login", "/register", "/cart"],
   });
   const { triggered, dismiss, markConverted } = exitIntent;
 
@@ -114,7 +101,6 @@ export function ExitIntentPopup({
           email: email.trim(),
           source: `exit_intent_${variant}`,
           metadata: {
-            discountCode: variant === "cart" || variant === "discount" ? discountCode : undefined,
             variant,
           },
         }),
@@ -139,12 +125,8 @@ export function ExitIntentPopup({
 
   const getSuccessMessage = () => {
     switch (variant) {
-      case "cart":
-        return `Your ${discountPercent}% discount code "${discountCode}" has been sent to your email!`;
       case "document":
         return "Check your inbox for your free legal resources!";
-      case "discount":
-        return `Your discount code "${discountCode}" is ready!`;
       default:
         return "Welcome! Check your inbox for a confirmation email.";
     }
@@ -156,28 +138,6 @@ export function ExitIntentPopup({
 
   const renderContent = () => {
     switch (variant) {
-      case "cart":
-        return (
-          <>
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <ShoppingCart className="h-8 w-8 text-orange-500" />
-              </div>
-              <h2 className="font-blair text-2xl font-bold text-gray-900 mb-2">
-                Wait! Don't Leave Empty-Handed
-              </h2>
-              <p className="text-gray-600">
-                Complete your order now and get <span className="font-bold text-tiffany">{discountPercent}% off</span> your purchase!
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-r from-tiffany/10 to-blue-500/10 rounded-xl p-4 mb-6 text-center">
-              <p className="text-sm text-gray-600 mb-1">Your exclusive discount code:</p>
-              <p className="font-mono text-2xl font-bold text-tiffany">{discountCode}</p>
-            </div>
-          </>
-        );
-
       case "document":
         return (
           <>
@@ -362,7 +322,7 @@ export function ExitIntentPopup({
                       </>
                     ) : (
                       <>
-                        {variant === "cart" ? "Get My Discount" : variant === "document" ? "Get Free Resources" : "Subscribe Now"}
+                        {variant === "document" ? "Get Free Resources" : "Subscribe Now"}
                         <ArrowRight className="h-5 w-5" />
                       </>
                     )}

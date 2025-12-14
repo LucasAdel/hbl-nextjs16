@@ -224,24 +224,18 @@ async function processSpecialEvent(
 
     case "checkout_start":
       // Track checkout started for funnel analysis
-      console.log(`[Analytics] Checkout started: ${properties.cart_value}`);
       break;
 
     case "xp_earned":
       // Log XP earning events
-      if (userId && properties.xp_amount) {
-        console.log(`[Analytics] XP earned: ${properties.xp_amount} for user ${userId}`);
-      }
       break;
 
     case "consultation_booked":
       // Track consultation bookings
-      console.log(`[Analytics] Consultation booked: ${properties.consultation_type}`);
       break;
 
     case "newsletter_signup":
       // Track newsletter signups
-      console.log(`[Analytics] Newsletter signup from ${properties.signup_source}`);
       break;
 
     case "exit_intent":

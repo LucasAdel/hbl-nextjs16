@@ -43,7 +43,6 @@ export default function DocumentConfiguratorPage() {
   const handleSaveConfiguration = (config: unknown, email: string) => {
     // In production, this would save to database and send email
     const docConfig = config as DocumentConfig;
-    console.log("Saving configuration for:", email, docConfig);
 
     // Store in localStorage for demo purposes
     const savedConfigs = JSON.parse(localStorage.getItem("saved-doc-configs") || "[]");

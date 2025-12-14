@@ -1,16 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { SupabaseClient } from "@supabase/supabase-js";
-
-// Helper to get untyped access for new tables not yet in types
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getUntypedClient(supabase: SupabaseClient): any {
-  return supabase;
-}
 
 interface TimelineEvent {
   event_type: string;
-  metadata?: { newStatus?: string };
+  description?: string | null;
 }
 
 export async function GET(request: NextRequest) {
@@ -27,10 +20,9 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = await createClient();
-    const db = getUntypedClient(supabase);
 
     // Get timeline events
-    const { data: events, error } = await db
+    const { data: events, error } = await supabase
       .from("case_timeline_events")
       .select("*")
       .eq("matter_id", matterId)
@@ -48,9 +40,10 @@ export async function GET(request: NextRequest) {
     const statusEvents = ((events as TimelineEvent[]) || []).filter(
       (e) => e.event_type === "status_change"
     );
+    // Use description field to store status, or default to "active"
     const currentStatus =
       statusEvents.length > 0
-        ? statusEvents[0].metadata?.newStatus || "active"
+        ? statusEvents[0].description || "active"
         : "active";
 
     return NextResponse.json({
@@ -79,16 +72,15 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient();
-    const db = getUntypedClient(supabase);
 
-    const { data: event, error } = await db
+    const { data: event, error } = await supabase
       .from("case_timeline_events")
       .insert({
         matter_id: matterId,
         event_type: eventType,
         title,
         description: description || null,
-        metadata: metadata || {},
+        event_date: new Date().toISOString(),
         created_by: createdBy || "System",
       })
       .select()

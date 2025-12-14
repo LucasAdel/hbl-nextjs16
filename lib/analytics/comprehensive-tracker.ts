@@ -111,7 +111,6 @@ class ComprehensiveAnalytics {
     this.sessionUpdateInterval = setInterval(() => this.updateSession(), 30000);
 
     this.isInitialized = true;
-    console.log('[Analytics] Comprehensive tracking initialized');
   }
 
   destroy(): void {

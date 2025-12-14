@@ -3,6 +3,12 @@
  *
  * Provides endpoints for managing and monitoring the AI knowledge base.
  * Uses Supabase for persistence and in-memory manager for fast lookups.
+ *
+ * SECURITY:
+ * - Public actions: track, feedback (used by chatbot for all users)
+ * - Admin-only actions: create-item, update-item, delete-item, dismiss-gap,
+ *   generate-draft, validate (modifies knowledge base)
+ * - GET analytics/export also require admin auth
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -15,11 +21,38 @@ import {
   recordChatFeedback,
 } from "@/lib/chat/knowledge-manager";
 import * as supabaseKnowledge from "@/lib/supabase/knowledge";
+import { requireAdminAuth } from "@/lib/auth/admin-auth";
+
+// Actions that require admin authentication
+const ADMIN_ACTIONS = [
+  "create-item",
+  "update-item",
+  "delete-item",
+  "dismiss-gap",
+  "generate-draft",
+  "validate",
+];
+
+// GET actions that require admin authentication
+const ADMIN_GET_ACTIONS = [
+  "analytics",
+  "export",
+  "usage-stats",
+  "feedback-review",
+];
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const action = searchParams.get("action");
   const useSupabase = searchParams.get("db") === "true";
+
+  // SECURITY: Check admin auth for sensitive GET actions
+  if (action && ADMIN_GET_ACTIONS.includes(action)) {
+    const authResult = await requireAdminAuth();
+    if (!authResult.authorized) {
+      return authResult.response;
+    }
+  }
 
   try {
     switch (action) {
@@ -135,6 +168,14 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { action, persist } = body;
+
+    // SECURITY: Check admin auth for write operations
+    if (ADMIN_ACTIONS.includes(action)) {
+      const authResult = await requireAdminAuth();
+      if (!authResult.authorized) {
+        return authResult.response;
+      }
+    }
 
     switch (action) {
       case "track":

@@ -206,7 +206,7 @@ export function AdvancedAnalyticsDashboard() {
         }
       }
     } catch (error) {
-      console.log("Rollups API not available, using mock data");
+      // Rollups API not available, falling back to mock data
     }
 
     // Fall back to mock data

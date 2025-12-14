@@ -43,7 +43,6 @@ export default function ComplianceQuizPage() {
   const handleEmailCapture = (email: string, result: unknown) => {
     // Store email and results for follow-up
     // In production, this would call an API endpoint
-    console.log("Email captured for follow-up:", email, result);
     toast.success(`Results saved!`, {
       description: `A copy will be sent to ${email}`,
     });

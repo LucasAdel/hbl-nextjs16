@@ -91,6 +91,7 @@ export type Database = {
           client_name: string;
           client_phone: string | null;
           created_at: string;
+          custom_answers: Json | null;
           end_time: string;
           event_type_id: string | null;
           event_type_name: string;
@@ -114,6 +115,7 @@ export type Database = {
           client_name: string;
           client_phone?: string | null;
           created_at?: string;
+          custom_answers?: Json | null;
           end_time: string;
           event_type_id?: string | null;
           event_type_name: string;
@@ -137,6 +139,7 @@ export type Database = {
           client_name?: string;
           client_phone?: string | null;
           created_at?: string;
+          custom_answers?: Json | null;
           end_time?: string;
           event_type_id?: string | null;
           event_type_name?: string;
@@ -493,6 +496,869 @@ export type Database = {
           value?: Json;
           created_at?: string;
           expires_at?: string | null;
+        };
+        Relationships: [];
+      };
+      // Additional tables for portal, analytics, and webhooks
+      client_messages: {
+        Row: {
+          id: string;
+          matter_id: string | null;
+          email: string;
+          sender_type: "client" | "staff";
+          subject: string | null;
+          content: string;
+          is_read: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          matter_id?: string | null;
+          email: string;
+          sender_type?: "client" | "staff";
+          subject?: string | null;
+          content: string;
+          is_read?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          matter_id?: string | null;
+          email?: string;
+          sender_type?: "client" | "staff";
+          subject?: string | null;
+          content?: string;
+          is_read?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      client_matters: {
+        Row: {
+          id: string;
+          email: string;
+          title: string;
+          description: string | null;
+          matter_type: string;
+          status: "active" | "pending" | "closed" | "on_hold";
+          assigned_to: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          title: string;
+          description?: string | null;
+          matter_type: string;
+          status?: "active" | "pending" | "closed" | "on_hold";
+          assigned_to?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          title?: string;
+          description?: string | null;
+          matter_type?: string;
+          status?: "active" | "pending" | "closed" | "on_hold";
+          assigned_to?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      client_invoices: {
+        Row: {
+          id: string;
+          matter_id: string | null;
+          email: string;
+          invoice_number: string;
+          amount: number;
+          status: "draft" | "sent" | "paid" | "overdue" | "cancelled";
+          due_date: string | null;
+          paid_date: string | null;
+          description: string | null;
+          stripe_invoice_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          matter_id?: string | null;
+          email: string;
+          invoice_number: string;
+          amount: number;
+          status?: "draft" | "sent" | "paid" | "overdue" | "cancelled";
+          due_date?: string | null;
+          paid_date?: string | null;
+          description?: string | null;
+          stripe_invoice_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          matter_id?: string | null;
+          email?: string;
+          invoice_number?: string;
+          amount?: number;
+          status?: "draft" | "sent" | "paid" | "overdue" | "cancelled";
+          due_date?: string | null;
+          paid_date?: string | null;
+          description?: string | null;
+          stripe_invoice_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      case_timeline_events: {
+        Row: {
+          id: string;
+          matter_id: string;
+          event_type: string;
+          title: string;
+          description: string | null;
+          event_date: string;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          matter_id: string;
+          event_type: string;
+          title: string;
+          description?: string | null;
+          event_date: string;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          matter_id?: string;
+          event_type?: string;
+          title?: string;
+          description?: string | null;
+          event_date?: string;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      client_documents: {
+        Row: {
+          id: string;
+          booking_id: string | null;
+          client_email: string;
+          file_name: string;
+          file_type: string;
+          file_size: number;
+          storage_path: string;
+          uploaded_at: string;
+        };
+        Insert: {
+          id?: string;
+          booking_id?: string | null;
+          client_email: string;
+          file_name: string;
+          file_type: string;
+          file_size: number;
+          storage_path: string;
+          uploaded_at?: string;
+        };
+        Update: {
+          id?: string;
+          booking_id?: string | null;
+          client_email?: string;
+          file_name?: string;
+          file_type?: string;
+          file_size?: number;
+          storage_path?: string;
+          uploaded_at?: string;
+        };
+        Relationships: [];
+      };
+      bailey_analytics: {
+        Row: {
+          id: string;
+          session_id: string | null;
+          message_count: number;
+          topics_discussed: string[];
+          sentiment_score: number | null;
+          is_lead: boolean;
+          lead_score: number | null;
+          user_email: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          session_id?: string | null;
+          message_count?: number;
+          topics_discussed?: string[];
+          sentiment_score?: number | null;
+          is_lead?: boolean;
+          lead_score?: number | null;
+          user_email?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          session_id?: string | null;
+          message_count?: number;
+          topics_discussed?: string[];
+          sentiment_score?: number | null;
+          is_lead?: boolean;
+          lead_score?: number | null;
+          user_email?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      webhook_events: {
+        Row: {
+          id: string;
+          event_id: string;
+          provider: string;
+          event_type: string;
+          status: "pending" | "processed" | "failed" | "skipped";
+          payload: Json | null;
+          metadata: Json | null;
+          processed_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          event_id: string;
+          provider: string;
+          event_type: string;
+          status?: "pending" | "processed" | "failed" | "skipped";
+          payload?: Json | null;
+          metadata?: Json | null;
+          processed_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          event_id?: string;
+          provider?: string;
+          event_type?: string;
+          status?: "pending" | "processed" | "failed" | "skipped";
+          payload?: Json | null;
+          metadata?: Json | null;
+          processed_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      audit_logs: {
+        Row: {
+          id: string;
+          created_at: string;
+          event_type: string;
+          severity: string;
+          action: string;
+          success: boolean;
+          metadata: Json | null;
+          ip_address: string | null;
+          user_agent: string | null;
+          endpoint: string | null;
+          method: string | null;
+          user_id: string | null;
+          user_email: string | null;
+          user_role: string | null;
+          resource_type: string | null;
+          resource_id: string | null;
+          error_code: string | null;
+          error_message: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          event_type: string;
+          severity?: string;
+          action: string;
+          success?: boolean;
+          metadata?: Json | null;
+          ip_address?: string | null;
+          user_agent?: string | null;
+          endpoint?: string | null;
+          method?: string | null;
+          user_id?: string | null;
+          user_email?: string | null;
+          user_role?: string | null;
+          resource_type?: string | null;
+          resource_id?: string | null;
+          error_code?: string | null;
+          error_message?: string | null;
+        };
+        Update: {
+          id?: string;
+          created_at?: string;
+          event_type?: string;
+          severity?: string;
+          action?: string;
+          success?: boolean;
+          metadata?: Json | null;
+          ip_address?: string | null;
+          user_agent?: string | null;
+          endpoint?: string | null;
+          method?: string | null;
+          user_id?: string | null;
+          user_email?: string | null;
+          user_role?: string | null;
+          resource_type?: string | null;
+          resource_id?: string | null;
+          error_code?: string | null;
+          error_message?: string | null;
+        };
+        Relationships: [];
+      };
+      availability_slots: {
+        Row: {
+          id: string;
+          event_type_id: string | null;
+          start_time: string;
+          end_time: string;
+          is_available: boolean;
+          booking_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          event_type_id?: string | null;
+          start_time: string;
+          end_time: string;
+          is_available?: boolean;
+          booking_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          event_type_id?: string | null;
+          start_time?: string;
+          end_time?: string;
+          is_available?: boolean;
+          booking_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      settings: {
+        Row: {
+          id: string;
+          key: string;
+          value: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          key: string;
+          value: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          key?: string;
+          value?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      email_analytics_daily: {
+        Row: {
+          id: string;
+          date: string;
+          sequence_type: string;
+          sent_count: number;
+          opened_count: number;
+          clicked_count: number;
+          bounced_count: number;
+          unsubscribed_count: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          date: string;
+          sequence_type: string;
+          sent_count?: number;
+          opened_count?: number;
+          clicked_count?: number;
+          bounced_count?: number;
+          unsubscribed_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          date?: string;
+          sequence_type?: string;
+          sent_count?: number;
+          opened_count?: number;
+          clicked_count?: number;
+          bounced_count?: number;
+          unsubscribed_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      contact_submissions: {
+        Row: {
+          id: string;
+          contact_id: string | null;
+          email: string;
+          submission_count: number;
+          last_submission_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          contact_id?: string | null;
+          email: string;
+          submission_count?: number;
+          last_submission_at?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          contact_id?: string | null;
+          email?: string;
+          submission_count?: number;
+          last_submission_at?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      intake_submissions: {
+        Row: {
+          id: string;
+          intake_id: string | null;
+          email: string;
+          submission_count: number;
+          last_submission_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          intake_id?: string | null;
+          email: string;
+          submission_count?: number;
+          last_submission_at?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          intake_id?: string | null;
+          email?: string;
+          submission_count?: number;
+          last_submission_at?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      chat_conversations: {
+        Row: {
+          id: string;
+          session_id: string;
+          user_email: string | null;
+          started_at: string;
+          last_message_at: string;
+          message_count: number;
+          metadata: Json | null;
+        };
+        Insert: {
+          id?: string;
+          session_id: string;
+          user_email?: string | null;
+          started_at?: string;
+          last_message_at?: string;
+          message_count?: number;
+          metadata?: Json | null;
+        };
+        Update: {
+          id?: string;
+          session_id?: string;
+          user_email?: string | null;
+          started_at?: string;
+          last_message_at?: string;
+          message_count?: number;
+          metadata?: Json | null;
+        };
+        Relationships: [];
+      };
+      chat_messages: {
+        Row: {
+          id: string;
+          conversation_id: string;
+          role: "user" | "assistant";
+          content: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          conversation_id: string;
+          role: "user" | "assistant";
+          content: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          conversation_id?: string;
+          role?: "user" | "assistant";
+          content?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      bailey_knowledge_base: {
+        Row: {
+          id: string;
+          category: string;
+          title: string;
+          content: string;
+          keywords: string[];
+          priority: number;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          category: string;
+          title: string;
+          content: string;
+          keywords?: string[];
+          priority?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          category?: string;
+          title?: string;
+          content?: string;
+          keywords?: string[];
+          priority?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      // Gamification tables
+      xp_transactions: {
+        Row: {
+          id: string;
+          user_email: string;
+          amount: number;
+          source: string;
+          multiplier: number;
+          description: string | null;
+          metadata: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_email: string;
+          amount: number;
+          source: string;
+          multiplier?: number;
+          description?: string | null;
+          metadata?: Json | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_email?: string;
+          amount?: number;
+          source?: string;
+          multiplier?: number;
+          description?: string | null;
+          metadata?: Json | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      user_profiles: {
+        Row: {
+          id: string;
+          email: string;
+          total_xp: number;
+          current_level: number;
+          current_streak: number;
+          longest_streak: number;
+          last_active_date: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          total_xp?: number;
+          current_level?: number;
+          current_streak?: number;
+          longest_streak?: number;
+          last_active_date?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          total_xp?: number;
+          current_level?: number;
+          current_streak?: number;
+          longest_streak?: number;
+          last_active_date?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      document_purchases: {
+        Row: {
+          id: string;
+          user_email: string;
+          stripe_session_id: string | null;
+          stripe_payment_intent: string | null;
+          items: Json;
+          subtotal: number;
+          discount: number;
+          gst: number;
+          total: number;
+          coupon_code: string | null;
+          status: string;
+          metadata: Json | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_email: string;
+          stripe_session_id?: string | null;
+          stripe_payment_intent?: string | null;
+          items: Json;
+          subtotal: number;
+          discount?: number;
+          gst: number;
+          total: number;
+          coupon_code?: string | null;
+          status?: string;
+          metadata?: Json | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_email?: string;
+          stripe_session_id?: string | null;
+          stripe_payment_intent?: string | null;
+          items?: Json;
+          subtotal?: number;
+          discount?: number;
+          gst?: number;
+          total?: number;
+          coupon_code?: string | null;
+          status?: string;
+          metadata?: Json | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      referrals: {
+        Row: {
+          id: string;
+          referrer_email: string;
+          referred_email: string;
+          status: string;
+          purchased_at: string | null;
+          purchase_xp_awarded: number | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          referrer_email: string;
+          referred_email: string;
+          status?: string;
+          purchased_at?: string | null;
+          purchase_xp_awarded?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          referrer_email?: string;
+          referred_email?: string;
+          status?: string;
+          purchased_at?: string | null;
+          purchase_xp_awarded?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      achievements: {
+        Row: {
+          id: string;
+          name: string;
+          slug: string;
+          description: string | null;
+          requirement_type: string;
+          requirement_value: number;
+          xp_reward: number;
+          icon: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          slug: string;
+          description?: string | null;
+          requirement_type: string;
+          requirement_value: number;
+          xp_reward?: number;
+          icon?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          slug?: string;
+          description?: string | null;
+          requirement_type?: string;
+          requirement_value?: number;
+          xp_reward?: number;
+          icon?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      user_achievements: {
+        Row: {
+          id: string;
+          user_email: string;
+          achievement_id: string;
+          earned_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_email: string;
+          achievement_id: string;
+          earned_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_email?: string;
+          achievement_id?: string;
+          earned_at?: string;
+        };
+        Relationships: [];
+      };
+      user_activity_log: {
+        Row: {
+          id: string;
+          user_email: string | null;
+          session_id: string;
+          activity_type: string;
+          page_path: string | null;
+          document_id: string | null;
+          metadata: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_email?: string | null;
+          session_id: string;
+          activity_type: string;
+          page_path?: string | null;
+          document_id?: string | null;
+          metadata?: Json | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_email?: string | null;
+          session_id?: string;
+          activity_type?: string;
+          page_path?: string | null;
+          document_id?: string | null;
+          metadata?: Json | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      document_views: {
+        Row: {
+          id: string;
+          user_email: string | null;
+          session_id: string;
+          document_id: string;
+          view_duration_seconds: number;
+          scroll_depth_percent: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_email?: string | null;
+          session_id: string;
+          document_id: string;
+          view_duration_seconds?: number;
+          scroll_depth_percent?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_email?: string | null;
+          session_id?: string;
+          document_id?: string;
+          view_duration_seconds?: number;
+          scroll_depth_percent?: number;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      document_correlations: {
+        Row: {
+          id: string;
+          document_id_1: string;
+          document_id_2: string;
+          correlation_score: number;
+          co_purchase_count: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          document_id_1: string;
+          document_id_2: string;
+          correlation_score?: number;
+          co_purchase_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          document_id_1?: string;
+          document_id_2?: string;
+          correlation_score?: number;
+          co_purchase_count?: number;
+          created_at?: string;
+          updated_at?: string;
         };
         Relationships: [];
       };

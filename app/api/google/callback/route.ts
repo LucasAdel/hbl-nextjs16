@@ -84,8 +84,6 @@ export async function GET(request: NextRequest) {
       throw new Error("Failed to store Google tokens");
     }
 
-    console.log("Google Calendar connected successfully");
-
     // Redirect to success page
     return NextResponse.redirect(
       new URL("/admin/settings?success=google_connected", request.url)

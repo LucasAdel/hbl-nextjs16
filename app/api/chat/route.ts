@@ -125,9 +125,9 @@ export async function POST(request: NextRequest) {
       await addMessageToConversation(conversationKey, userMessage, 0);
       await addMessageToConversation(conversationKey, assistantMessage, xpAwarded, "objection_handled");
 
-      // Log analytics
+      // Log analytics (non-blocking)
       const responseTime = Date.now() - startTime;
-      await logBaileyAnalytics({
+      logBaileyAnalytics({
         conversationId: conversation.id,
         sessionId: conversationKey,
         userMessage: message,
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
         intentCategory: "objection_handled",
         confidenceScore: 0.9,
         responseTimeMs: responseTime,
-      });
+      }).catch((err) => console.error("Analytics log error:", err));
 
       return NextResponse.json({
         success: true,
@@ -168,9 +168,9 @@ export async function POST(request: NextRequest) {
       await addMessageToConversation(conversationKey, userMessage, 0, intent);
       await addMessageToConversation(conversationKey, assistantMessage, 0, intent);
 
-      // Log analytics for fallback
+      // Log analytics for fallback (non-blocking)
       const responseTime = Date.now() - startTime;
-      await logBaileyAnalytics({
+      logBaileyAnalytics({
         conversationId: conversation.id,
         sessionId: conversationKey,
         userMessage: message,
@@ -178,7 +178,7 @@ export async function POST(request: NextRequest) {
         intentCategory: intent,
         confidenceScore: 0.3,
         responseTimeMs: responseTime,
-      });
+      }).catch((err) => console.error("Analytics log error:", err));
 
       return NextResponse.json({
         success: true,
@@ -225,9 +225,9 @@ export async function POST(request: NextRequest) {
     await addMessageToConversation(conversationKey, userMessage, 0, intent);
     await addMessageToConversation(conversationKey, assistantMessage, xpAwarded, intent);
 
-    // Log analytics for knowledge-based response
+    // Log analytics for knowledge-based response (non-blocking)
     const responseTime = Date.now() - startTime;
-    await logBaileyAnalytics({
+    logBaileyAnalytics({
       conversationId: conversation.id,
       sessionId: conversationKey,
       userMessage: message,
@@ -237,7 +237,7 @@ export async function POST(request: NextRequest) {
       confidenceScore: primary.confidenceLevel / 10,
       responseTimeMs: responseTime,
       converted: primary.relatedProducts && primary.relatedProducts.length > 0,
-    });
+    }).catch((err) => console.error("Analytics log error:", err));
 
     return NextResponse.json({
       success: true,

@@ -1,12 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { SupabaseClient } from "@supabase/supabase-js";
-
-// Helper to get untyped access for new tables not yet in types
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getUntypedClient(supabase: SupabaseClient): any {
-  return supabase;
-}
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,10 +14,9 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = await createClient();
-    const db = getUntypedClient(supabase);
 
     // Query client_matters table
-    const { data: matters, error } = await db
+    const { data: matters, error } = await supabase
       .from("client_matters")
       .select("*")
       .eq("client_email", email.toLowerCase())

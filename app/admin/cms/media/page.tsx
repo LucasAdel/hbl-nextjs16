@@ -216,7 +216,6 @@ export default function MediaLibraryPage() {
     setIsDragging(false);
     // Handle file drop - would integrate with Supabase storage
     const files = Array.from(e.dataTransfer.files);
-    console.log("Dropped files:", files);
   }, []);
 
   const stats = {

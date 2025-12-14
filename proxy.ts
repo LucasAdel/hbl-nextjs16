@@ -21,6 +21,10 @@ import {
   getClientIdentifier,
   RATE_LIMITS,
 } from "@/lib/rate-limiter";
+import {
+  validateCSRFToken,
+  isCSRFExempt,
+} from "@/lib/csrf/csrf-protection";
 
 // ============================================
 // Configuration
@@ -63,6 +67,7 @@ const rateLimitedApiRoutes = [
   "/api/chat",
   "/api/client-portal",
   "/api/stripe",
+  "/api/upload-documents",
 ];
 
 // Paths to completely skip processing
@@ -79,6 +84,7 @@ const SKIP_PATHS = [
   "/sw.js",
   "/workbox",
   "/.well-known",
+  "/api/health", // Health checks should not be rate limited
 ];
 
 // ============================================
@@ -150,6 +156,7 @@ function getRateLimitConfig(pathname: string) {
   if (pathname.startsWith("/api/chat")) return RATE_LIMITS.chat;
   if (pathname.startsWith("/api/client-portal")) return RATE_LIMITS.clientPortal;
   if (pathname.startsWith("/api/stripe")) return RATE_LIMITS.payment;
+  if (pathname.startsWith("/api/upload-documents")) return RATE_LIMITS.upload;
   return RATE_LIMITS.general;
 }
 
@@ -197,6 +204,29 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
             "X-RateLimit-Remaining": "0",
             "X-RateLimit-Reset": String(Math.ceil(resetIn / 1000)),
           },
+        }
+      );
+    }
+  }
+
+  // ============================================
+  // CSRF Protection (for API mutations)
+  // ============================================
+
+  const isMutation = ["POST", "PUT", "DELETE", "PATCH"].includes(request.method);
+  const isApiRoute = pathname.startsWith("/api/");
+
+  if (isMutation && isApiRoute && !isCSRFExempt(pathname)) {
+    const isValid = await validateCSRFToken(request);
+    if (!isValid) {
+      return new NextResponse(
+        JSON.stringify({
+          error: "Invalid or missing CSRF token",
+          message: "Please refresh the page and try again",
+        }),
+        {
+          status: 403,
+          headers: { "Content-Type": "application/json" },
         }
       );
     }

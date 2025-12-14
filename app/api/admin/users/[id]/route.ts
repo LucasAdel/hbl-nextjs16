@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 
+// Valid roles whitelist - prevents privilege escalation via arbitrary role injection
+const ALLOWED_ROLES = ["client", "staff", "admin", "super_admin"] as const;
+type AllowedRole = (typeof ALLOWED_ROLES)[number];
+
+// Roles that require super_admin to assign
+const PRIVILEGED_ROLES: AllowedRole[] = ["admin", "super_admin"];
+
 // GET /api/admin/users/[id] - Get a specific user
 export async function GET(
   request: NextRequest,
@@ -21,8 +28,8 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const currentUserRole = currentUser.user_metadata?.role;
-    if (currentUserRole !== "admin") {
+    const currentUserRole = currentUser.user_metadata?.role as AllowedRole | undefined;
+    if (!currentUserRole || !["admin", "super_admin"].includes(currentUserRole)) {
       return NextResponse.json({ error: "Forbidden - Admin access required" }, { status: 403 });
     }
 
@@ -72,13 +79,28 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const currentUserRole = currentUser.user_metadata?.role;
-    if (currentUserRole !== "admin") {
+    const currentUserRole = currentUser.user_metadata?.role as AllowedRole | undefined;
+    if (!currentUserRole || !["admin", "super_admin"].includes(currentUserRole)) {
       return NextResponse.json({ error: "Forbidden - Admin access required" }, { status: 403 });
     }
 
     const body = await request.json();
     const { firstName, lastName, role, email, password } = body;
+
+    // Validate role if provided - prevents privilege escalation
+    if (role !== undefined) {
+      // Check role is in whitelist
+      if (!ALLOWED_ROLES.includes(role as AllowedRole)) {
+        console.warn(`SECURITY: ${currentUser.email} attempted to assign invalid role "${role}" to user ${id}`);
+        return NextResponse.json({ error: "Invalid role specified" }, { status: 400 });
+      }
+
+      // Only super_admin can assign privileged roles (admin, super_admin)
+      if (PRIVILEGED_ROLES.includes(role as AllowedRole) && currentUserRole !== "super_admin") {
+        console.warn(`SECURITY: ${currentUser.email} (${currentUserRole}) attempted to assign privileged role "${role}" to user ${id}`);
+        return NextResponse.json({ error: "Only super_admin can assign admin or super_admin roles" }, { status: 403 });
+      }
+    }
 
     // Use service role to update user
     const serviceClient = createServiceRoleClient();
@@ -95,6 +117,8 @@ export async function PATCH(
     }
 
     if (password) {
+      // Log password changes for security audit
+      console.warn(`SECURITY: ${currentUser.email} changed password for user ${id}`);
       updateData.password = password;
     }
 
@@ -153,8 +177,8 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const currentUserRole = currentUser.user_metadata?.role;
-    if (currentUserRole !== "admin") {
+    const currentUserRole = currentUser.user_metadata?.role as AllowedRole | undefined;
+    if (!currentUserRole || !["admin", "super_admin"].includes(currentUserRole)) {
       return NextResponse.json({ error: "Forbidden - Admin access required" }, { status: 403 });
     }
 

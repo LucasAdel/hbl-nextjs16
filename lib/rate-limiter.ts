@@ -205,13 +205,14 @@ function hashString(str: string): string {
 export const RATE_LIMITS = {
   contact: { windowMs: 60000, maxRequests: 5 },
   booking: { windowMs: 60000, maxRequests: 10 },
-  payment: { windowMs: 60000, maxRequests: 20 },
+  payment: { windowMs: 60000, maxRequests: 5 }, // Reduced from 20 - payment attempts should be infrequent
   general: { windowMs: 60000, maxRequests: 100 },
   newsletter: { windowMs: 60000, maxRequests: 3 },
   clientPortal: { windowMs: 60000, maxRequests: 30 },
   cartAbandon: { windowMs: 60000, maxRequests: 10 },
   chat: { windowMs: 60000, maxRequests: 30 },
   webhook: { windowMs: 60000, maxRequests: 100 },
+  upload: { windowMs: 3600000, maxRequests: 5 }, // 5 uploads per hour - strict to prevent DoS
 };
 
 /**

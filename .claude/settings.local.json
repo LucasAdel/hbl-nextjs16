@@ -7,5 +7,13 @@
     ],
     "deny": [],
     "ask": []
+  },
+  "mcpServers": {
+    "cloudflare": {
+      "command": "mcp-server-cloudflare",
+      "env": {
+        "CLOUDFLARE_API_TOKEN": "TLeNuPfiPJevMxMhEwNxFWqFbt9vSZYi795-MnuQ"
+      }
+    }
   }
 }

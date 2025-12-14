@@ -1,23 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import { Resend } from "resend";
 import { createServiceRoleClient } from "@/lib/supabase/server";
-import { SupabaseClient } from "@supabase/supabase-js";
+import type { Json } from "@/lib/supabase/types";
 import {
   notifyPaymentReceived,
   notifyDocumentPurchased,
   notifyXPEarned,
   notifyAchievementUnlocked,
 } from "@/lib/notifications/notification-triggers";
+import { processWebhookIdempotent } from "@/lib/webhooks/idempotency";
+import { createCalendarEvent } from "@/lib/google-calendar";
+import { env } from "@/lib/env";
+
+const resend = new Resend(env.RESEND_API_KEY);
+
+// SECURITY: Use environment variable for admin email
+const ADMIN_EMAIL = env.ADMIN_NOTIFICATION_EMAIL;
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-11-17.clover",
 });
-
-// Helper to get untyped access for new tables not yet in types
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getUntypedClient(supabase: SupabaseClient): any {
-  return supabase;
-}
 
 // XP rewards for purchases
 const PURCHASE_XP = {
@@ -39,14 +42,13 @@ interface PurchaseItem {
  * Award XP for a purchase
  */
 async function awardPurchaseXP(
-  supabase: SupabaseClient,
+  supabase: ReturnType<typeof createServiceRoleClient>,
   email: string,
   amount: number,
   isFirstPurchase: boolean,
   hasBundle: boolean,
   sessionId: string
 ): Promise<number> {
-  const db = getUntypedClient(supabase);
 
   // Calculate base XP (10 XP per dollar)
   let xpAmount = Math.round(amount * PURCHASE_XP.basePerDollar);
@@ -57,7 +59,7 @@ async function awardPurchaseXP(
   }
 
   // Record base XP transaction
-  await db.from("xp_transactions").insert({
+  await supabase.from("xp_transactions").insert({
     user_email: email,
     amount: xpAmount,
     source: "purchase",
@@ -68,7 +70,7 @@ async function awardPurchaseXP(
 
   // First purchase bonus
   if (isFirstPurchase) {
-    await db.from("xp_transactions").insert({
+    await supabase.from("xp_transactions").insert({
       user_email: email,
       amount: PURCHASE_XP.firstPurchaseBonus,
       source: "achievement",
@@ -80,20 +82,20 @@ async function awardPurchaseXP(
   }
 
   // Update user profile total XP
-  const { data: profile } = await db
+  const { data: profile } = await supabase
     .from("user_profiles")
     .select("id, total_xp")
     .eq("email", email)
     .single();
 
   if (profile) {
-    await db
+    await supabase
       .from("user_profiles")
       .update({ total_xp: (profile.total_xp || 0) + xpAmount })
       .eq("id", profile.id);
   } else {
     // Create profile if doesn't exist
-    await db.from("user_profiles").insert({
+    await supabase.from("user_profiles").insert({
       email,
       total_xp: xpAmount,
       current_level: 1,
@@ -108,9 +110,8 @@ async function awardPurchaseXP(
 /**
  * Check if this is the user's first purchase
  */
-async function isFirstPurchase(supabase: SupabaseClient, email: string): Promise<boolean> {
-  const db = getUntypedClient(supabase);
-  const { count } = await db
+async function isFirstPurchase(supabase: ReturnType<typeof createServiceRoleClient>, email: string): Promise<boolean> {
+  const { count } = await supabase
     .from("document_purchases")
     .select("*", { count: "exact", head: true })
     .eq("user_email", email)
@@ -123,11 +124,10 @@ async function isFirstPurchase(supabase: SupabaseClient, email: string): Promise
  * Record purchase to database
  */
 async function recordPurchase(
-  supabase: SupabaseClient,
+  supabase: ReturnType<typeof createServiceRoleClient>,
   session: Stripe.Checkout.Session,
   lineItems: Stripe.LineItem[]
 ): Promise<void> {
-  const db = getUntypedClient(supabase);
 
   const email = session.customer_email || session.metadata?.customerEmail || "";
   const metadata = session.metadata || {};
@@ -145,11 +145,11 @@ async function recordPurchase(
   const total = (session.amount_total || 0) / 100;
   const gst = Math.round((total / 11) * 100) / 100; // Extract GST from total
 
-  await db.from("document_purchases").insert({
+  await supabase.from("document_purchases").insert({
     user_email: email,
     stripe_session_id: session.id,
     stripe_payment_intent: session.payment_intent?.toString(),
-    items: items,
+    items: items as unknown as Json,
     subtotal: Math.round(subtotal * 100), // Store in cents
     discount: 0,
     gst: Math.round(gst * 100),
@@ -159,18 +159,16 @@ async function recordPurchase(
     metadata: {
       type: metadata.type,
       customer_name: metadata.customerName,
-    },
+    } as unknown as Json,
   });
 }
 
 /**
  * Update referral status if purchase was from referred user
  */
-async function checkReferralPurchase(supabase: SupabaseClient, email: string): Promise<void> {
-  const db = getUntypedClient(supabase);
-
+async function checkReferralPurchase(supabase: ReturnType<typeof createServiceRoleClient>, email: string): Promise<void> {
   // Check if user was referred and hasn't purchased before
-  const { data: referral } = await db
+  const { data: referral } = await supabase
     .from("referrals")
     .select("id, referrer_email, status")
     .eq("referred_email", email)
@@ -179,7 +177,7 @@ async function checkReferralPurchase(supabase: SupabaseClient, email: string): P
 
   if (referral) {
     // Update referral to purchased
-    await db
+    await supabase
       .from("referrals")
       .update({
         status: "purchased",
@@ -189,7 +187,7 @@ async function checkReferralPurchase(supabase: SupabaseClient, email: string): P
       .eq("id", referral.id);
 
     // Award referrer XP
-    await db.from("xp_transactions").insert({
+    await supabase.from("xp_transactions").insert({
       user_email: referral.referrer_email,
       amount: 500,
       source: "referral",
@@ -199,14 +197,14 @@ async function checkReferralPurchase(supabase: SupabaseClient, email: string): P
     });
 
     // Update referrer's total XP
-    const { data: referrerProfile } = await db
+    const { data: referrerProfile } = await supabase
       .from("user_profiles")
       .select("id, total_xp")
       .eq("email", referral.referrer_email)
       .single();
 
     if (referrerProfile) {
-      await db
+      await supabase
         .from("user_profiles")
         .update({ total_xp: (referrerProfile.total_xp || 0) + 500 })
         .eq("id", referrerProfile.id);
@@ -216,12 +214,14 @@ async function checkReferralPurchase(supabase: SupabaseClient, email: string): P
 
 /**
  * Update booking status to "confirmed" after payment
+ * ALSO creates Google Calendar event and sends confirmation emails
+ *
+ * SECURITY: Calendar event and emails are ONLY sent here, after payment confirmed
  */
 async function updateBookingStatusAfterPayment(
-  supabase: SupabaseClient,
+  supabase: ReturnType<typeof createServiceRoleClient>,
   session: Stripe.Checkout.Session
 ): Promise<void> {
-  const db = getUntypedClient(supabase);
   const bookingId = session.metadata?.bookingId;
 
   if (!bookingId) {
@@ -230,12 +230,286 @@ async function updateBookingStatusAfterPayment(
   }
 
   try {
-    await db
+    // Fetch full booking details
+    const { data: booking, error: fetchError } = await supabase
+      .from("advanced_bookings")
+      .select("*")
+      .eq("id", bookingId)
+      .single();
+
+    if (fetchError || !booking) {
+      console.error("Failed to fetch booking:", fetchError);
+      return;
+    }
+
+    // Update status to confirmed
+    await supabase
       .from("advanced_bookings")
       .update({ status: "confirmed" })
       .eq("id", bookingId);
 
     console.log(`Booking confirmed: ${bookingId}`);
+
+    // Extract booking details
+    const clientName = booking.client_name;
+    const clientEmail = booking.client_email;
+    const clientPhone = booking.client_phone;
+    const consultationType = booking.event_type_name || "Consultation";
+    const startTime = new Date(booking.start_time);
+    const endTime = new Date(booking.end_time);
+    const notes = booking.notes || "";
+    const customAnswers = (booking.custom_answers || {}) as Record<string, unknown>;
+    const practiceType = (customAnswers.practiceType as string) || "";
+    const practiceWebsite = (customAnswers.practiceWebsite as string) || "";
+    const uploadedFiles = (customAnswers.uploadedFiles as string[]) || [];
+
+    // Calculate duration
+    const durationMinutes = Math.round((endTime.getTime() - startTime.getTime()) / 60000);
+
+    // Create Google Calendar event NOW (after payment confirmed)
+    let meetLink: string | null = null;
+    const calendarResult = await createCalendarEvent({
+      summary: `${consultationType} - ${clientName}`,
+      description: `
+Client: ${clientName}
+Email: ${clientEmail}
+Phone: ${clientPhone || "Not provided"}
+Practice Type: ${practiceType || "Not specified"}
+Practice Website: ${practiceWebsite || "Not provided"}
+
+Notes:
+${notes || "No additional notes"}
+
+${uploadedFiles && uploadedFiles.length > 0 ? `Uploaded Documents: ${uploadedFiles.join(", ")}` : ""}
+      `.trim(),
+      startTime,
+      endTime,
+      attendeeEmail: clientEmail,
+      attendeeName: clientName,
+      location: "Video Conference",
+    });
+
+    // Store calendar event ID if created
+    if (calendarResult.success && calendarResult.eventId) {
+      await supabase
+        .from("advanced_bookings")
+        .update({ google_event_id: calendarResult.eventId })
+        .eq("id", bookingId);
+
+      // Extract Meet link from calendar event
+      if (calendarResult.eventData) {
+        const eventData = calendarResult.eventData as Record<string, unknown>;
+        meetLink = (eventData.hangoutLink as string) || null;
+      }
+
+      console.log(`Calendar event created for booking ${bookingId}: ${calendarResult.eventId}`);
+    } else {
+      console.error(`Failed to create calendar event for booking ${bookingId}`);
+    }
+
+    // Format date for display
+    const formattedDate = startTime.toLocaleDateString("en-AU", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    const formattedTime = startTime.toLocaleTimeString("en-AU", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    // Send confirmation email to client
+    try {
+      await resend.emails.send({
+        from: "HBL Legal <noreply@hamiltonbailey.com>",
+        to: clientEmail,
+        subject: `Booking Confirmed - ${consultationType}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: #40E0D0; padding: 20px; text-align: center;">
+              <h1 style="color: white; margin: 0;">Booking Confirmed</h1>
+            </div>
+
+            <div style="padding: 30px; background: #f9f9f9;">
+              <p>Dear ${clientName},</p>
+
+              <p>Thank you for your payment. Your <strong>${consultationType}</strong> with Hamilton Bailey Legal is now confirmed.</p>
+
+              <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #40E0D0; margin-top: 0;">Appointment Details</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Date:</td>
+                    <td style="padding: 8px 0; font-weight: bold;">${formattedDate}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Time:</td>
+                    <td style="padding: 8px 0; font-weight: bold;">${formattedTime} (ACST)</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Duration:</td>
+                    <td style="padding: 8px 0; font-weight: bold;">${durationMinutes} minutes</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Format:</td>
+                    <td style="padding: 8px 0; font-weight: bold;">Video Conference</td>
+                  </tr>
+                </table>
+              </div>
+
+              ${meetLink ? `
+              <div style="background: #E8F5E9; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+                <p style="margin: 0 0 15px 0; color: #2E7D32; font-weight: bold;">
+                  Your Video Conference Link
+                </p>
+                <a href="${meetLink}" style="display: inline-block; background: #0F9D58; color: white; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+                  Join Google Meet
+                </a>
+                <p style="margin: 15px 0 0 0; font-size: 12px; color: #666;">
+                  ${meetLink}
+                </p>
+              </div>
+              ` : `
+              <div style="background: #FFF9E6; padding: 15px; border-radius: 8px; border-left: 4px solid #F59E0B; margin: 20px 0;">
+                <p style="margin: 0; color: #92400E;">
+                  <strong>What's Next?</strong><br />
+                  You will receive a calendar invitation with a video conference link. Please ensure you have a stable internet connection and a quiet space for your consultation.
+                </p>
+              </div>
+              `}
+
+              <p style="color: #666;">If you need to reschedule or cancel your appointment, please contact us at least 24 hours in advance.</p>
+
+              <p>We look forward to speaking with you.</p>
+
+              <p>Best regards,<br />
+              <strong>Hamilton Bailey Legal</strong></p>
+            </div>
+
+            <div style="background: #333; padding: 20px; text-align: center;">
+              <p style="color: #999; font-size: 12px; margin: 0;">
+                Hamilton Bailey Legal | 147 Pirie Street, Adelaide SA 5000<br />
+                Phone: 08 5122 6500 | lw@hamiltonbailey.com
+              </p>
+            </div>
+          </div>
+        `,
+      });
+      console.log(`Confirmation email sent to client: ${clientEmail}`);
+    } catch (emailError) {
+      console.error("Client email error:", emailError);
+    }
+
+    // Send notification email to admin
+    try {
+      await resend.emails.send({
+        from: "HBL Legal <noreply@hamiltonbailey.com>",
+        to: ADMIN_EMAIL,
+        subject: `New Paid Booking: ${consultationType} - ${clientName}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: #40E0D0; padding: 20px; text-align: center;">
+              <h1 style="color: white; margin: 0;">New Paid Booking</h1>
+            </div>
+
+            <div style="padding: 30px; background: #f9f9f9;">
+              <div style="background: #E8F5E9; padding: 15px; border-radius: 8px; border-left: 4px solid #4CAF50; margin-bottom: 20px;">
+                <p style="margin: 0; color: #2E7D32; font-weight: bold;">
+                  ✓ Payment Confirmed - Booking Active
+                </p>
+              </div>
+
+              <h2 style="color: #333; margin-top: 0;">Appointment Details</h2>
+
+              <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding: 8px 0; color: #666; width: 140px;">Consultation:</td>
+                    <td style="padding: 8px 0; font-weight: bold;">${consultationType}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Date:</td>
+                    <td style="padding: 8px 0; font-weight: bold;">${formattedDate}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Time:</td>
+                    <td style="padding: 8px 0; font-weight: bold;">${formattedTime} (ACST)</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Duration:</td>
+                    <td style="padding: 8px 0; font-weight: bold;">${durationMinutes} minutes</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Payment:</td>
+                    <td style="padding: 8px 0; font-weight: bold; color: #4CAF50;">$${((session.amount_total || 0) / 100).toFixed(2)} AUD</td>
+                  </tr>
+                </table>
+              </div>
+
+              <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="color: #40E0D0; margin-top: 0;">Client Information</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding: 8px 0; color: #666; width: 140px;">Name:</td>
+                    <td style="padding: 8px 0;">${clientName}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Email:</td>
+                    <td style="padding: 8px 0;"><a href="mailto:${clientEmail}">${clientEmail}</a></td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Phone:</td>
+                    <td style="padding: 8px 0;">${clientPhone || "Not provided"}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Practice Type:</td>
+                    <td style="padding: 8px 0;">${practiceType || "Not specified"}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Practice Website:</td>
+                    <td style="padding: 8px 0;">
+                      ${practiceWebsite ? `<a href="${practiceWebsite}">${practiceWebsite}</a>` : "Not provided"}
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+              ${notes ? `
+              <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="color: #40E0D0; margin-top: 0;">Client Notes</h3>
+                <p style="color: #333; margin: 0; white-space: pre-wrap;">${notes}</p>
+              </div>
+              ` : ""}
+
+              ${meetLink ? `
+              <div style="background: #E8F5E9; padding: 20px; border-radius: 8px; text-align: center;">
+                <p style="margin: 0 0 10px 0; color: #2E7D32; font-weight: bold;">
+                  Google Meet Link
+                </p>
+                <a href="${meetLink}" style="display: inline-block; background: #0F9D58; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+                  Join Meeting
+                </a>
+                <p style="margin: 10px 0 0 0; font-size: 11px; color: #666;">
+                  ${meetLink}
+                </p>
+              </div>
+              ` : ""}
+            </div>
+
+            <div style="background: #333; padding: 20px; text-align: center;">
+              <p style="color: #999; font-size: 12px; margin: 0;">
+                This is an automated notification from the HBL website booking system.
+              </p>
+            </div>
+          </div>
+        `,
+      });
+      console.log(`Notification email sent to admin: ${ADMIN_EMAIL}`);
+    } catch (emailError) {
+      console.error("Admin email error:", emailError);
+    }
   } catch (error) {
     console.error("Error updating booking status:", error);
   }
@@ -337,7 +611,6 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session): Promise
  */
 async function handleRefund(charge: Stripe.Charge): Promise<void> {
   const supabase = createServiceRoleClient();
-  const db = getUntypedClient(supabase);
 
   const paymentIntent = charge.payment_intent?.toString();
 
@@ -347,7 +620,7 @@ async function handleRefund(charge: Stripe.Charge): Promise<void> {
   }
 
   // Update purchase status
-  await db
+  await supabase
     .from("document_purchases")
     .update({ status: "refunded" })
     .eq("stripe_payment_intent", paymentIntent);
@@ -360,7 +633,6 @@ async function handleRefund(charge: Stripe.Charge): Promise<void> {
  */
 async function handleCheckoutExpired(session: Stripe.Checkout.Session): Promise<void> {
   const supabase = createServiceRoleClient();
-  const db = getUntypedClient(supabase);
   const bookingId = session.metadata?.bookingId;
 
   if (!bookingId) {
@@ -370,7 +642,7 @@ async function handleCheckoutExpired(session: Stripe.Checkout.Session): Promise<
 
   try {
     // Mark booking as pending payment (user can try again)
-    await db
+    await supabase
       .from("advanced_bookings")
       .update({ status: "pending" })
       .eq("id", bookingId);
@@ -425,45 +697,55 @@ export async function POST(request: NextRequest) {
 
     console.log(`Stripe webhook received: ${event.type}`);
 
-    // Handle different event types
-    switch (event.type) {
-      case "checkout.session.completed": {
-        const session = event.data.object as Stripe.Checkout.Session;
-        await handleCheckoutComplete(session);
-        break;
-      }
+    // Process with idempotency check to prevent duplicate handling
+    const { processed, status } = await processWebhookIdempotent(
+      "stripe",
+      event.id,
+      event.type,
+      async () => {
+        // Handle different event types
+        switch (event.type) {
+          case "checkout.session.completed": {
+            const session = event.data.object as Stripe.Checkout.Session;
+            await handleCheckoutComplete(session);
+            break;
+          }
 
-      case "payment_intent.succeeded": {
-        // Log for debugging, main processing is in checkout.session.completed
-        console.log("Payment intent succeeded:", event.data.object.id);
-        break;
-      }
+          case "payment_intent.succeeded": {
+            // Log for debugging, main processing is in checkout.session.completed
+            console.log("Payment intent succeeded:", event.data.object.id);
+            break;
+          }
 
-      case "charge.refunded": {
-        const charge = event.data.object as Stripe.Charge;
-        await handleRefund(charge);
-        break;
-      }
+          case "charge.refunded": {
+            const charge = event.data.object as Stripe.Charge;
+            await handleRefund(charge);
+            break;
+          }
 
-      case "checkout.session.expired": {
-        const session = event.data.object as Stripe.Checkout.Session;
-        await handleCheckoutExpired(session);
-        break;
-      }
+          case "checkout.session.expired": {
+            const session = event.data.object as Stripe.Checkout.Session;
+            await handleCheckoutExpired(session);
+            break;
+          }
 
-      case "payment_intent.payment_failed": {
-        // Payment failed - log for debugging
-        // Note: bookingId passed via checkout.session metadata
-        // checkout.session.expired will handle cleanup
-        console.log("Payment intent failed:", event.data.object.id);
-        break;
-      }
+          case "payment_intent.payment_failed": {
+            // Payment failed - log for debugging
+            console.log("Payment intent failed:", event.data.object.id);
+            break;
+          }
 
-      default:
-        console.log(`Unhandled event type: ${event.type}`);
+          default:
+            console.log(`Unhandled event type: ${event.type}`);
+        }
+      }
+    );
+
+    if (status === "duplicate") {
+      console.log(`Stripe webhook ${event.id} already processed, skipping`);
     }
 
-    return NextResponse.json({ received: true });
+    return NextResponse.json({ received: true, processed, status });
   } catch (error) {
     console.error("Stripe webhook error:", error);
     return NextResponse.json(

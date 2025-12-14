@@ -136,13 +136,10 @@ export async function PUT(request: NextRequest) {
     if (parsed.action === "confirm") {
       // Find and confirm the appointment
       // In production, look up appointment by phone number and update status
-      console.log(`Appointment confirmed by ${parsed.from}`);
     } else if (parsed.action === "cancel") {
       // Find and cancel the appointment
-      console.log(`Appointment cancelled by ${parsed.from}`);
     } else if (parsed.action === "stop") {
       // Opt out user from SMS notifications
-      console.log(`User ${parsed.from} unsubscribed from SMS`);
     }
 
     // Return TwiML response

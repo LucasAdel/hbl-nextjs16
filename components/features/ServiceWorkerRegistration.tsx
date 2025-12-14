@@ -27,7 +27,6 @@ export function ServiceWorkerRegistration() {
       .register("/sw.js")
       .then((reg) => {
         setRegistration(reg);
-        console.log("Service Worker registered:", reg.scope);
 
         // Check for updates
         reg.addEventListener("updatefound", () => {
@@ -79,9 +78,8 @@ export function ServiceWorkerRegistration() {
     const { outcome } = await deferredPrompt.userChoice;
 
     if (outcome === "accepted") {
-      console.log("PWA installed");
+      // PWA installed
     } else {
-      console.log("PWA installation declined");
       localStorage.setItem("hbl-pwa-dismissed", "true");
     }
 

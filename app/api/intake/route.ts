@@ -54,16 +54,12 @@ export async function POST(request: NextRequest) {
       .select("*")
       .limit(1);
 
-    console.log("Client intake table check:", { tableCheck, tableError });
-
     if (tableError) {
       // Try intake_submissions table
       const { data: altCheck, error: altError } = await supabase
         .from("intake_submissions")
         .select("*")
         .limit(1);
-
-      console.log("Alt table (intake_submissions) check:", { altCheck, altError });
 
       if (!altError) {
         // Use intake_submissions table
@@ -102,8 +98,6 @@ export async function POST(request: NextRequest) {
         .from("contact_submissions")
         .select("*")
         .limit(1);
-
-      console.log("Fallback contact_submissions check:", { contactSubmCheck, contactSubmError });
 
       if (!contactSubmError) {
         // Use contact_submissions table as fallback

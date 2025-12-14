@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { SupabaseClient } from "@supabase/supabase-js";
 import crypto from "crypto";
-
-// Helper to get untyped access for new tables not yet in types
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getUntypedClient(supabase: SupabaseClient): any {
-  return supabase;
-}
 
 // Resend webhook event types
 interface ResendWebhookEvent {
@@ -151,10 +144,9 @@ export async function POST(request: NextRequest) {
 
     // Update daily analytics
     const today = new Date().toISOString().split("T")[0];
-    const db = getUntypedClient(supabase);
 
     // Try to get existing record for today
-    const { data: existingStats } = await db
+    const { data: existingStats } = await supabase
       .from("email_analytics_daily")
       .select("*")
       .eq("date", today)
@@ -171,14 +163,14 @@ export async function POST(request: NextRequest) {
       if (eventType === "unsubscribed") updates.unsubscribed_count = existingStats.unsubscribed_count + 1;
 
       if (Object.keys(updates).length > 0) {
-        await db
+        await supabase
           .from("email_analytics_daily")
           .update(updates)
           .eq("id", existingStats.id);
       }
     } else {
       // Create new record
-      await db.from("email_analytics_daily").insert({
+      await supabase.from("email_analytics_daily").insert({
         date: today,
         sequence_type: "all",
         sent_count: eventType === "sent" ? 1 : 0,

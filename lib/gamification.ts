@@ -5,13 +5,6 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
-import { SupabaseClient } from "@supabase/supabase-js";
-
-// Helper to get untyped access for new tables not yet in types
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getUntypedClient(supabase: SupabaseClient): any {
-  return supabase;
-}
 
 // XP Reward Tiers with Variable Reinforcement
 const XP_REWARDS = {
@@ -123,10 +116,9 @@ export async function awardXP(
   metadata: Record<string, unknown> = {}
 ): Promise<XPResult> {
   const supabase = await createClient();
-  const db = getUntypedClient(supabase);
 
   // Get or create user profile
-  let { data: profile } = await db
+  let { data: profile } = await supabase
     .from("user_profiles")
     .select("*")
     .eq("email", email.toLowerCase())
@@ -134,7 +126,7 @@ export async function awardXP(
 
   if (!profile) {
     // Create new profile
-    const { data: newProfile } = await db
+    const { data: newProfile } = await supabase
       .from("user_profiles")
       .insert({
         email: email.toLowerCase(),
@@ -188,7 +180,7 @@ export async function awardXP(
   const levelUp = newLevel > previousLevel;
 
   // Update profile
-  await db
+  await supabase
     .from("user_profiles")
     .update({
       total_xp: newTotalXP,
@@ -200,7 +192,7 @@ export async function awardXP(
     .eq("id", profile.id);
 
   // Record XP transaction
-  await db.from("xp_transactions").insert({
+  await supabase.from("xp_transactions").insert({
     user_email: email.toLowerCase(),
     amount: totalXPEarned,
     source: activity,
@@ -243,18 +235,17 @@ async function checkAndAwardAchievements(
   }
 ): Promise<string[]> {
   const supabase = await createClient();
-  const db = getUntypedClient(supabase);
   const earnedAchievements: string[] = [];
 
   // Get all achievements
-  const { data: achievements } = await db
+  const { data: achievements } = await supabase
     .from("achievements")
     .select("*");
 
   if (!achievements) return [];
 
   // Get user's existing achievements
-  const { data: userAchievements } = await db
+  const { data: userAchievements } = await supabase
     .from("user_achievements")
     .select("achievement_id")
     .eq("user_email", email.toLowerCase());
@@ -262,19 +253,19 @@ async function checkAndAwardAchievements(
   const earnedIds = new Set(userAchievements?.map((a: { achievement_id: string }) => a.achievement_id) || []);
 
   // Get activity counts
-  const { count: visitCount } = await db
+  const { count: visitCount } = await supabase
     .from("user_activity_log")
     .select("*", { count: "exact", head: true })
     .eq("user_email", email.toLowerCase())
     .eq("activity_type", "page_view");
 
-  const { count: purchaseCount } = await db
+  const { count: purchaseCount } = await supabase
     .from("user_activity_log")
     .select("*", { count: "exact", head: true })
     .eq("user_email", email.toLowerCase())
     .eq("activity_type", "document_purchase");
 
-  const { count: consultationCount } = await db
+  const { count: consultationCount } = await supabase
     .from("user_activity_log")
     .select("*", { count: "exact", head: true })
     .eq("user_email", email.toLowerCase())
@@ -309,13 +300,13 @@ async function checkAndAwardAchievements(
 
     if (earned) {
       // Award achievement
-      await db.from("user_achievements").insert({
+      await supabase.from("user_achievements").insert({
         user_email: email.toLowerCase(),
         achievement_id: achievement.id,
       });
 
       // Award XP for achievement
-      await db.from("xp_transactions").insert({
+      await supabase.from("xp_transactions").insert({
         user_email: email.toLowerCase(),
         amount: achievement.xp_reward,
         source: "achievement",
@@ -323,7 +314,7 @@ async function checkAndAwardAchievements(
       });
 
       // Update total XP
-      await db
+      await supabase
         .from("user_profiles")
         .update({
           total_xp: context.totalXP + achievement.xp_reward,
@@ -342,9 +333,8 @@ async function checkAndAwardAchievements(
  */
 export async function getUserProfile(email: string) {
   const supabase = await createClient();
-  const db = getUntypedClient(supabase);
 
-  const { data: profile } = await db
+  const { data: profile } = await supabase
     .from("user_profiles")
     .select("*")
     .eq("email", email.toLowerCase())
@@ -353,7 +343,7 @@ export async function getUserProfile(email: string) {
   if (!profile) return null;
 
   // Get achievements
-  const { data: userAchievements } = await db
+  const { data: userAchievements } = await supabase
     .from("user_achievements")
     .select(`
       earned_at,
@@ -369,7 +359,7 @@ export async function getUserProfile(email: string) {
   );
 
   // Get recent XP history
-  const { data: recentXP } = await db
+  const { data: recentXP } = await supabase
     .from("xp_transactions")
     .select("*")
     .eq("user_email", email.toLowerCase())
@@ -396,9 +386,8 @@ export async function trackActivity(
   metadata: Record<string, unknown> = {}
 ): Promise<void> {
   const supabase = await createClient();
-  const db = getUntypedClient(supabase);
 
-  await db.from("user_activity_log").insert({
+  await supabase.from("user_activity_log").insert({
     user_email: email?.toLowerCase() || null,
     session_id: sessionId,
     activity_type: activityType,
@@ -419,9 +408,8 @@ export async function trackDocumentView(
   scrollDepth: number = 0
 ): Promise<void> {
   const supabase = await createClient();
-  const db = getUntypedClient(supabase);
 
-  await db.from("document_views").insert({
+  await supabase.from("document_views").insert({
     user_email: email?.toLowerCase() || null,
     session_id: sessionId,
     document_id: documentId,

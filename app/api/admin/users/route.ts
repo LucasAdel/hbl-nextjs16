@@ -1,25 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
+import { requirePermission, PERMISSIONS } from "@/lib/auth/admin-auth";
 
 // GET /api/admin/users - List all users with pagination and filtering
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-
-    // Check current user is admin
-    const {
-      data: { user: currentUser },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !currentUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const currentUserRole = currentUser.user_metadata?.role;
-    if (currentUserRole !== "admin") {
-      return NextResponse.json({ error: "Forbidden - Admin access required" }, { status: 403 });
+    // SECURITY: Verify user has MANAGE_USERS permission (admin only)
+    const auth = await requirePermission(PERMISSIONS.MANAGE_USERS);
+    if (!auth.authorized) {
+      return auth.response;
     }
 
     // Parse query params
@@ -85,21 +74,10 @@ export async function GET(request: NextRequest) {
 // POST /api/admin/users - Create a new user
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
-
-    // Check current user is admin
-    const {
-      data: { user: currentUser },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !currentUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const currentUserRole = currentUser.user_metadata?.role;
-    if (currentUserRole !== "admin") {
-      return NextResponse.json({ error: "Forbidden - Admin access required" }, { status: 403 });
+    // SECURITY: Verify user has MANAGE_USERS permission (admin only)
+    const auth = await requirePermission(PERMISSIONS.MANAGE_USERS);
+    if (!auth.authorized) {
+      return auth.response;
     }
 
     const body = await request.json();

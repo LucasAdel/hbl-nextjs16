@@ -1,15 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { checkRateLimit, getClientIdentifier } from "@/lib/rate-limiter";
-import { SupabaseClient } from "@supabase/supabase-js";
 import { requirePortalOrAdminAuth } from "@/lib/auth/portal-auth";
 import { requireAdminAuth } from "@/lib/auth/admin-auth";
-
-// Helper to get untyped access for new tables not yet in types
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getUntypedClient(supabase: SupabaseClient): any {
-  return supabase;
-}
 
 // Rate limit for messages
 const MESSAGES_RATE_LIMIT = {
@@ -46,12 +39,11 @@ export async function GET(request: NextRequest) {
     const queryEmail = authResult.user.isAdmin ? email : authResult.user.email;
 
     const supabase = await createClient();
-    const db = getUntypedClient(supabase);
 
-    let query = db
+    let query = supabase
       .from("client_messages")
       .select("*")
-      .eq("client_email", queryEmail.toLowerCase())
+      .eq("email", queryEmail.toLowerCase())
       .order("created_at", { ascending: true });
 
     if (matterId) {
@@ -119,7 +111,6 @@ export async function POST(request: NextRequest) {
     const senderEmail = authResult.user.isAdmin ? email : authResult.user.email;
 
     const supabase = await createClient();
-    const db = getUntypedClient(supabase);
 
     // Handle file upload if present
     let attachmentUrl: string | null = null;
@@ -143,16 +134,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Insert message using verified email
-    const { data: newMessage, error } = await db
+    const { data: newMessage, error } = await supabase
       .from("client_messages")
       .insert({
-        client_email: senderEmail.toLowerCase(),
+        email: senderEmail.toLowerCase(),
         matter_id: matterId || null,
-        sender_type: authResult.user.isAdmin ? "admin" : "client",
-        sender_name: authResult.user.isAdmin ? "Hamilton Bailey Legal" : senderEmail.split("@")[0],
-        message,
-        attachment_url: attachmentUrl,
-        attachment_name: attachmentName,
+        sender_type: authResult.user.isAdmin ? "staff" : "client",
+        content: message,
         is_read: false,
       })
       .select()
@@ -194,9 +182,8 @@ export async function PATCH(request: NextRequest) {
 
     if (action === "mark_read" && messageIds?.length > 0) {
       const supabase = await createClient();
-      const db = getUntypedClient(supabase);
 
-      await db
+      await supabase
         .from("client_messages")
         .update({ is_read: true })
         .in("id", messageIds);

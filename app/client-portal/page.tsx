@@ -778,7 +778,6 @@ export default function ClientPortalPage() {
                   <DocumentUpload
                     userEmail={user.email}
                     onUploadComplete={(files) => {
-                      console.log("Uploaded files:", files);
                       refreshData();
                     }}
                   />
