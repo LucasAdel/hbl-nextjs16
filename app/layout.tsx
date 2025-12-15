@@ -15,7 +15,7 @@ import { OrganizationSchema, WebsiteSchema, LocalBusinessSchema } from "@/compon
 import { CartAbandonmentTracker } from "@/components/cart/CartAbandonmentTracker";
 import { AIChatWidget } from "@/features/bailey-ai";
 import { GamificationWidgetWrapper } from "@/components/gamification-widget-wrapper";
-import { PostHogProvider } from "@/components/providers/PostHogProvider";
+// PostHog removed - using self-hosted analytics via AnalyticsProvider
 import { CommandPalette } from "@/components/search/CommandPalette";
 import { SocialProofNotifications } from "@/components/social-proof/SocialProofNotifications";
 import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
@@ -128,7 +128,6 @@ export default function RootLayout({
         />
       </head>
       <body className={`${montserrat.variable} font-sans antialiased`}>
-        <PostHogProvider>
           <AnalyticsProvider>
           <ThemeProvider>
             <Navigation />
@@ -168,7 +167,6 @@ export default function RootLayout({
           <LocalBusinessSchema />
           </ThemeProvider>
           </AnalyticsProvider>
-        </PostHogProvider>
       </body>
     </html>
   );

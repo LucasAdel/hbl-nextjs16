@@ -1362,6 +1362,151 @@ export type Database = {
         };
         Relationships: [];
       };
+      // Analytics tables
+      analytics_events: {
+        Row: {
+          id: string;
+          timestamp: string;
+          session_id: string | null;
+          event_name: string | null;
+          event_category: string | null;
+          page_url: string | null;
+          page_title: string | null;
+          properties: Json | null;
+          device_type: string | null;
+          browser: string | null;
+          os: string | null;
+          country_code: string | null;
+          city: string | null;
+          referrer: string | null;
+          click_x: number | null;
+          click_y: number | null;
+          element_selector: string | null;
+          element_text: string | null;
+          viewport_height: number | null;
+          viewport_width: number | null;
+        };
+        Insert: {
+          id?: string;
+          timestamp?: string;
+          session_id?: string | null;
+          event_name?: string | null;
+          event_category?: string | null;
+          page_url?: string | null;
+          page_title?: string | null;
+          properties?: Json | null;
+          device_type?: string | null;
+          browser?: string | null;
+          os?: string | null;
+          country_code?: string | null;
+          city?: string | null;
+          referrer?: string | null;
+          click_x?: number | null;
+          click_y?: number | null;
+          element_selector?: string | null;
+          element_text?: string | null;
+          viewport_height?: number | null;
+          viewport_width?: number | null;
+        };
+        Update: {
+          id?: string;
+          timestamp?: string;
+          session_id?: string | null;
+          event_name?: string | null;
+          event_category?: string | null;
+          page_url?: string | null;
+          page_title?: string | null;
+          properties?: Json | null;
+          device_type?: string | null;
+          browser?: string | null;
+          os?: string | null;
+          country_code?: string | null;
+          city?: string | null;
+          referrer?: string | null;
+          click_x?: number | null;
+          click_y?: number | null;
+          element_selector?: string | null;
+          element_text?: string | null;
+          viewport_height?: number | null;
+          viewport_width?: number | null;
+        };
+        Relationships: [];
+      };
+      analytics_session_summaries: {
+        Row: {
+          id: string;
+          session_id: string;
+          summary: string;
+          key_actions: Json | null;
+          pages_visited: number | null;
+          total_events: number | null;
+          duration_seconds: number | null;
+          conversion_intent: string | null;
+          generated_at: string | null;
+          model_used: string | null;
+          created_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          session_id: string;
+          summary: string;
+          key_actions?: Json | null;
+          pages_visited?: number | null;
+          total_events?: number | null;
+          duration_seconds?: number | null;
+          conversion_intent?: string | null;
+          generated_at?: string | null;
+          model_used?: string | null;
+          created_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          session_id?: string;
+          summary?: string;
+          key_actions?: Json | null;
+          pages_visited?: number | null;
+          total_events?: number | null;
+          duration_seconds?: number | null;
+          conversion_intent?: string | null;
+          generated_at?: string | null;
+          model_used?: string | null;
+          created_at?: string | null;
+        };
+        Relationships: [];
+      };
+      analytics_heatmap_config: {
+        Row: {
+          id: string;
+          page_pattern: string;
+          enabled: boolean | null;
+          description: string | null;
+          click_count: number | null;
+          last_click_at: string | null;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          page_pattern: string;
+          enabled?: boolean | null;
+          description?: string | null;
+          click_count?: number | null;
+          last_click_at?: string | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          page_pattern?: string;
+          enabled?: boolean | null;
+          description?: string | null;
+          click_count?: number | null;
+          last_click_at?: string | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;

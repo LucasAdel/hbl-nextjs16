@@ -99,7 +99,7 @@ export function CookieConsent() {
             <div className="flex items-center gap-3">
               <Cookie className="h-5 w-5 text-tiffany flex-shrink-0" />
               <p className="text-sm text-gray-600 flex-1">
-                We use cookies to improve your experience.{" "}
+                We use first-party cookies to improve your experience. No data is shared with third parties.{" "}
                 <Link href="/privacy-policy" className="text-tiffany hover:underline">
                   Privacy Policy
                 </Link>

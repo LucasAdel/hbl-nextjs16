@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
@@ -290,6 +290,7 @@ export type Database = {
       advanced_bookings: {
         Row: {
           attached_files: string[] | null
+          availability_slot_id: string | null
           cancellation_reason: string | null
           cancelled_at: string | null
           client_email: string
@@ -317,6 +318,7 @@ export type Database = {
         }
         Insert: {
           attached_files?: string[] | null
+          availability_slot_id?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           client_email: string
@@ -344,6 +346,7 @@ export type Database = {
         }
         Update: {
           attached_files?: string[] | null
+          availability_slot_id?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           client_email?: string
@@ -369,221 +372,307 @@ export type Database = {
           timezone?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "advanced_bookings_availability_slot_id_fkey"
+            columns: ["availability_slot_id"]
+            isOneToOne: false
+            referencedRelation: "availability_slots"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       analytics_events: {
         Row: {
-          id: string
-          user_id: string | null
-          session_id: string
-          event_name: string | null
-          event_type: string | null // Legacy field, use event_name
-          event_category: string | null
-          properties: Json | null
-          page_url: string
-          page_title: string | null
-          referrer: string | null
-          user_agent: string | null
-          ip_hash: string | null
-          device_type: string | null
           browser: string | null
-          os: string | null
-          screen_width: number | null
-          screen_height: number | null
-          viewport_width: number | null
-          viewport_height: number | null
-          // Legacy fields (kept for backwards compatibility)
-          screen_size: string | null
-          viewport_size: string | null
+          city: string | null
+          click_x: number | null
+          click_y: number | null
+          connection_type: string | null
+          conversion_currency: string | null
+          conversion_value: number | null
+          country_code: string | null
+          created_at: string | null
+          device_type: string | null
           document_name: string | null
+          dom_ready_time: number | null
           element_id: string | null
+          element_selector: string | null
           element_text: string | null
           element_type: string | null
-          scroll_depth: number | null
-          search_query: string | null
-          time_spent: number | null
-          // Geo fields
-          country_code: string | null
-          region: string | null
-          city: string | null
-          // UTM tracking
-          utm_source: string | null
-          utm_medium: string | null
-          utm_campaign: string | null
-          utm_term: string | null
-          utm_content: string | null
-          // Session analytics
-          landing_page: string | null
+          event_category: string | null
+          event_name: string | null
+          event_type: string | null
           exit_page: string | null
-          session_duration: number | null
-          page_view_count: number | null
+          experiment_id: string | null
+          id: string
+          ip_hash: string | null
           is_bounce: boolean | null
           is_returning: boolean | null
+          landing_page: string | null
           language: string | null
-          timezone_offset: number | null
-          connection_type: string | null
-          // Performance
+          os: string | null
           page_load_time: number | null
-          dom_ready_time: number | null
-          // Conversion tracking
-          conversion_value: number | null
-          conversion_currency: string | null
-          // A/B testing
-          experiment_id: string | null
-          variant_id: string | null
-          // Gamification
-          xp_earned: number | null
+          page_title: string | null
+          page_url: string | null
+          page_view_count: number | null
+          properties: Json | null
+          referrer: string | null
+          region: string | null
+          screen_height: number | null
+          screen_size: string | null
+          screen_width: number | null
+          scroll_depth: number | null
+          search_query: string | null
+          session_duration: number | null
+          session_id: string | null
           streak_day: number | null
-          // Timestamps
+          time_spent: number | null
           timestamp: string
-          created_at: string | null
+          timezone_offset: number | null
+          user_agent: string | null
+          user_id: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+          variant_id: string | null
+          viewport_height: number | null
+          viewport_size: string | null
+          viewport_width: number | null
+          xp_earned: number | null
         }
         Insert: {
-          id?: string
-          user_id?: string | null
-          session_id: string
-          event_name?: string | null
-          event_type?: string | null
-          event_category?: string | null
-          properties?: Json | null
-          page_url: string
-          page_title?: string | null
-          referrer?: string | null
-          user_agent?: string | null
-          ip_hash?: string | null
-          device_type?: string | null
           browser?: string | null
-          os?: string | null
-          screen_width?: number | null
-          screen_height?: number | null
-          viewport_width?: number | null
-          viewport_height?: number | null
-          screen_size?: string | null
-          viewport_size?: string | null
+          city?: string | null
+          click_x?: number | null
+          click_y?: number | null
+          connection_type?: string | null
+          conversion_currency?: string | null
+          conversion_value?: number | null
+          country_code?: string | null
+          created_at?: string | null
+          device_type?: string | null
           document_name?: string | null
+          dom_ready_time?: number | null
           element_id?: string | null
+          element_selector?: string | null
           element_text?: string | null
           element_type?: string | null
-          scroll_depth?: number | null
-          search_query?: string | null
-          time_spent?: number | null
-          country_code?: string | null
-          region?: string | null
-          city?: string | null
-          utm_source?: string | null
-          utm_medium?: string | null
-          utm_campaign?: string | null
-          utm_term?: string | null
-          utm_content?: string | null
-          landing_page?: string | null
+          event_category?: string | null
+          event_name?: string | null
+          event_type?: string | null
           exit_page?: string | null
-          session_duration?: number | null
-          page_view_count?: number | null
+          experiment_id?: string | null
+          id?: string
+          ip_hash?: string | null
           is_bounce?: boolean | null
           is_returning?: boolean | null
+          landing_page?: string | null
           language?: string | null
-          timezone_offset?: number | null
-          connection_type?: string | null
+          os?: string | null
           page_load_time?: number | null
-          dom_ready_time?: number | null
-          conversion_value?: number | null
-          conversion_currency?: string | null
-          experiment_id?: string | null
-          variant_id?: string | null
-          xp_earned?: number | null
+          page_title?: string | null
+          page_url?: string | null
+          page_view_count?: number | null
+          properties?: Json | null
+          referrer?: string | null
+          region?: string | null
+          screen_height?: number | null
+          screen_size?: string | null
+          screen_width?: number | null
+          scroll_depth?: number | null
+          search_query?: string | null
+          session_duration?: number | null
+          session_id?: string | null
           streak_day?: number | null
-          timestamp: string
-          created_at?: string | null
+          time_spent?: number | null
+          timestamp?: string
+          timezone_offset?: number | null
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          variant_id?: string | null
+          viewport_height?: number | null
+          viewport_size?: string | null
+          viewport_width?: number | null
+          xp_earned?: number | null
         }
         Update: {
-          id?: string
-          user_id?: string | null
-          session_id?: string
-          event_name?: string | null
-          event_type?: string | null
-          event_category?: string | null
-          properties?: Json | null
-          page_url?: string
-          page_title?: string | null
-          referrer?: string | null
-          user_agent?: string | null
-          ip_hash?: string | null
-          device_type?: string | null
           browser?: string | null
-          os?: string | null
-          screen_width?: number | null
-          screen_height?: number | null
-          viewport_width?: number | null
-          viewport_height?: number | null
-          screen_size?: string | null
-          viewport_size?: string | null
+          city?: string | null
+          click_x?: number | null
+          click_y?: number | null
+          connection_type?: string | null
+          conversion_currency?: string | null
+          conversion_value?: number | null
+          country_code?: string | null
+          created_at?: string | null
+          device_type?: string | null
           document_name?: string | null
+          dom_ready_time?: number | null
           element_id?: string | null
+          element_selector?: string | null
           element_text?: string | null
           element_type?: string | null
-          scroll_depth?: number | null
-          search_query?: string | null
-          time_spent?: number | null
-          country_code?: string | null
-          region?: string | null
-          city?: string | null
-          utm_source?: string | null
-          utm_medium?: string | null
-          utm_campaign?: string | null
-          utm_term?: string | null
-          utm_content?: string | null
-          landing_page?: string | null
+          event_category?: string | null
+          event_name?: string | null
+          event_type?: string | null
           exit_page?: string | null
-          session_duration?: number | null
-          page_view_count?: number | null
+          experiment_id?: string | null
+          id?: string
+          ip_hash?: string | null
           is_bounce?: boolean | null
           is_returning?: boolean | null
+          landing_page?: string | null
           language?: string | null
-          timezone_offset?: number | null
-          connection_type?: string | null
+          os?: string | null
           page_load_time?: number | null
-          dom_ready_time?: number | null
-          conversion_value?: number | null
-          conversion_currency?: string | null
-          experiment_id?: string | null
-          variant_id?: string | null
-          xp_earned?: number | null
+          page_title?: string | null
+          page_url?: string | null
+          page_view_count?: number | null
+          properties?: Json | null
+          referrer?: string | null
+          region?: string | null
+          screen_height?: number | null
+          screen_size?: string | null
+          screen_width?: number | null
+          scroll_depth?: number | null
+          search_query?: string | null
+          session_duration?: number | null
+          session_id?: string | null
           streak_day?: number | null
+          time_spent?: number | null
           timestamp?: string
-          created_at?: string | null
+          timezone_offset?: number | null
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          variant_id?: string | null
+          viewport_height?: number | null
+          viewport_size?: string | null
+          viewport_width?: number | null
+          xp_earned?: number | null
         }
         Relationships: []
       }
       analytics_events_daily: {
         Row: {
-          count: number
           created_at: string | null
           date: string
           event_category: string
+          event_count: number
           event_name: string
           id: string
           properties_summary: Json | null
           unique_users: number | null
+          updated_at: string | null
         }
         Insert: {
-          count?: number
           created_at?: string | null
           date: string
           event_category: string
+          event_count?: number
           event_name: string
           id?: string
           properties_summary?: Json | null
           unique_users?: number | null
+          updated_at?: string | null
         }
         Update: {
-          count?: number
           created_at?: string | null
           date?: string
           event_category?: string
+          event_count?: number
           event_name?: string
           id?: string
           properties_summary?: Json | null
           unique_users?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      analytics_heatmap_config: {
+        Row: {
+          click_count: number | null
+          created_at: string | null
+          description: string | null
+          enabled: boolean | null
+          id: string
+          last_click_at: string | null
+          page_pattern: string
+          updated_at: string | null
+        }
+        Insert: {
+          click_count?: number | null
+          created_at?: string | null
+          description?: string | null
+          enabled?: boolean | null
+          id?: string
+          last_click_at?: string | null
+          page_pattern: string
+          updated_at?: string | null
+        }
+        Update: {
+          click_count?: number | null
+          created_at?: string | null
+          description?: string | null
+          enabled?: boolean | null
+          id?: string
+          last_click_at?: string | null
+          page_pattern?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      analytics_session_summaries: {
+        Row: {
+          conversion_intent: string | null
+          created_at: string | null
+          duration_seconds: number | null
+          generated_at: string | null
+          id: string
+          key_actions: Json | null
+          model_used: string | null
+          pages_visited: number | null
+          session_id: string
+          summary: string
+          total_events: number | null
+        }
+        Insert: {
+          conversion_intent?: string | null
+          created_at?: string | null
+          duration_seconds?: number | null
+          generated_at?: string | null
+          id?: string
+          key_actions?: Json | null
+          model_used?: string | null
+          pages_visited?: number | null
+          session_id: string
+          summary: string
+          total_events?: number | null
+        }
+        Update: {
+          conversion_intent?: string | null
+          created_at?: string | null
+          duration_seconds?: number | null
+          generated_at?: string | null
+          id?: string
+          key_actions?: Json | null
+          model_used?: string | null
+          pages_visited?: number | null
+          session_id?: string
+          summary?: string
+          total_events?: number | null
         }
         Relationships: []
       }
@@ -887,6 +976,75 @@ export type Database = {
         }
         Relationships: []
       }
+      article_reading_progress: {
+        Row: {
+          article_category: string | null
+          article_slug: string
+          article_title: string | null
+          completed_at: string | null
+          completion_threshold: number | null
+          estimated_read_time: number | null
+          first_visited_at: string
+          highlights_count: number | null
+          id: string
+          is_completed: boolean | null
+          last_visited_at: string
+          notes_count: number | null
+          scroll_depth: number | null
+          sections_viewed: string[] | null
+          time_spent_seconds: number | null
+          user_id: string
+          visit_count: number | null
+          word_count: number | null
+          xp_award_breakdown: Json | null
+          xp_awarded: number | null
+        }
+        Insert: {
+          article_category?: string | null
+          article_slug: string
+          article_title?: string | null
+          completed_at?: string | null
+          completion_threshold?: number | null
+          estimated_read_time?: number | null
+          first_visited_at?: string
+          highlights_count?: number | null
+          id?: string
+          is_completed?: boolean | null
+          last_visited_at?: string
+          notes_count?: number | null
+          scroll_depth?: number | null
+          sections_viewed?: string[] | null
+          time_spent_seconds?: number | null
+          user_id: string
+          visit_count?: number | null
+          word_count?: number | null
+          xp_award_breakdown?: Json | null
+          xp_awarded?: number | null
+        }
+        Update: {
+          article_category?: string | null
+          article_slug?: string
+          article_title?: string | null
+          completed_at?: string | null
+          completion_threshold?: number | null
+          estimated_read_time?: number | null
+          first_visited_at?: string
+          highlights_count?: number | null
+          id?: string
+          is_completed?: boolean | null
+          last_visited_at?: string
+          notes_count?: number | null
+          scroll_depth?: number | null
+          sections_viewed?: string[] | null
+          time_spent_seconds?: number | null
+          user_id?: string
+          visit_count?: number | null
+          word_count?: number | null
+          xp_award_breakdown?: Json | null
+          xp_awarded?: number | null
+        }
+        Relationships: []
+      }
       article_views: {
         Row: {
           article_id: string | null
@@ -965,12 +1123,17 @@ export type Database = {
         Row: {
           action: string | null
           created_at: string | null
+          endpoint: string | null
+          error_code: string | null
           error_message: string | null
           event_type: string
           id: string
           ip_address: string | null
           metadata: Json | null
+          method: string | null
           resource: string | null
+          resource_id: string | null
+          resource_type: string | null
           result: string | null
           session_id: string | null
           severity: string
@@ -978,16 +1141,22 @@ export type Database = {
           user_agent: string | null
           user_email: string | null
           user_id: string | null
+          user_role: string | null
         }
         Insert: {
           action?: string | null
           created_at?: string | null
+          endpoint?: string | null
+          error_code?: string | null
           error_message?: string | null
           event_type: string
           id?: string
           ip_address?: string | null
           metadata?: Json | null
+          method?: string | null
           resource?: string | null
+          resource_id?: string | null
+          resource_type?: string | null
           result?: string | null
           session_id?: string | null
           severity: string
@@ -995,16 +1164,22 @@ export type Database = {
           user_agent?: string | null
           user_email?: string | null
           user_id?: string | null
+          user_role?: string | null
         }
         Update: {
           action?: string | null
           created_at?: string | null
+          endpoint?: string | null
+          error_code?: string | null
           error_message?: string | null
           event_type?: string
           id?: string
           ip_address?: string | null
           metadata?: Json | null
+          method?: string | null
           resource?: string | null
+          resource_id?: string | null
+          resource_type?: string | null
           result?: string | null
           session_id?: string | null
           severity?: string
@@ -1012,6 +1187,7 @@ export type Database = {
           user_agent?: string | null
           user_email?: string | null
           user_id?: string | null
+          user_role?: string | null
         }
         Relationships: []
       }
@@ -1339,6 +1515,74 @@ export type Database = {
           work_start_time?: string | null
         }
         Relationships: []
+      }
+      availability_slots: {
+        Row: {
+          blocked_by_booking: boolean
+          blocked_by_calendar: boolean
+          booking_id: string | null
+          created_at: string
+          duration_minutes: number
+          end_time: string
+          generation_date: string
+          generation_method: string
+          google_event_id: string | null
+          google_event_summary: string | null
+          id: string
+          is_available: boolean
+          last_synced_at: string | null
+          slot_date: string
+          slot_priority: number | null
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          blocked_by_booking?: boolean
+          blocked_by_calendar?: boolean
+          booking_id?: string | null
+          created_at?: string
+          duration_minutes: number
+          end_time: string
+          generation_date?: string
+          generation_method?: string
+          google_event_id?: string | null
+          google_event_summary?: string | null
+          id?: string
+          is_available?: boolean
+          last_synced_at?: string | null
+          slot_date: string
+          slot_priority?: number | null
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          blocked_by_booking?: boolean
+          blocked_by_calendar?: boolean
+          booking_id?: string | null
+          created_at?: string
+          duration_minutes?: number
+          end_time?: string
+          generation_date?: string
+          generation_method?: string
+          google_event_id?: string | null
+          google_event_summary?: string | null
+          id?: string
+          is_available?: boolean
+          last_synced_at?: string | null
+          slot_date?: string
+          slot_priority?: number | null
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_slots_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "advanced_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       bailey_conversations: {
         Row: {
@@ -1678,6 +1922,54 @@ export type Database = {
         }
         Relationships: []
       }
+      calendar_sync_state: {
+        Row: {
+          calendar_email: string
+          consecutive_errors: number
+          created_at: string
+          events_synced_count: number
+          id: string
+          is_healthy: boolean
+          last_error: string | null
+          last_error_at: string | null
+          last_sync_at: string | null
+          next_sync_at: string | null
+          slots_blocked_count: number
+          sync_interval_minutes: number
+          updated_at: string
+        }
+        Insert: {
+          calendar_email: string
+          consecutive_errors?: number
+          created_at?: string
+          events_synced_count?: number
+          id?: string
+          is_healthy?: boolean
+          last_error?: string | null
+          last_error_at?: string | null
+          last_sync_at?: string | null
+          next_sync_at?: string | null
+          slots_blocked_count?: number
+          sync_interval_minutes?: number
+          updated_at?: string
+        }
+        Update: {
+          calendar_email?: string
+          consecutive_errors?: number
+          created_at?: string
+          events_synced_count?: number
+          id?: string
+          is_healthy?: boolean
+          last_error?: string | null
+          last_error_at?: string | null
+          last_sync_at?: string | null
+          next_sync_at?: string | null
+          slots_blocked_count?: number
+          sync_interval_minutes?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       call_logs: {
         Row: {
           answered_by: string | null
@@ -1815,6 +2107,96 @@ export type Database = {
           },
         ]
       }
+      challenges: {
+        Row: {
+          achievement_id: string | null
+          badge_image_url: string | null
+          bonus_reward_type: string | null
+          bonus_reward_value: string | null
+          colour: string | null
+          created_at: string
+          created_by: string | null
+          current_completions: number | null
+          description: string
+          difficulty: string | null
+          end_date: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          is_featured: boolean | null
+          max_completions: number | null
+          max_level: number | null
+          min_level: number | null
+          recurrence_rule: string | null
+          required_achievement_ids: string[] | null
+          requirements: Json
+          short_description: string | null
+          start_date: string | null
+          title: string
+          type: string
+          updated_at: string
+          xp_reward: number
+        }
+        Insert: {
+          achievement_id?: string | null
+          badge_image_url?: string | null
+          bonus_reward_type?: string | null
+          bonus_reward_value?: string | null
+          colour?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_completions?: number | null
+          description: string
+          difficulty?: string | null
+          end_date?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          max_completions?: number | null
+          max_level?: number | null
+          min_level?: number | null
+          recurrence_rule?: string | null
+          required_achievement_ids?: string[] | null
+          requirements?: Json
+          short_description?: string | null
+          start_date?: string | null
+          title: string
+          type: string
+          updated_at?: string
+          xp_reward?: number
+        }
+        Update: {
+          achievement_id?: string | null
+          badge_image_url?: string | null
+          bonus_reward_type?: string | null
+          bonus_reward_value?: string | null
+          colour?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_completions?: number | null
+          description?: string
+          difficulty?: string | null
+          end_date?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          max_completions?: number | null
+          max_level?: number | null
+          min_level?: number | null
+          recurrence_rule?: string | null
+          required_achievement_ids?: string[] | null
+          requirements?: Json
+          short_description?: string | null
+          start_date?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       chat_conversations: {
         Row: {
           completed_at: string | null
@@ -1908,6 +2290,7 @@ export type Database = {
         Row: {
           access_count: number | null
           archived_at: string | null
+          booking_id: string | null
           category: Database["public"]["Enums"]["document_category"] | null
           client_email: string
           created_at: string | null
@@ -1920,14 +2303,23 @@ export type Database = {
           is_archived: boolean | null
           last_accessed_at: string | null
           metadata: Json | null
+          mime_type: string | null
           notes: string | null
+          original_name: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          storage_path: string | null
           tags: string[] | null
           updated_at: string | null
           uploaded_at: string | null
+          user_email: string | null
+          user_id: string | null
         }
         Insert: {
           access_count?: number | null
           archived_at?: string | null
+          booking_id?: string | null
           category?: Database["public"]["Enums"]["document_category"] | null
           client_email: string
           created_at?: string | null
@@ -1940,14 +2332,23 @@ export type Database = {
           is_archived?: boolean | null
           last_accessed_at?: string | null
           metadata?: Json | null
+          mime_type?: string | null
           notes?: string | null
+          original_name?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          storage_path?: string | null
           tags?: string[] | null
           updated_at?: string | null
           uploaded_at?: string | null
+          user_email?: string | null
+          user_id?: string | null
         }
         Update: {
           access_count?: number | null
           archived_at?: string | null
+          booking_id?: string | null
           category?: Database["public"]["Enums"]["document_category"] | null
           client_email?: string
           created_at?: string | null
@@ -1960,10 +2361,18 @@ export type Database = {
           is_archived?: boolean | null
           last_accessed_at?: string | null
           metadata?: Json | null
+          mime_type?: string | null
           notes?: string | null
+          original_name?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          storage_path?: string | null
           tags?: string[] | null
           updated_at?: string | null
           uploaded_at?: string | null
+          user_email?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -4210,6 +4619,87 @@ export type Database = {
           },
         ]
       }
+      gamification_notifications: {
+        Row: {
+          achievement_id: string | null
+          animation_type: string | null
+          bonus_multiplier: number | null
+          challenge_id: string | null
+          colour: string | null
+          created_at: string
+          current_value: number | null
+          dismissed_at: string | null
+          display_priority: number | null
+          expires_at: string | null
+          gap_amount: number | null
+          icon: string | null
+          id: string
+          is_dismissed: boolean | null
+          is_read: boolean | null
+          leaderboard_period: string | null
+          message: string | null
+          read_at: string | null
+          reward_tier: string | null
+          target_value: number | null
+          title: string
+          type: string
+          user_id: string
+          xp_amount: number | null
+        }
+        Insert: {
+          achievement_id?: string | null
+          animation_type?: string | null
+          bonus_multiplier?: number | null
+          challenge_id?: string | null
+          colour?: string | null
+          created_at?: string
+          current_value?: number | null
+          dismissed_at?: string | null
+          display_priority?: number | null
+          expires_at?: string | null
+          gap_amount?: number | null
+          icon?: string | null
+          id?: string
+          is_dismissed?: boolean | null
+          is_read?: boolean | null
+          leaderboard_period?: string | null
+          message?: string | null
+          read_at?: string | null
+          reward_tier?: string | null
+          target_value?: number | null
+          title: string
+          type: string
+          user_id: string
+          xp_amount?: number | null
+        }
+        Update: {
+          achievement_id?: string | null
+          animation_type?: string | null
+          bonus_multiplier?: number | null
+          challenge_id?: string | null
+          colour?: string | null
+          created_at?: string
+          current_value?: number | null
+          dismissed_at?: string | null
+          display_priority?: number | null
+          expires_at?: string | null
+          gap_amount?: number | null
+          icon?: string | null
+          id?: string
+          is_dismissed?: boolean | null
+          is_read?: boolean | null
+          leaderboard_period?: string | null
+          message?: string | null
+          read_at?: string | null
+          reward_tier?: string | null
+          target_value?: number | null
+          title?: string
+          type?: string
+          user_id?: string
+          xp_amount?: number | null
+        }
+        Relationships: []
+      }
       gdpr_audit_log: {
         Row: {
           action: string
@@ -5162,6 +5652,69 @@ export type Database = {
           },
         ]
       }
+      leaderboard_snapshots: {
+        Row: {
+          achievements_count: number | null
+          avatar_url: string | null
+          challenges_completed: number | null
+          computed_at: string
+          display_name: string | null
+          id: string
+          is_visible: boolean | null
+          level: number | null
+          period_end: string
+          period_start: string
+          period_type: string
+          previous_rank: number | null
+          rank: number
+          rank_change: number | null
+          streak_days: number | null
+          user_id: string
+          xp_earned_in_period: number
+          xp_total: number
+        }
+        Insert: {
+          achievements_count?: number | null
+          avatar_url?: string | null
+          challenges_completed?: number | null
+          computed_at?: string
+          display_name?: string | null
+          id?: string
+          is_visible?: boolean | null
+          level?: number | null
+          period_end: string
+          period_start: string
+          period_type: string
+          previous_rank?: number | null
+          rank: number
+          rank_change?: number | null
+          streak_days?: number | null
+          user_id: string
+          xp_earned_in_period?: number
+          xp_total?: number
+        }
+        Update: {
+          achievements_count?: number | null
+          avatar_url?: string | null
+          challenges_completed?: number | null
+          computed_at?: string
+          display_name?: string | null
+          id?: string
+          is_visible?: boolean | null
+          level?: number | null
+          period_end?: string
+          period_start?: string
+          period_type?: string
+          previous_rank?: number | null
+          rank?: number
+          rank_change?: number | null
+          streak_days?: number | null
+          user_id?: string
+          xp_earned_in_period?: number
+          xp_total?: number
+        }
+        Relationships: []
+      }
       legal_documents: {
         Row: {
           areas: string[]
@@ -5228,7 +5781,7 @@ export type Database = {
           category: string | null
           created_at: string | null
           description: string | null
-          id: string | null
+          id: string
           jurisdictions: string[] | null
           preview_content: string | null
           price: number | null
@@ -5241,7 +5794,7 @@ export type Database = {
           category?: string | null
           created_at?: string | null
           description?: string | null
-          id?: string | null
+          id: string
           jurisdictions?: string[] | null
           preview_content?: string | null
           price?: number | null
@@ -5254,7 +5807,7 @@ export type Database = {
           category?: string | null
           created_at?: string | null
           description?: string | null
-          id?: string | null
+          id?: string
           jurisdictions?: string[] | null
           preview_content?: string | null
           price?: number | null
@@ -5840,6 +6393,45 @@ export type Database = {
         }
         Relationships: []
       }
+      newsletter_subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          metadata: Json | null
+          name: string | null
+          source: string | null
+          status: string
+          subscribed_at: string
+          unsubscribed_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          metadata?: Json | null
+          name?: string | null
+          source?: string | null
+          status?: string
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          metadata?: Json | null
+          name?: string | null
+          source?: string | null
+          status?: string
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string | null
@@ -6366,6 +6958,138 @@ export type Database = {
           },
         ]
       }
+      referral_stats: {
+        Row: {
+          best_month_referrals: number | null
+          current_month_referrals: number | null
+          id: string
+          last_referral_at: string | null
+          milestones_reached: number[] | null
+          pending_referrals: number | null
+          successful_referrals: number | null
+          total_commission_earned: number | null
+          total_commission_paid: number | null
+          total_referrals: number | null
+          total_xp_earned: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          best_month_referrals?: number | null
+          current_month_referrals?: number | null
+          id?: string
+          last_referral_at?: string | null
+          milestones_reached?: number[] | null
+          pending_referrals?: number | null
+          successful_referrals?: number | null
+          total_commission_earned?: number | null
+          total_commission_paid?: number | null
+          total_referrals?: number | null
+          total_xp_earned?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          best_month_referrals?: number | null
+          current_month_referrals?: number | null
+          id?: string
+          last_referral_at?: string | null
+          milestones_reached?: number[] | null
+          pending_referrals?: number | null
+          successful_referrals?: number | null
+          total_commission_earned?: number | null
+          total_commission_paid?: number | null
+          total_referrals?: number | null
+          total_xp_earned?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          click_count: number | null
+          clicked_at: string | null
+          commission_amount: number | null
+          commission_paid: boolean | null
+          commission_paid_at: string | null
+          commission_rate: number | null
+          conversion_type: string | null
+          conversion_value: number | null
+          converted_at: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          landing_page: string | null
+          last_clicked_at: string | null
+          referral_code: string
+          referred_bonus: string | null
+          referred_email: string | null
+          referred_user_id: string | null
+          referrer_bonus_reward: string | null
+          referrer_id: string
+          referrer_xp_reward: number | null
+          signed_up_at: string | null
+          status: string | null
+          utm_campaign: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          click_count?: number | null
+          clicked_at?: string | null
+          commission_amount?: number | null
+          commission_paid?: boolean | null
+          commission_paid_at?: string | null
+          commission_rate?: number | null
+          conversion_type?: string | null
+          conversion_value?: number | null
+          converted_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          landing_page?: string | null
+          last_clicked_at?: string | null
+          referral_code: string
+          referred_bonus?: string | null
+          referred_email?: string | null
+          referred_user_id?: string | null
+          referrer_bonus_reward?: string | null
+          referrer_id: string
+          referrer_xp_reward?: number | null
+          signed_up_at?: string | null
+          status?: string | null
+          utm_campaign?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          click_count?: number | null
+          clicked_at?: string | null
+          commission_amount?: number | null
+          commission_paid?: boolean | null
+          commission_paid_at?: string | null
+          commission_rate?: number | null
+          conversion_type?: string | null
+          conversion_value?: number | null
+          converted_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          landing_page?: string | null
+          last_clicked_at?: string | null
+          referral_code?: string
+          referred_bonus?: string | null
+          referred_email?: string | null
+          referred_user_id?: string | null
+          referrer_bonus_reward?: string | null
+          referrer_id?: string
+          referrer_xp_reward?: number | null
+          signed_up_at?: string | null
+          status?: string | null
+          utm_campaign?: string | null
+          utm_source?: string | null
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           comment: string | null
@@ -6774,6 +7498,45 @@ export type Database = {
         }
         Relationships: []
       }
+      social_proof_aggregates: {
+        Row: {
+          action_verb: string | null
+          computed_at: string
+          country_breakdown: Json | null
+          event_count: number
+          event_type: string
+          id: string
+          message_template: string | null
+          period_start: string
+          period_type: string | null
+          unique_users: number
+        }
+        Insert: {
+          action_verb?: string | null
+          computed_at?: string
+          country_breakdown?: Json | null
+          event_count?: number
+          event_type: string
+          id?: string
+          message_template?: string | null
+          period_start: string
+          period_type?: string | null
+          unique_users?: number
+        }
+        Update: {
+          action_verb?: string | null
+          computed_at?: string
+          country_breakdown?: Json | null
+          event_count?: number
+          event_type?: string
+          id?: string
+          message_template?: string | null
+          period_start?: string
+          period_type?: string | null
+          unique_users?: number
+        }
+        Relationships: []
+      }
       staff_members: {
         Row: {
           active: boolean | null
@@ -6940,6 +7703,81 @@ export type Database = {
           role?: string | null
           two_factor_enabled?: boolean
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      streak_events: {
+        Row: {
+          created_at: string
+          event_date: string
+          event_type: string
+          freeze_reason: string | null
+          freeze_token_change: number | null
+          id: string
+          streak_day: number | null
+          streak_multiplier: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_date?: string
+          event_type: string
+          freeze_reason?: string | null
+          freeze_token_change?: number | null
+          id?: string
+          streak_day?: number | null
+          streak_multiplier?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_date?: string
+          event_type?: string
+          freeze_reason?: string | null
+          freeze_token_change?: number | null
+          id?: string
+          streak_day?: number | null
+          streak_multiplier?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      streak_freeze_tokens: {
+        Row: {
+          auto_use_enabled: boolean | null
+          created_at: string
+          id: string
+          last_earned_at: string | null
+          last_used_at: string | null
+          tokens_available: number
+          tokens_earned_total: number
+          tokens_used: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_use_enabled?: boolean | null
+          created_at?: string
+          id?: string
+          last_earned_at?: string | null
+          last_used_at?: string | null
+          tokens_available?: number
+          tokens_earned_total?: number
+          tokens_used?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_use_enabled?: boolean | null
+          created_at?: string
+          id?: string
+          last_earned_at?: string | null
+          last_used_at?: string | null
+          tokens_available?: number
+          tokens_earned_total?: number
+          tokens_used?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -7811,6 +8649,62 @@ export type Database = {
         }
         Relationships: []
       }
+      user_challenge_progress: {
+        Row: {
+          bonus_claimed: boolean | null
+          challenge_id: string
+          completed_at: string | null
+          expires_at: string | null
+          id: string
+          progress: number
+          progress_details: Json | null
+          progress_percentage: number | null
+          started_at: string
+          status: string | null
+          target: number
+          user_id: string
+          xp_claimed: number | null
+        }
+        Insert: {
+          bonus_claimed?: boolean | null
+          challenge_id: string
+          completed_at?: string | null
+          expires_at?: string | null
+          id?: string
+          progress?: number
+          progress_details?: Json | null
+          progress_percentage?: number | null
+          started_at?: string
+          status?: string | null
+          target: number
+          user_id: string
+          xp_claimed?: number | null
+        }
+        Update: {
+          bonus_claimed?: boolean | null
+          challenge_id?: string
+          completed_at?: string | null
+          expires_at?: string | null
+          id?: string
+          progress?: number
+          progress_details?: Json | null
+          progress_percentage?: number | null
+          started_at?: string
+          status?: string | null
+          target?: number
+          user_id?: string
+          xp_claimed?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_challenge_progress_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_conditions: {
         Row: {
           condition: string
@@ -7917,6 +8811,72 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_privacy_settings: {
+        Row: {
+          allow_activity_analytics: boolean | null
+          allow_personalisation: boolean | null
+          anonymous_mode: boolean | null
+          created_at: string
+          hide_activity_from_connections: boolean | null
+          hide_from_employer_search: boolean | null
+          id: string
+          include_in_social_proof: boolean | null
+          include_in_testimonials: boolean | null
+          leaderboard_display_name: string | null
+          show_achievements_publicly: boolean | null
+          show_activity_status: boolean | null
+          show_level_publicly: boolean | null
+          show_on_leaderboard: boolean | null
+          show_recent_activity: boolean | null
+          show_streak_publicly: boolean | null
+          show_xp_publicly: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          allow_activity_analytics?: boolean | null
+          allow_personalisation?: boolean | null
+          anonymous_mode?: boolean | null
+          created_at?: string
+          hide_activity_from_connections?: boolean | null
+          hide_from_employer_search?: boolean | null
+          id?: string
+          include_in_social_proof?: boolean | null
+          include_in_testimonials?: boolean | null
+          leaderboard_display_name?: string | null
+          show_achievements_publicly?: boolean | null
+          show_activity_status?: boolean | null
+          show_level_publicly?: boolean | null
+          show_on_leaderboard?: boolean | null
+          show_recent_activity?: boolean | null
+          show_streak_publicly?: boolean | null
+          show_xp_publicly?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          allow_activity_analytics?: boolean | null
+          allow_personalisation?: boolean | null
+          anonymous_mode?: boolean | null
+          created_at?: string
+          hide_activity_from_connections?: boolean | null
+          hide_from_employer_search?: boolean | null
+          id?: string
+          include_in_social_proof?: boolean | null
+          include_in_testimonials?: boolean | null
+          leaderboard_display_name?: string | null
+          show_achievements_publicly?: boolean | null
+          show_activity_status?: boolean | null
+          show_level_publicly?: boolean | null
+          show_on_leaderboard?: boolean | null
+          show_recent_activity?: boolean | null
+          show_streak_publicly?: boolean | null
+          show_xp_publicly?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_profiles: {
         Row: {
@@ -8322,6 +9282,36 @@ export type Database = {
           },
         ]
       }
+      webhook_events: {
+        Row: {
+          event_id: string
+          event_type: string
+          id: string
+          metadata: Json | null
+          processed_at: string
+          provider: string
+          status: string
+        }
+        Insert: {
+          event_id: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          processed_at?: string
+          provider: string
+          status?: string
+        }
+        Update: {
+          event_id?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          processed_at?: string
+          provider?: string
+          status?: string
+        }
+        Relationships: []
+      }
       webhooks: {
         Row: {
           created_at: string | null
@@ -8443,6 +9433,20 @@ export type Database = {
       }
     }
     Views: {
+      analytics_summary: {
+        Row: {
+          conversions: number | null
+          date: string | null
+          desktop_events: number | null
+          mobile_events: number | null
+          tablet_events: number | null
+          total_events: number | null
+          total_revenue: number | null
+          unique_sessions: number | null
+          unique_users: number | null
+        }
+        Relationships: []
+      }
       chat_analytics_summary: {
         Row: {
           abandoned_conversations: number | null
@@ -8454,6 +9458,30 @@ export type Database = {
           hot_leads: number | null
           total_conversations: number | null
           warm_leads: number | null
+        }
+        Relationships: []
+      }
+      current_leaderboards: {
+        Row: {
+          achievements_count: number | null
+          avatar_url: string | null
+          challenges_completed: number | null
+          computed_at: string | null
+          display_name: string | null
+          id: string | null
+          is_visible: boolean | null
+          level: number | null
+          period_end: string | null
+          period_start: string | null
+          period_type: string | null
+          previous_rank: number | null
+          rank: number | null
+          rank_change: number | null
+          rank_direction: string | null
+          streak_days: number | null
+          user_id: string | null
+          xp_earned_in_period: number | null
+          xp_total: number | null
         }
         Relationships: []
       }
@@ -8532,6 +9560,23 @@ export type Database = {
       aggregate_xp_daily: { Args: { p_date: string }; Returns: undefined }
       archive_expired_documents: { Args: never; Returns: number }
       archive_old_documents: { Args: never; Returns: number }
+      award_streak_freeze_token: {
+        Args: { p_reason?: string; p_user_id: string }
+        Returns: number
+      }
+      award_xp_with_notification: {
+        Args: {
+          p_amount: number
+          p_description?: string
+          p_source: string
+          p_user_id: string
+        }
+        Returns: number
+      }
+      block_slot_for_booking: {
+        Args: { p_booking_id: string; p_slot_id: string }
+        Returns: boolean
+      }
       calculate_retention_expiry: {
         Args: { completion_date: string }
         Returns: string
@@ -8546,9 +9591,25 @@ export type Database = {
       }
       check_court_event_reminders: { Args: never; Returns: undefined }
       check_document_limit: { Args: { p_tenant_id: string }; Returns: Json }
+      check_slot_overlap: {
+        Args: {
+          p_end_time: string
+          p_exclude_id?: string
+          p_slot_date: string
+          p_start_time: string
+        }
+        Returns: boolean
+      }
       check_user_role: { Args: { required_roles: string[] }; Returns: boolean }
       cleanup_expired_2fa_codes: { Args: never; Returns: undefined }
-      cleanup_old_audit_logs: { Args: never; Returns: undefined }
+      cleanup_old_audit_logs:
+        | { Args: never; Returns: undefined }
+        | { Args: { days_to_keep?: number }; Returns: number }
+      cleanup_old_availability_slots: { Args: never; Returns: number }
+      cleanup_old_webhook_events: {
+        Args: { days_to_keep?: number }
+        Returns: number
+      }
       cleanup_stale_presence: { Args: never; Returns: undefined }
       cleanup_stale_presence_rpc: {
         Args: never
@@ -8557,6 +9618,7 @@ export type Database = {
           execution_time_ms: number
         }[]
       }
+      count_slots_for_date: { Args: { p_date: string }; Returns: number }
       create_document_version: {
         Args: {
           change_desc: string
@@ -8567,14 +9629,57 @@ export type Database = {
         }
         Returns: string
       }
+      create_gamification_notification: {
+        Args: {
+          p_achievement_id?: string
+          p_animation_type?: string
+          p_bonus_multiplier?: number
+          p_challenge_id?: string
+          p_current_value?: number
+          p_icon?: string
+          p_message?: string
+          p_reward_tier?: string
+          p_target_value?: number
+          p_title: string
+          p_type: string
+          p_user_id: string
+          p_xp_amount?: number
+        }
+        Returns: string
+      }
       create_user_session: {
         Args: { p_ip_address?: unknown; p_user_agent?: string }
         Returns: string
       }
       delete_expired_documents: { Args: never; Returns: undefined }
+      enrol_in_challenge: {
+        Args: { p_challenge_id: string; p_user_id: string }
+        Returns: {
+          bonus_claimed: boolean | null
+          challenge_id: string
+          completed_at: string | null
+          expires_at: string | null
+          id: string
+          progress: number
+          progress_details: Json | null
+          progress_percentage: number | null
+          started_at: string
+          status: string | null
+          target: number
+          user_id: string
+          xp_claimed: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "user_challenge_progress"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       export_user_data: { Args: { user_uuid: string }; Returns: Json }
       generate_backup_codes: { Args: never; Returns: Json }
       generate_government_pin: { Args: never; Returns: string }
+      generate_referral_code: { Args: { p_user_id: string }; Returns: string }
       get_annotation_count: {
         Args: { doc_id: string }
         Returns: {
@@ -8586,10 +9691,158 @@ export type Database = {
         }[]
       }
       get_document_page_count: { Args: { doc_id: string }; Returns: number }
+      get_funnel_analysis: {
+        Args: { p_end_date?: string; p_start_date?: string }
+        Returns: {
+          conversion_rate: number
+          event_count: number
+          stage_name: string
+          stage_order: number
+          unique_users: number
+        }[]
+      }
+      get_heatmap_data: {
+        Args: { p_days?: number; p_page_pattern: string }
+        Returns: {
+          click_count: number
+          click_x: number
+          click_y: number
+          element_selector: string
+          viewport_width: number
+        }[]
+      }
+      get_leaderboard: {
+        Args: {
+          p_include_user_rank?: string
+          p_limit?: number
+          p_offset?: number
+          p_period_type?: string
+        }
+        Returns: {
+          achievements_count: number
+          avatar_url: string
+          display_name: string
+          is_current_user: boolean
+          level: number
+          rank: number
+          rank_change: number
+          rank_direction: string
+          streak_days: number
+          user_id: string
+          xp_earned_in_period: number
+          xp_total: number
+        }[]
+      }
+      get_leaderboard_data: {
+        Args: { p_period_end: string; p_period_start: string }
+        Returns: {
+          achievements_count: number
+          avatar_url: string
+          display_name: string
+          level: number
+          period_xp: number
+          show_on_leaderboard: boolean
+          streak_days: number
+          total_xp: number
+          user_id: string
+        }[]
+      }
       get_medical_scraper_stats: { Args: never; Returns: Json }
       get_or_create_conversation: {
         Args: { tenant_id_param: string; user1_id: string; user2_id: string }
         Returns: string
+      }
+      get_or_create_privacy_settings: {
+        Args: { p_user_id: string }
+        Returns: {
+          allow_activity_analytics: boolean | null
+          allow_personalisation: boolean | null
+          anonymous_mode: boolean | null
+          created_at: string
+          hide_activity_from_connections: boolean | null
+          hide_from_employer_search: boolean | null
+          id: string
+          include_in_social_proof: boolean | null
+          include_in_testimonials: boolean | null
+          leaderboard_display_name: string | null
+          show_achievements_publicly: boolean | null
+          show_activity_status: boolean | null
+          show_level_publicly: boolean | null
+          show_on_leaderboard: boolean | null
+          show_recent_activity: boolean | null
+          show_streak_publicly: boolean | null
+          show_xp_publicly: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "user_privacy_settings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      get_reading_stats: {
+        Args: { p_user_id: string }
+        Returns: {
+          articles_completed: number
+          articles_started: number
+          completion_rate: number
+          favourite_category: string
+          total_time_minutes: number
+          total_xp_earned: number
+        }[]
+      }
+      get_realtime_visitors: {
+        Args: { p_minutes?: number }
+        Returns: {
+          country_code: string
+          current_page: string
+          device_type: string
+          last_activity: string
+          pages_viewed: number
+          session_id: string
+          started_at: string
+        }[]
+      }
+      get_session_metrics: {
+        Args: { p_session_id: string }
+        Returns: {
+          conversions: number
+          device_type: string
+          duration_seconds: number
+          entry_page: string
+          exit_page: string
+          first_event: string
+          last_event: string
+          page_views: number
+          total_events: number
+        }[]
+      }
+      get_session_stats: {
+        Args: { p_session_id: string }
+        Returns: {
+          browser: string
+          city: string
+          country_code: string
+          device_type: string
+          duration_seconds: number
+          event_count: number
+          first_event: string
+          has_conversion: boolean
+          last_event: string
+          os: string
+          page_count: number
+        }[]
+      }
+      get_social_proof_messages: {
+        Args: { p_limit?: number }
+        Returns: {
+          count: number
+          event_type: string
+          message: string
+          time_ago: string
+        }[]
       }
       get_storage_stats: {
         Args: never
@@ -8599,10 +9852,20 @@ export type Database = {
           total_size: number
         }[]
       }
-      get_unread_notification_count: {
-        Args: { p_user_email: string }
-        Returns: number
+      get_unread_notification_count:
+        | { Args: { p_user_email: string }; Returns: number }
+        | { Args: { p_user_id: string }; Returns: number }
+      get_user_ranks: {
+        Args: { p_user_id: string }
+        Returns: {
+          percentile: number
+          period_type: string
+          rank: number
+          total_participants: number
+          xp_earned: number
+        }[]
       }
+      get_user_referral_code: { Args: { p_user_id: string }; Returns: string }
       get_user_role: { Args: { user_id: string }; Returns: string }
       get_visible_facilities: {
         Args: never
@@ -8744,10 +10007,9 @@ export type Database = {
         }
         Returns: undefined
       }
-      mark_all_notifications_read: {
-        Args: { p_user_email: string }
-        Returns: number
-      }
+      mark_all_notifications_read:
+        | { Args: { p_user_email: string }; Returns: number }
+        | { Args: { p_user_id: string }; Returns: number }
       match_practitioners_facilities: {
         Args: { p_practitioner_id: string }
         Returns: {
@@ -8759,6 +10021,15 @@ export type Database = {
           match_score: number
         }[]
       }
+      process_referral_conversion: {
+        Args: {
+          p_conversion_type?: string
+          p_conversion_value?: number
+          p_referral_code: string
+          p_referred_user_id: string
+        }
+        Returns: boolean
+      }
       record_knowledge_gap: {
         Args: { p_category: string; p_intent: string; p_query: string }
         Returns: string
@@ -8769,10 +10040,77 @@ export type Database = {
         Args: { p_staff_user_id: string }
         Returns: undefined
       }
+      rollup_daily_analytics: { Args: never; Returns: undefined }
       track_document_access: { Args: { document_id: string }; Returns: number }
+      update_challenge_progress: {
+        Args: {
+          p_challenge_id: string
+          p_increment?: number
+          p_user_id: string
+        }
+        Returns: {
+          bonus_claimed: boolean | null
+          challenge_id: string
+          completed_at: string | null
+          expires_at: string | null
+          id: string
+          progress: number
+          progress_details: Json | null
+          progress_percentage: number | null
+          started_at: string
+          status: string | null
+          target: number
+          user_id: string
+          xp_claimed: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "user_challenge_progress"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       update_knowledge_usage: {
         Args: { p_item_id: string }
         Returns: undefined
+      }
+      update_reading_progress: {
+        Args: {
+          p_article_category?: string
+          p_article_slug: string
+          p_article_title?: string
+          p_scroll_depth: number
+          p_time_spent: number
+          p_user_id: string
+        }
+        Returns: {
+          article_category: string | null
+          article_slug: string
+          article_title: string | null
+          completed_at: string | null
+          completion_threshold: number | null
+          estimated_read_time: number | null
+          first_visited_at: string
+          highlights_count: number | null
+          id: string
+          is_completed: boolean | null
+          last_visited_at: string
+          notes_count: number | null
+          scroll_depth: number | null
+          sections_viewed: string[] | null
+          time_spent_seconds: number | null
+          user_id: string
+          visit_count: number | null
+          word_count: number | null
+          xp_award_breakdown: Json | null
+          xp_awarded: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "article_reading_progress"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       update_satisfaction_score: {
         Args: { p_item_id: string; p_rating: string }
@@ -8782,6 +10120,8 @@ export type Database = {
         Args: { p_new_role: string; p_user_id: string }
         Returns: undefined
       }
+      update_user_streak: { Args: { p_user_id: string }; Returns: number }
+      use_streak_freeze: { Args: { p_user_id: string }; Returns: boolean }
       validate_session: { Args: { p_session_token: string }; Returns: boolean }
       verify_backup_code: {
         Args: { p_backup_code: string; p_staff_user_id: string }

@@ -16,7 +16,8 @@ export type EventCategory =
   | "engagement"
   | "gamification"
   | "conversion"
-  | "experiment";
+  | "experiment"
+  | "interaction";
 
 export type EventName =
   // XP Events
@@ -61,7 +62,12 @@ export type EventName =
   | "referral_converted"
   // Experiment Events
   | "experiment_assigned"
-  | "experiment_conversion";
+  | "experiment_conversion"
+  // Interaction Events (for heatmaps)
+  | "click"
+  | "scroll"
+  | "form_focus"
+  | "form_submit";
 
 export interface AnalyticsEvent {
   name: EventName;
@@ -390,6 +396,106 @@ export function trackPageView(path: string, title?: string) {
 }
 
 // ============================================================================
+// HEATMAP & CLICK TRACKING
+// ============================================================================
+
+/**
+ * Get a CSS selector for an element (for heatmap element identification)
+ */
+function getElementSelector(el: HTMLElement): string {
+  if (el.id) return `#${el.id}`;
+
+  const classes = el.className;
+  if (classes && typeof classes === 'string' && classes.trim()) {
+    const cleanClasses = classes.trim().split(/\s+/).slice(0, 3).join('.');
+    return `${el.tagName.toLowerCase()}.${cleanClasses}`;
+  }
+
+  return el.tagName.toLowerCase();
+}
+
+/**
+ * Get text content of an element (truncated for storage)
+ */
+function getElementText(el: HTMLElement): string {
+  const text = el.innerText || el.textContent || '';
+  return text.trim().slice(0, 100);
+}
+
+/**
+ * Track a click event with position data (for heatmaps)
+ */
+export function trackClick(
+  element: HTMLElement,
+  event: MouseEvent,
+  properties?: Record<string, unknown>
+) {
+  trackEvent({
+    name: "click",
+    category: "interaction",
+    properties: {
+      ...properties,
+      click_x: Math.round(event.pageX),
+      click_y: Math.round(event.pageY),
+      viewport_width: window.innerWidth,
+      viewport_height: window.innerHeight,
+      element_selector: getElementSelector(element),
+      element_text: getElementText(element),
+      element_tag: element.tagName.toLowerCase(),
+      page_url: window.location.pathname,
+    },
+  });
+}
+
+/**
+ * Track scroll depth event
+ */
+export function trackScroll(depth: number, maxDepth: number) {
+  trackEvent({
+    name: "scroll",
+    category: "interaction",
+    properties: {
+      scroll_depth: depth,
+      max_scroll_depth: maxDepth,
+      page_url: window.location.pathname,
+      page_height: document.documentElement.scrollHeight,
+      viewport_height: window.innerHeight,
+    },
+  });
+}
+
+/**
+ * Track form field focus (for understanding form engagement)
+ */
+export function trackFormFocus(fieldName: string, formId?: string) {
+  trackEvent({
+    name: "form_focus",
+    category: "interaction",
+    properties: {
+      field_name: fieldName,
+      form_id: formId,
+      page_url: window.location.pathname,
+    },
+  });
+}
+
+/**
+ * Track form submission
+ */
+export function trackFormSubmit(formId: string, formName?: string, success: boolean = true) {
+  trackEvent({
+    name: "form_submit",
+    category: "interaction",
+    properties: {
+      form_id: formId,
+      form_name: formName,
+      success,
+      page_url: window.location.pathname,
+    },
+  });
+}
+
+// ============================================================================
 // REACT HOOKS
 // ============================================================================
 
@@ -417,4 +523,9 @@ export default {
   trackExperimentAssigned,
   trackExperimentConversion,
   trackPageView,
+  // Heatmap & interaction tracking
+  trackClick,
+  trackScroll,
+  trackFormFocus,
+  trackFormSubmit,
 };

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, createContext, useContext, ReactNode, Suspense } from "react";
+import { useEffect, createContext, useContext, ReactNode, Suspense, useState, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { analytics } from "@/lib/analytics/comprehensive-tracker";
+import { initHeatmapTracking, cleanupHeatmapTracking, updateHeatmapConfig } from "@/lib/analytics/heatmap-tracker";
 
 // ============================================================================
 // Analytics Context
@@ -58,6 +59,8 @@ interface AnalyticsProviderProps {
 }
 
 export function AnalyticsProvider({ children, userId }: AnalyticsProviderProps) {
+  const heatmapInitialized = useRef(false);
+
   // Initialize analytics on mount
   useEffect(() => {
     analytics.init(userId);
@@ -66,6 +69,42 @@ export function AnalyticsProvider({ children, userId }: AnalyticsProviderProps) 
       analytics.destroy();
     };
   }, [userId]);
+
+  // Initialize heatmap tracking on mount
+  useEffect(() => {
+    if (heatmapInitialized.current) return;
+
+    // Fetch enabled pages for heatmap tracking
+    async function initHeatmap() {
+      try {
+        // Use public endpoint to get enabled pages (no auth required for client)
+        const response = await fetch("/api/analytics/heatmap-config");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.enabledPages?.length > 0) {
+            initHeatmapTracking({
+              enabledPages: data.enabledPages,
+              trackScrollDepth: true,
+              debounceMs: 100,
+            });
+            heatmapInitialized.current = true;
+          }
+        }
+      } catch (error) {
+        // Silently fail - heatmap tracking is optional
+        console.debug("Heatmap config not available:", error);
+      }
+    }
+
+    initHeatmap();
+
+    return () => {
+      if (heatmapInitialized.current) {
+        cleanupHeatmapTracking();
+        heatmapInitialized.current = false;
+      }
+    };
+  }, []);
 
   // Identify user when userId changes
   useEffect(() => {

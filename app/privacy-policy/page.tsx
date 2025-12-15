@@ -175,10 +175,20 @@ export default function PrivacyPolicyPage() {
               <section className="mb-10">
                 <h2 className="font-blair text-2xl text-text-primary mb-4">8. Cookies and Website Analytics</h2>
                 <p className="text-gray-600 leading-relaxed">
-                  Our website uses cookies and similar technologies to improve your browsing experience,
+                  Our website uses first-party cookies and similar technologies to improve your browsing experience,
                   analyse website traffic, and understand where our visitors come from. You can control
-                  cookies through your browser settings. We use analytics services that may collect
-                  anonymous usage data.
+                  cookies through your browser settings.
+                </p>
+                <p className="text-gray-600 leading-relaxed mt-4">
+                  <strong>First-Party Analytics:</strong> We use our own self-hosted analytics system. Your usage data
+                  is stored securely in our own database and is never shared with third-party analytics providers.
+                  We collect anonymous usage data including pages visited, session duration, device type, and general
+                  location (country/city level only). We do not store IP addresses or any personally identifiable
+                  information in our analytics data.
+                </p>
+                <p className="text-gray-600 leading-relaxed mt-4">
+                  <strong>Session Cookies:</strong> We use session cookies to track your browsing session for analytics
+                  purposes. These cookies expire when you close your browser and are not used to identify you personally.
                 </p>
               </section>
 

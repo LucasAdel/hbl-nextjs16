@@ -190,9 +190,53 @@ export async function DELETE(
     // Use service role to delete user
     const serviceClient = createServiceRoleClient();
 
-    // First delete user data from related tables (only tables that have user_id)
-    await serviceClient.from("advanced_bookings").delete().eq("user_id", id);
-    await serviceClient.from("simple_bookings").delete().eq("user_id", id);
+    // Get user's email first for booking lookup
+    const { data: userData, error: getUserError } = await serviceClient.auth.admin.getUserById(id);
+
+    if (getUserError) {
+      console.error("Get user error during deletion:", getUserError);
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const userEmail = userData?.user?.email;
+
+    if (userEmail) {
+      /**
+       * ANONYMIZE BOOKINGS (DO NOT DELETE)
+       *
+       * Australian Legal Requirement: Financial/booking records must be retained for 7 years
+       * GDPR Compliance: Right to Erasure allows anonymization when retention is legally required
+       *
+       * Pattern matches: /app/api/user/delete-data/route.ts (lines 90-114)
+       *
+       * NOTE: simple_bookings is LEGACY (compliance retention only)
+       *       advanced_bookings is ACTIVE production system
+       */
+
+      // Anonymize simple_bookings (LEGACY - compliance retention only)
+      await serviceClient
+        .from("simple_bookings")
+        .update({
+          name: "[DELETED BY ADMIN]",
+          email: "[DELETED BY ADMIN]",
+          phone: null,
+          message: null,
+        })
+        .eq("email", userEmail);
+
+      // Anonymize advanced_bookings (ACTIVE - production system)
+      await serviceClient
+        .from("advanced_bookings")
+        .update({
+          client_name: "[DELETED BY ADMIN]",
+          client_email: "[DELETED BY ADMIN]",
+          client_phone: null,
+          notes: null,
+        })
+        .eq("client_email", userEmail);
+    }
+
+    // Delete from tables without retention requirements
     await serviceClient.from("email_sequence_enrollments").delete().eq("user_id", id);
 
     // Delete the user from auth

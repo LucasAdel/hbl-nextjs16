@@ -27,7 +27,15 @@ import {
   Target,
   Zap,
   Globe,
+  Flame,
+  Settings,
 } from "lucide-react";
+
+// Import new analytics components
+import { SessionBrowser } from "@/components/admin/analytics/SessionBrowser";
+import { HeatmapViewer } from "@/components/admin/analytics/HeatmapViewer";
+import { HeatmapConfig } from "@/components/admin/analytics/HeatmapConfig";
+import { RealtimeVisitors } from "@/components/admin/analytics/RealtimeVisitors";
 import {
   LineChart,
   Line,
@@ -102,7 +110,8 @@ export default function AdminAnalyticsPage() {
   });
   const [timeRange, setTimeRange] = useState("7");
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "behavior" | "funnel" | "realtime">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "sessions" | "heatmaps" | "behavior" | "funnel" | "realtime">("overview");
+  const [heatmapSubTab, setHeatmapSubTab] = useState<"viewer" | "config">("viewer");
 
   // Fetch analytics data
   const fetchAnalytics = useCallback(async () => {
@@ -338,9 +347,11 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg w-fit mb-8">
+        <div className="flex flex-wrap gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg w-fit mb-8">
           {[
             { id: "overview", label: "Overview", icon: BarChart3 },
+            { id: "sessions", label: "Sessions", icon: Users },
+            { id: "heatmaps", label: "Heatmaps", icon: Flame },
             { id: "behavior", label: "User Behavior", icon: MousePointer },
             { id: "funnel", label: "Conversion Funnel", icon: Target },
             { id: "realtime", label: "Real-time", icon: Activity },
@@ -551,6 +562,64 @@ export default function AdminAnalyticsPage() {
                     ))}
                   </div>
                 </motion.div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Sessions Tab */}
+          {activeTab === "sessions" && (
+            <motion.div
+              key="sessions"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                <SessionBrowser initialDays={parseInt(timeRange)} />
+              </div>
+            </motion.div>
+          )}
+
+          {/* Heatmaps Tab */}
+          {activeTab === "heatmaps" && (
+            <motion.div
+              key="heatmaps"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              {/* Heatmap Sub-tabs */}
+              <div className="flex gap-2 mb-6">
+                <button
+                  onClick={() => setHeatmapSubTab("viewer")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    heatmapSubTab === "viewer"
+                      ? "bg-tiffany text-white"
+                      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  <Flame className="h-4 w-4" />
+                  View Heatmaps
+                </button>
+                <button
+                  onClick={() => setHeatmapSubTab("config")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    heatmapSubTab === "config"
+                      ? "bg-tiffany text-white"
+                      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  <Settings className="h-4 w-4" />
+                  Configure Pages
+                </button>
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                {heatmapSubTab === "viewer" ? (
+                  <HeatmapViewer initialPage="/" />
+                ) : (
+                  <HeatmapConfig />
+                )}
               </div>
             </motion.div>
           )}
@@ -818,25 +887,10 @@ export default function AdminAnalyticsPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
             >
-              {/* Live Activity Banner */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-gradient-to-r from-tiffany to-tiffany-dark rounded-xl p-6 mb-6 text-white"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
-                    <div className="absolute inset-0 w-3 h-3 bg-white rounded-full animate-ping" />
-                  </div>
-                  <div>
-                    <h2 className="font-blair text-xl font-bold">Live Activity</h2>
-                    <p className="text-white/80">
-                      {analytics?.summary.uniqueSessions || 0} active sessions in the last {timeRange} day(s)
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
+              {/* Real-time Visitors Component */}
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
+                <RealtimeVisitors autoRefresh={true} refreshInterval={10} minutes={5} />
+              </div>
 
               {/* Event Stream */}
               <motion.div

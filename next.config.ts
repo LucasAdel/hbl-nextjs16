@@ -27,7 +27,7 @@ const nextConfig: NextConfig = {
       // Fonts: self and Google Fonts
       "font-src 'self' https://fonts.gstatic.com data:",
       // Connect: API endpoints and services
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://api.mapbox.com https://events.mapbox.com https://*.posthog.com https://*.sentry.io https://www.google-analytics.com https://api.resend.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://api.mapbox.com https://events.mapbox.com https://*.sentry.io https://api.resend.com",
       // Frames: Stripe for payment forms
       "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
       // Workers: self for service workers

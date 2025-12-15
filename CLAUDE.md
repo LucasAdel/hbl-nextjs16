@@ -278,3 +278,19 @@ npx tsc --noEmit
 ---
 
 *Last Updated: 2024-12-10*
+
+## CRITICAL: Next.js 16 Proxy Architecture
+
+**Rule:** When using Next.js 16, logic MUST be placed in `proxy.ts`, NOT directly in `middleware.ts`. 
+
+**Implementation Pattern:**
+1. **Logic File:** Put all middleware logic (routing, auth, rate-limiting) in `proxy.ts`.
+2. **Bridge File:** `middleware.ts` must exist as the Next.js entry point but should ONLY import and re-export from proxy.
+
+**Required `middleware.ts` Content:**
+```typescript
+import { proxy, config as proxyConfig } from "./proxy";
+
+export const config = proxyConfig;
+export const middleware = proxy;
+```
