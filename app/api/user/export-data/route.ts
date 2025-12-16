@@ -47,9 +47,13 @@ export async function GET(request: NextRequest) {
           .in("conversation_id", conversationIds)
       : { data: [] };
 
-    // Step 3: Get bookings (both simple and advanced) and contacts by email
-    const [simpleBookingsResult, advancedBookingsResult, contactSubmissionsResult] = await Promise.all([
-      supabase.from("simple_bookings").select("*").eq("email", userEmail),
+    /**
+     * Step 3: Get bookings and contact submissions by email
+     *
+     * Booking System: advanced_bookings (production system with payment integration)
+     * See: /docs/BOOKING_SYSTEM_ARCHITECTURE.md
+     */
+    const [advancedBookingsResult, contactSubmissionsResult] = await Promise.all([
       supabase.from("advanced_bookings").select("*").eq("client_email", userEmail),
       supabase.from("contact_submissions").select("*").eq("email", userEmail),
     ]);
@@ -74,7 +78,6 @@ export async function GET(request: NextRequest) {
       },
       chat_conversations: chatConversationsResult.data || [],
       chat_messages: chatMessagesResult.data || [],
-      simple_bookings: simpleBookingsResult.data || [],
       advanced_bookings: advancedBookingsResult.data || [],
       contact_submissions: contactSubmissionsResult.data || [],
       data_retention_policy: {
@@ -88,7 +91,6 @@ export async function GET(request: NextRequest) {
       userId: user.id,
       chatConversationsCount: chatConversationsResult.data?.length || 0,
       chatMessagesCount: chatMessagesResult.data?.length || 0,
-      simpleBookingsCount: simpleBookingsResult.data?.length || 0,
       advancedBookingsCount: advancedBookingsResult.data?.length || 0,
     });
 

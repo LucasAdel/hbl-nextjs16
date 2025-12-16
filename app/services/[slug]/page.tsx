@@ -120,7 +120,7 @@ export default async function ServiceDetailPage({ params }: Props) {
                   href="/contact"
                   className="inline-flex items-center justify-center px-6 py-3 bg-white dark:bg-gray-800 text-tiffany-dark dark:text-tiffany font-semibold rounded-xl border border-tiffany/20 hover:border-tiffany/40 transition-colors"
                 >
-                  Get Free Consultation
+                  Contact Us
                 </Link>
               </div>
             </div>

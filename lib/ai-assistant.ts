@@ -28,7 +28,7 @@ IMPORTANT GUIDELINES:
 - Keep responses concise but informative.
 
 AVAILABLE SERVICES (you can recommend these):
-- Initial Consultation (free 15 minutes)
+- Initial Consultation (free 10 minutes)
 - Practice Setup & Compliance Review
 - Tenant Doctor Agreements
 - Employment Contracts
@@ -155,7 +155,7 @@ function extractSuggestedActions(response: string): ChatResponse["suggestedActio
   ) {
     actions.push({
       type: "book_consultation",
-      label: "Book Free Consultation",
+      label: "Book Consultation",
       url: "/book-appointment",
     });
   }
@@ -365,7 +365,7 @@ export const FAQ_KNOWLEDGE_BASE = [
   },
   {
     question: "How much does a consultation cost?",
-    answer: "We offer a free 15-minute initial consultation to understand your needs. After that, consultation fees vary based on the complexity of your matter. Standard consultations range from $330-$550 per hour. We always provide a cost estimate before proceeding with any work.",
+    answer: "Consultation fees vary based on the complexity of your matter. Initial consultations start from $320 for 30 minutes, and standard consultations range from $330-$550 per hour. We always provide a cost estimate before proceeding with any work.",
     keywords: ["cost", "fee", "consultation", "price", "charge"],
   },
   {

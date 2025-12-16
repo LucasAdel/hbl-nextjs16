@@ -174,8 +174,19 @@ export async function POST(request: NextRequest) {
       durationMinutes
     );
 
-    // Create booking in advanced_bookings table with status "pending_payment"
-    // SECURITY: Calendar event and emails are ONLY sent after Stripe payment confirmation
+    /**
+     * CREATE BOOKING IN ACTIVE SYSTEM (advanced_bookings)
+     *
+     * Initial Status: "pending_payment" - awaiting Stripe confirmation
+     *
+     * PAYMENT-GATED WORKFLOW (prevents spam):
+     * - NO calendar event created here (only after payment)
+     * - NO emails sent here (only after payment)
+     *
+     * Post-payment processing: /app/api/webhooks/stripe/route.ts
+     * See: /docs/BOOKING_SYSTEM_ARCHITECTURE.md for full workflow
+     * See: CLAUDE.md Section 11 for payment-gating security rules
+     */
     const bookingData = {
       client_name: name,
       client_email: email.toLowerCase(),

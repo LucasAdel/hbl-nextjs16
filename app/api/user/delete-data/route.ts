@@ -84,21 +84,15 @@ export async function DELETE(request: NextRequest) {
     // Step 4: Handle email-based data
     const userEmail = user.email ?? "";
     if (userEmail) {
-      // Anonymize bookings (retain for legal compliance but remove PII)
-      // Australian legal requirement: financial records must be kept for 7 years
-
-      // Anonymize simple_bookings (uses: name, email, phone, message)
-      const { data: anonymizedSimpleBookings } = await adminClient
-        .from("simple_bookings")
-        .update({
-          name: "[DELETED]",
-          email: "[DELETED]",
-          phone: null,
-          message: null,
-        })
-        .eq("email", userEmail)
-        .select("id");
-      deletionResults.simple_bookings_anonymized = anonymizedSimpleBookings?.length || 0;
+      /**
+       * ANONYMIZE BOOKINGS (DO NOT DELETE)
+       *
+       * Australian Legal Requirement: Financial/booking records must be retained for 7 years
+       * GDPR Compliance: Right to Erasure allows anonymization when retention is legally required
+       *
+       * Booking System: advanced_bookings (production system with payment integration)
+       * See: /docs/BOOKING_SYSTEM_ARCHITECTURE.md
+       */
 
       // Anonymize advanced_bookings (uses: client_name, client_email, client_phone, notes)
       const { data: anonymizedAdvancedBookings } = await adminClient
@@ -148,7 +142,6 @@ export async function DELETE(request: NextRequest) {
           contact_submissions: deletionResults.contact_submissions || 0,
         },
         anonymized: {
-          simple_bookings: deletionResults.simple_bookings_anonymized || 0,
           advanced_bookings: deletionResults.advanced_bookings_anonymized || 0,
         },
         note: "Financial records (bookings) are retained in anonymized form for 7 years per Australian legal requirements.",

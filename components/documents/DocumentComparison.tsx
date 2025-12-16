@@ -439,7 +439,7 @@ export function DocumentComparison({
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <Info className="h-4 w-4" />
-            <span>Can&apos;t decide? Get a free consultation to find the right fit.</span>
+            <span>Can&apos;t decide? Contact us to find the right fit.</span>
           </div>
           <div className="flex gap-3">
             <Link

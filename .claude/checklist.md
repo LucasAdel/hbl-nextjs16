@@ -16,8 +16,8 @@
 ```
 
 ## Quick Stats
-- **Total Features:** 16+
-- **Completed:** 3
+- **Total Features:** 17+
+- **Completed:** 4 (Booking System Architecture Documentation added)
 - **In Progress:** 1 (Self-Hosted Analytics)
 - **Pending:** 12+
 
@@ -25,6 +25,15 @@
 
 ## Recently Completed
 <!-- Keep last 10 completed items here for quick reference -->
+
+### Booking System Architecture Documentation
+- [x] Fix admin deletion compliance violation (anonymize instead of delete) <!-- Completed: 2025-12-15 -->
+- [x] Add LEGACY/ACTIVE markers to type definitions in `/lib/supabase/types.ts` <!-- Completed: 2025-12-15 -->
+- [x] Create `/docs/BOOKING_SYSTEM_ARCHITECTURE.md` comprehensive documentation <!-- Completed: 2025-12-15 -->
+- [x] Add usage site comments to GDPR endpoints (`delete-data`, `export-data`) <!-- Completed: 2025-12-15 -->
+- [x] Add payment-gated workflow documentation to `/app/api/booking/route.ts` <!-- Completed: 2025-12-15 -->
+- [x] Add payment-gated workflow documentation to `/app/api/webhooks/stripe/route.ts` <!-- Completed: 2025-12-15 -->
+- [x] Build verification passed <!-- Completed: 2025-12-15 -->
 
 ### Codex Table of Contents Enhancements
 - [x] Sticky TOC that follows scroll <!-- Completed: 2024-12-10 -->

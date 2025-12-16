@@ -213,10 +213,22 @@ async function checkReferralPurchase(supabase: ReturnType<typeof createServiceRo
 }
 
 /**
- * Update booking status to "confirmed" after payment
- * ALSO creates Google Calendar event and sends confirmation emails
+ * PAYMENT-GATED WORKFLOW: Post-Payment Booking Confirmation
  *
- * SECURITY: Calendar event and emails are ONLY sent here, after payment confirmed
+ * This is the ONLY function that confirms bookings after payment.
+ *
+ * Process:
+ * 1. Updates advanced_bookings: "pending_payment" -> "confirmed"
+ * 2. Creates Google Calendar event with Meet link
+ * 3. Sends confirmation email to client
+ * 4. Sends notification email to admin
+ *
+ * SECURITY: Payment-gating prevents spam/fake bookings
+ * - Calendar events ONLY created here (after payment)
+ * - Emails ONLY sent here (after payment)
+ *
+ * See: /docs/BOOKING_SYSTEM_ARCHITECTURE.md for workflow diagram
+ * See: CLAUDE.md Section 11 for payment-gating security rules
  */
 async function updateBookingStatusAfterPayment(
   supabase: ReturnType<typeof createServiceRoleClient>,

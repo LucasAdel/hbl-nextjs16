@@ -55,14 +55,14 @@ export default function DocumentComparePage() {
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
               Our legal experts can help you identify the right documents for your
-              specific practice needs. Book a free 15-minute consultation.
+              specific practice needs. Contact us to discuss your requirements.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
                 href="/contact"
                 className="px-6 py-3 bg-tiffany text-white font-semibold rounded-lg hover:bg-tiffany-dark transition-colors"
               >
-                Book Free Consultation
+                Contact Us
               </a>
               <a
                 href="/documents"

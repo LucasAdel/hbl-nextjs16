@@ -296,7 +296,7 @@ export function AIChatWidget() {
         content: objection.response,
         timestamp: new Date(),
         actions: [
-          { label: "Book Free Consultation", action: "book_consultation", url: "/book" },
+          { label: "Book Consultation", action: "book_consultation", url: "/book" },
           { label: "Learn More", action: "services", url: "/services" },
         ],
       };
@@ -921,7 +921,7 @@ export function AIChatWidget() {
                     className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-teal-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-teal-hover"
                   >
                     <Calendar className="h-4 w-4" />
-                    Book Free Consultation
+                    Book Consultation
                   </button>
                   <button
                     onClick={() => setShowBookingPrompt(false)}

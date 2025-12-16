@@ -124,7 +124,7 @@ export default function ServicesPage() {
             Need Help Choosing the Right Service?
           </h2>
           <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
-            Book a free consultation to discuss your practice&apos;s specific legal needs with our
+            Book a consultation to discuss your practice&apos;s specific legal needs with our
             team of healthcare law specialists.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

@@ -476,7 +476,7 @@ export function WelcomeEmail2Value({
 
           <div style={{ textAlign: "center", marginBottom: "25px" }}>
             <PremiumButton href="https://hamiltonbailey.com/book-appointment">
-              Book Free 15-Min Consultation
+              Book a Consultation
             </PremiumButton>
           </div>
 
@@ -597,7 +597,7 @@ export function WelcomeEmail4CTA({
   unsubscribeUrl?: string;
 }) {
   return (
-    <PremiumEmailWrapper previewText="Ready for a Legal Health Check? Book Your Free Consultation">
+    <PremiumEmailWrapper previewText="Ready for a Legal Health Check? Book Your Consultation">
       <PremiumHeader subtitle="Let's Connect" />
       <tr>
         <td style={{ backgroundColor: BRAND.bgWhite, padding: "45px 35px" }}>
@@ -628,13 +628,13 @@ export function WelcomeEmail4CTA({
             marginBottom: "30px",
           }}>
             <p style={{ color: "rgba(255,255,255,0.9)", fontSize: "13px", fontWeight: "500", margin: "0 0 10px 0", letterSpacing: "1px" }}>
-              COMPLIMENTARY OFFER
+              LET&apos;S CONNECT
             </p>
             <p style={{ color: "#FFFFFF", fontSize: "22px", fontWeight: "700", margin: "0 0 20px 0" }}>
-              Free 15-Minute Legal Health Check
+              10-Minute Legal Health Check
             </p>
             <p style={{ color: "rgba(255,255,255,0.9)", fontSize: "14px", margin: "0 0 20px 0", lineHeight: "1.6" }}>
-              In this no-obligation call, we&apos;ll review your concerns, identify compliance gaps, and recommend next steps.
+              In this call, we&apos;ll review your concerns, identify compliance gaps, and recommend next steps.
             </p>
             <a
               href="https://hamiltonbailey.com/book-appointment"
@@ -649,7 +649,7 @@ export function WelcomeEmail4CTA({
                 color: BRAND.primary,
               }}
             >
-              Book Your Free Call
+              Book Your Consultation
             </a>
           </div>
 

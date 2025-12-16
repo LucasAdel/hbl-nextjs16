@@ -45,45 +45,24 @@ export type Database = {
         };
         Relationships: [];
       };
-      simple_bookings: {
-        Row: {
-          created_at: string;
-          date: string;
-          email: string;
-          id: string;
-          message: string | null;
-          name: string;
-          phone: string | null;
-          status: Database["public"]["Enums"]["booking_status"];
-          time: string;
-          updated_at: string;
-        };
-        Insert: {
-          created_at?: string;
-          date: string;
-          email: string;
-          id?: string;
-          message?: string | null;
-          name: string;
-          phone?: string | null;
-          status?: Database["public"]["Enums"]["booking_status"];
-          time: string;
-          updated_at?: string;
-        };
-        Update: {
-          created_at?: string;
-          date?: string;
-          email?: string;
-          id?: string;
-          message?: string | null;
-          name?: string;
-          phone?: string | null;
-          status?: Database["public"]["Enums"]["booking_status"];
-          time?: string;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
+      /**
+       * ACTIVE PRODUCTION BOOKING SYSTEM
+       *
+       * This is the current production booking system with full payment integration.
+       *
+       * Features:
+       * - Stripe payment integration (payment-gated workflow)
+       * - Google Calendar sync with Google Meet links
+       * - Availability slot management
+       * - Automated confirmation emails (post-payment only)
+       *
+       * Workflow:
+       * 1. Form submission -> status: "pending_payment"
+       * 2. Stripe checkout -> user completes payment
+       * 3. Stripe webhook -> status: "confirmed" + calendar event + emails
+       *
+       * See: /docs/BOOKING_SYSTEM_ARCHITECTURE.md for complete workflow
+       */
       advanced_bookings: {
         Row: {
           cancellation_reason: string | null;

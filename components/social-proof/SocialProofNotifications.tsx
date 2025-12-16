@@ -183,7 +183,7 @@ const REVIEW_SNIPPETS = [
 
 // Consultation types
 const CONSULTATION_TYPES = [
-  "a free consultation",
+  "a consultation",
   "a practice setup consultation",
   "a compliance review",
   "a partnership consultation",

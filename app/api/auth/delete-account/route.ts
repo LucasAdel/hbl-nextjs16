@@ -22,17 +22,33 @@ export async function DELETE() {
     // Use service role client to delete user (admin-level operation)
     const serviceClient = createServiceRoleClient();
 
-    // Delete user data from related tables first (only tables that have user_id)
-    await serviceClient
-      .from("advanced_bookings")
-      .delete()
-      .eq("user_id", user.id);
+    // Get user's email for booking lookup (bookings link by email, not user_id)
+    const userEmail = user.email ?? "";
 
-    await serviceClient
-      .from("simple_bookings")
-      .delete()
-      .eq("user_id", user.id);
+    if (userEmail) {
+      /**
+       * ANONYMIZE BOOKINGS (DO NOT DELETE)
+       *
+       * Australian Legal Requirement: Financial/booking records must be retained for 7 years
+       * GDPR Compliance: Right to Erasure allows anonymization when retention is legally required
+       *
+       * Booking System: advanced_bookings (production system with payment integration)
+       * Pattern matches: /app/api/user/delete-data/route.ts
+       */
 
+      // Anonymize advanced_bookings (production system)
+      await serviceClient
+        .from("advanced_bookings")
+        .update({
+          client_name: "[DELETED]",
+          client_email: "[DELETED]",
+          client_phone: null,
+          notes: null,
+        })
+        .eq("client_email", userEmail);
+    }
+
+    // Delete from tables without retention requirements
     await serviceClient
       .from("email_sequence_enrollments")
       .delete()

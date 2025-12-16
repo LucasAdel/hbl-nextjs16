@@ -74,7 +74,7 @@ export const EMAIL_SEQUENCES: Record<ExtendedSequenceType, EmailSequence> = {
       {
         stepNumber: 4,
         delayHours: 168, // 7 days later
-        subject: "Ready for a Legal Health Check? Book Your Free Consultation",
+        subject: "Ready for a Legal Health Check? Book Your Consultation",
         templateId: "welcome_4_cta",
         conditions: {
           skipIf: ["has_booked", "has_purchased"],

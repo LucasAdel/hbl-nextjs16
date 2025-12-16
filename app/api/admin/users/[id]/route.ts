@@ -207,24 +207,12 @@ export async function DELETE(
        * Australian Legal Requirement: Financial/booking records must be retained for 7 years
        * GDPR Compliance: Right to Erasure allows anonymization when retention is legally required
        *
-       * Pattern matches: /app/api/user/delete-data/route.ts (lines 90-114)
+       * Pattern matches: /app/api/user/delete-data/route.ts
        *
-       * NOTE: simple_bookings is LEGACY (compliance retention only)
-       *       advanced_bookings is ACTIVE production system
+       * Booking System: advanced_bookings (production system with payment integration)
        */
 
-      // Anonymize simple_bookings (LEGACY - compliance retention only)
-      await serviceClient
-        .from("simple_bookings")
-        .update({
-          name: "[DELETED BY ADMIN]",
-          email: "[DELETED BY ADMIN]",
-          phone: null,
-          message: null,
-        })
-        .eq("email", userEmail);
-
-      // Anonymize advanced_bookings (ACTIVE - production system)
+      // Anonymize advanced_bookings (production system)
       await serviceClient
         .from("advanced_bookings")
         .update({
